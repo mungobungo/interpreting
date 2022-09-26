@@ -23,4 +23,10 @@ internal class ParserKtTest {
     fun testSimpleAdd(){
         assertEquals(EAdd(EInt(3), EInt(5)), parse("[add, 3, 5]"))
     }
+    @Test
+    fun testComplicatedAdd(){
+        assertEquals(
+            EAdd(EAdd(EInt(3), EInt(5)), EInt(42)),
+            parse("[add, [add, 3,5], 42]"))
+    }
 }
