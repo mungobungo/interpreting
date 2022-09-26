@@ -16,6 +16,11 @@ fun convert(obj:Any):Expression{
             val right = convert(obj[2])
             return EAdd(left, right)
         }
+        if(operation =="mul"){
+            val left = convert(obj[1])
+            val right = convert(obj[2])
+            return EMul(left, right)
+        }
     }
     return EInt(-42)
 }
