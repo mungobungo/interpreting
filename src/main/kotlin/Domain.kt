@@ -7,9 +7,13 @@ data class EInt(val value:Int):Expression {
     }
 }
 
+val zeroInt = EInt(0)
 data class EMul(val a:Expression, val b:Expression): Expression {
     override fun eval(): Expression {
         val left = a.eval() as EInt
+        if (left.value == 0){
+            return zeroInt
+        }
         val right = b.eval() as EInt
         return EInt(left.value * right.value)
     }
