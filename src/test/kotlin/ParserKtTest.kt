@@ -39,4 +39,10 @@ internal class ParserKtTest {
             EMul(EMul(EInt(3), EInt(5)), EInt(42)),
             parse("[mul, [mul, 3,5], 42]"))
     }
+    @Test
+    fun testMulAndAdd(){
+         assertEquals(
+            EMul(EAdd(EInt(22), EInt(11)), EInt(44)),
+            parse("[mul, [add, 22, 11], 44]"))
+    }
 }

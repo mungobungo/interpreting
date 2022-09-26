@@ -49,4 +49,12 @@ internal class DomainKtTest {
         assertEquals(EInt(10), (EMul(EMul(EInt(1), EInt(5)), EInt(2))).eval())
         assertEquals(EInt(12), (EMul(EAdd(EInt(1), EInt(5)), EInt(2))).eval())
     }
+    @Test
+    fun testComplicatedExpressionWithParsing() {
+        assertEquals(EInt(10), (EMul(EMul(EInt(1), EInt(5)), EInt(2))).eval())
+        assertEquals(EInt(10), parse("[mul, [mul, 1, 5], 2]").eval())
+        assertEquals(EInt(12), (EMul(EAdd(EInt(1), EInt(5)), EInt(2))).eval())
+        assertEquals(EInt(12), parse("[mul, [add, 1, 5], 2]").eval())
+
+    }
 }
