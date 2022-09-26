@@ -27,4 +27,8 @@ internal class DomainKtTest {
         assertEquals(EInt(7), eval(EAdd(EInt(-3), EInt(10))))
         assertEquals(EInt(6), eval(EAdd(EInt(10), EInt(-4))))
     }
+    @Test
+    fun testComplexAddition(){
+        assertEquals(EInt(6), eval( EAdd(EInt(1), EAdd( EInt(2),EInt(3)) )))
+    }
 }
