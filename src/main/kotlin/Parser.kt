@@ -1,26 +1,31 @@
 import org.yaml.snakeyaml.Yaml
 
-fun parse(input:String):Expression{
+fun parse(input:String):SugarExpression{
     val yaml = Yaml()
     val script = yaml.load<Any>(input)
     return convert(script)
 }
-fun convert(obj:Any):Expression{
+fun convert(obj:Any):SugarExpression{
    if(obj is Int){
-       return EInt(obj)
+       return SugarInt(obj)
    }
     if(obj is ArrayList<*>){
         val operation= obj[0]
         if(operation == "add"){
             val left = convert(obj[1])
             val right = convert(obj[2])
-            return EAdd(left, right)
+            return SugarAdd(left, right)
         }
         if(operation =="mul"){
             val left = convert(obj[1])
             val right = convert(obj[2])
-            return EMul(left, right)
+            return SugarMul(left, right)
+        }
+        if(operation =="sub"){
+            val left = convert(obj[1])
+            val right = convert(obj[2])
+            return SugarSub(left, right)
         }
     }
-    return EInt(-42)
+    return SugarInt(-42)
 }

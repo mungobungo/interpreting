@@ -17,76 +17,87 @@ internal class ParserKtTest {
 
     @Test
     fun testSimpleInt(){
-        assertEquals(EInt(42), parse("42"))
+        assertEquals(SugarInt(42), parse("42"))
     }
     @Test
     fun testSimpleAdd(){
-        assertEquals(EAdd(EInt(3), EInt(5)), parse("[add, 3, 5]"))
+        assertEquals(SugarAdd(SugarInt(3), SugarInt(5)), parse("[add, 3, 5]"))
     }
     @Test
     fun testComplicatedAdd(){
         assertEquals(
-            EAdd(EAdd(EInt(3), EInt(5)), EInt(42)),
+            SugarAdd(SugarAdd(SugarInt(3), SugarInt(5)), SugarInt(42)),
             parse("[add, [add, 3,5], 42]"))
     }
     @Test
     fun testSimpleMultiplication(){
-        assertEquals(EMul(EInt(11), EInt(33)), parse("[mul, 11, 33]"))
+        assertEquals(SugarMul(SugarInt(11), SugarInt(33)), parse("[mul, 11, 33]"))
     }
     @Test
     fun testComplicatedMultiplication(){
         assertEquals(
-            EMul(EMul(EInt(3), EInt(5)), EInt(42)),
+            SugarMul(SugarMul(SugarInt(3), SugarInt(5)), SugarInt(42)),
             parse("[mul, [mul, 3,5], 42]"))
     }
     @Test
     fun testMulAndAdd(){
          assertEquals(
-            EMul(EAdd(EInt(22), EInt(11)), EInt(44)),
+            SugarMul(SugarAdd(SugarInt(22), SugarInt(11)), SugarInt(44)),
             parse("[mul, [add, 22, 11], 44]"))
     }
 
     @Test
     fun testSimpleIntUnparse(){
-        assertEquals("42",EInt(42).unparse())
-        assertEquals("42", parse("42").unparse())
+        assertEquals("42",SugarInt(42).desugar().unparse())
+        assertEquals("42", parse("42").desugar().unparse())
     }
 
     @Test
     fun testSimpleAddUnparse(){
         val yaml = "[add, 3, 5]"
-        assertEquals(yaml, EAdd(EInt(3), EInt(5)).unparse())
-        assertEquals(yaml, parse(yaml).unparse())
+        assertEquals(yaml, SugarAdd(SugarInt(3), SugarInt(5)).desugar().unparse())
+        assertEquals(yaml, parse(yaml).desugar().unparse())
     }
     @Test
     fun testComplicatedAddUnparse(){
         val yaml = "[add, [add, 3, 5], 42]"
         assertEquals(
             yaml,
-            EAdd(EAdd(EInt(3), EInt(5)), EInt(42)).unparse())
-        assertEquals(yaml, parse(yaml).unparse())
+            SugarAdd(SugarAdd(SugarInt(3), SugarInt(5)), SugarInt(42)).desugar().unparse())
+        assertEquals(yaml, parse(yaml).desugar().unparse())
     }
     @Test
     fun testSimpleMultiplicationUnparse(){
         val yaml = "[mul, 11, 33]"
 
-        assertEquals(yaml, EMul(EInt(11), EInt(33)).unparse())
-        assertEquals(yaml, parse(yaml).unparse())
+        assertEquals(yaml, SugarMul(SugarInt(11), SugarInt(33)).desugar().unparse())
+        assertEquals(yaml, parse(yaml).desugar().unparse())
     }
     @Test
     fun testComplicatedMultiplicationUnparse(){
         val yaml = "[mul, [mul, 3, 5], 42]"
         assertEquals(
             yaml,
-            EMul(EMul(EInt(3), EInt(5)), EInt(42)).unparse())
-        assertEquals(yaml, parse(yaml).unparse())
+            SugarMul(SugarMul(SugarInt(3), SugarInt(5)), SugarInt(42)).desugar().unparse())
+        assertEquals(yaml, parse(yaml).desugar().unparse())
     }
     @Test
     fun testMulAndAddUnparse(){
         val yaml = "[mul, [add, 22, 11], 44]"
         assertEquals(
             yaml,
-            EMul(EAdd(EInt(22), EInt(11)), EInt(44)).unparse())
-        assertEquals(yaml, parse(yaml).unparse())
+            SugarMul(SugarAdd(SugarInt(22), SugarInt(11)), SugarInt(44)).desugar().unparse())
+        assertEquals(yaml, parse(yaml).desugar().unparse())
+    }
+
+    @Test
+    fun testMulAndSubUnparse(){
+
+        val yaml = "[mul, [sub, 22, 11], 44]"
+        val desugared = "[mul, [add, [mul, -1, 22], 11], 44]"
+        assertEquals(
+            desugared,
+            SugarMul(SugarSub(SugarInt(22), SugarInt(11)), SugarInt(44)).desugar().unparse())
+        assertEquals(desugared, parse(yaml).desugar().unparse())
     }
 }
