@@ -1,9 +1,14 @@
 interface Expression{
-    fun eval():Expression
+    fun eval(env:Environment):Expression
+    fun substitute(symbol:ESymbol, env:Environment):Expression
     fun unparse():String
 }
 data class EInt(val value:Int):Expression {
-    override fun eval(): Expression {
+    override fun eval(env:Environment): Expression {
+        return this
+    }
+
+    override fun substitute(symbol: ESymbol, env: Environment): Expression {
         return this
     }
 
@@ -14,13 +19,18 @@ data class EInt(val value:Int):Expression {
 
 val zeroInt = EInt(0)
 data class EMul(val a:Expression, val b:Expression): Expression {
-    override fun eval(): Expression {
-        val left = a.eval() as EInt
+    override fun eval(env:Environment): Expression {
+        val left = a.eval(env) as EInt
         if (left.value == 0){
             return zeroInt
         }
-        val right = b.eval() as EInt
+        val right = b.eval(env) as EInt
         return EInt(left.value * right.value)
+    }
+
+
+    override fun substitute(symbol: ESymbol, env: Environment): Expression {
+        return EMul(a.substitute(symbol, env), b.substitute(symbol, env))
     }
 
     override fun unparse(): String {
@@ -29,11 +39,15 @@ data class EMul(val a:Expression, val b:Expression): Expression {
 }
 
 data class EAdd(val a:Expression, val b:Expression): Expression {
-    override fun eval(): Expression {
-        val left = a.eval() as EInt
-        val right = b.eval() as EInt
+    override fun eval(env:Environment): Expression {
+        val left = a.eval(env) as EInt
+        val right = b.eval(env) as EInt
         return EInt(left.value + right.value)
 
+    }
+
+    override fun substitute(symbol: ESymbol, env: Environment): Expression {
+        return EAdd(a.substitute(symbol, env), b.substitute(symbol,env))
     }
 
     override fun unparse(): String {
@@ -42,7 +56,15 @@ data class EAdd(val a:Expression, val b:Expression): Expression {
 }
 
 data class ESymbol(val name:String):Expression{
-    override fun eval(): Expression {
+
+    override fun eval(env: Environment): Expression {
+        return this
+    }
+
+    override fun substitute(symbol: ESymbol, env: Environment): Expression {
+        if(symbol.name == name){
+            return env.get(symbol)
+        }
         return this
     }
 
@@ -52,8 +74,13 @@ data class ESymbol(val name:String):Expression{
 }
 
 data class EFunDef(val name:ESymbol, val argument:ESymbol, val body:Expression):Expression{
-    override fun eval(): Expression {
-        return this
+
+    override fun eval(env: Environment): Expression {
+        TODO("Not yet implemented")
+    }
+
+    override fun substitute(symbol: ESymbol, env: Environment): Expression {
+        TODO("Not yet implemented")
     }
 
     override fun unparse(): String {
@@ -62,7 +89,12 @@ data class EFunDef(val name:ESymbol, val argument:ESymbol, val body:Expression):
 }
 
 data class EFunCall(val name:ESymbol, val argument:Expression):Expression{
-    override fun eval(): Expression {
+
+    override fun eval(env: Environment): Expression {
+        TODO("Not yet implemented")
+    }
+
+    override fun substitute(symbol: ESymbol, env: Environment): Expression {
         TODO("Not yet implemented")
     }
 
