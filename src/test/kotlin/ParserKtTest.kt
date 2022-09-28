@@ -100,4 +100,12 @@ internal class ParserKtTest {
             SugarMul(SugarSub(SugarInt(22), SugarInt(11)), SugarInt(44)).desugar().unparse())
         assertEquals(desugared, parse(yaml).desugar().unparse())
     }
+    @Test
+    fun testNegUnparse()
+    {
+        val yaml = "[neg, [mul, 2, 10]]"
+        val desugared = "[mul, -1, [mul, 2, 10]]"
+        assertEquals(desugared, SugarNeg(SugarMul(SugarInt(2), SugarInt(10))).desugar().unparse())
+        assertEquals(desugared, parse(yaml).desugar().unparse())
+    }
 }

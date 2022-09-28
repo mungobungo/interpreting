@@ -103,4 +103,9 @@ internal class DomainKtTest {
         assertEquals("484", parse(yaml).desugar().eval().unparse())
     }
 
+    @Test
+    fun testNegationEvaluation(){
+        val yaml = "[neg, [mul, [sub, 22, 11], 44]]"
+        assertEquals("-484", parse(yaml).desugar().eval().unparse())
+    }
 }
