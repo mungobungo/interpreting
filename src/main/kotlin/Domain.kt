@@ -71,3 +71,15 @@ data class EFunCall(val name:ESymbol, val argument:Expression):Expression{
     }
 
 }
+
+data class Environment(val bindings:HashMap<ESymbol, Expression>){
+    fun addBinding( name:ESymbol,  value:Expression){
+        bindings[name] = value
+    }
+    fun isDefined(name:ESymbol): Boolean{
+        return bindings.containsKey(name)
+    }
+    fun get(name:ESymbol):Expression{
+        return bindings[name]!!
+    }
+}
