@@ -109,4 +109,47 @@ internal class DomainKtTest {
         val yaml = "[neg, [mul, [sub, 22, 11], 44]]"
         assertEquals("-484", parse(yaml).desugar().eval(emptyEnv).unparse())
     }
+
+    @Test
+    fun testSubstitution(){
+        val env1 = Environment(hashMapOf(Pair(ESymbol("x"), EInt(5))))
+        assertEquals(EInt(5), ESymbol("x").substitute(ESymbol("x"), env1))
+        assertEquals(ESymbol("y"), ESymbol("y").substitute(ESymbol("x"), env1))
+
+        assertEquals("[add, 5, 5]",
+            parse("[add, x, x]").desugar()
+                .substitute(ESymbol("x"), env1).unparse())
+
+        assertEquals("[mul, 5, 5]",
+            parse("[mul, x, x]").desugar()
+                .substitute(ESymbol("x"), env1).unparse())
+
+        assertEquals("[add, [mul, 5, 5], 5]",
+            parse("[add, [mul, x, x], x]").desugar()
+                .substitute(ESymbol("x"), env1).unparse())
+
+
+        val env2 = Environment(hashMapOf(Pair(ESymbol("x"), EInt(5)),
+            Pair(ESymbol("y"), EInt(7))))
+
+        assertEquals("[add, [mul, 5, y], 5]",
+            parse("[add, [mul, x, y], x]").desugar()
+                .substitute(ESymbol("x"), env2).unparse())
+
+
+        assertEquals("[add, [mul, 5, 7], 5]",
+            parse("[add, [mul, x, y], x]").desugar()
+                .substitute(ESymbol("x"), env2)
+                .substitute(ESymbol("y"), env2)
+                .unparse())
+
+        val complexEnv = Environment(hashMapOf(Pair(ESymbol("x"),
+            parse("[mul, 11, [add, [add, 3, 4], 11]]").desugar())))
+
+        assertEquals("[add, [mul, 11, [add, [add, 3, 4], 11]], [mul, 11, [add, [add, 3, 4], 11]]]",
+            parse("[add, x, x]").desugar()
+                .substitute(ESymbol("x"), complexEnv)
+                .unparse()
+            )
+    }
 }
