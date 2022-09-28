@@ -94,7 +94,7 @@ internal class ParserKtTest {
     fun testMulAndSubUnparse(){
 
         val yaml = "[mul, [sub, 22, 11], 44]"
-        val desugared = "[mul, [add, [mul, -1, 22], 11], 44]"
+        val desugared = "[mul, [add, 22, [mul, -1, 11]], 44]"
         assertEquals(
             desugared,
             SugarMul(SugarSub(SugarInt(22), SugarInt(11)), SugarInt(44)).desugar().unparse())
@@ -107,5 +107,23 @@ internal class ParserKtTest {
         val desugared = "[mul, -1, [mul, 2, 10]]"
         assertEquals(desugared, SugarNeg(SugarMul(SugarInt(2), SugarInt(10))).desugar().unparse())
         assertEquals(desugared, parse(yaml).desugar().unparse())
+    }
+
+    @Test
+    fun testSymbolParsing()
+    {
+        val yaml = "x"
+
+        assertEquals(SugarSymbol("x"), parse(yaml))
+    }
+
+    @Test
+    fun testOperationWithSymbol(){
+        assertEquals(SugarAdd(SugarSymbol("x"), SugarInt(5)), parse("[add, x, 5]"))
+        assertEquals(SugarAdd(SugarSymbol("x"), SugarSymbol("y")), parse("[add, x, y]"))
+
+        assertEquals(SugarAdd( SugarAdd(SugarSymbol("x"), SugarSymbol("y")), SugarSymbol("z")),
+            parse("[add, [add, x, y], z]"))
+
     }
 }

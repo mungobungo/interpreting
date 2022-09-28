@@ -34,15 +34,9 @@ data class SugarNeg(val value:SugarExpression):SugarExpression{
 
 }
 
-data class SugarNeg2(val value:SugarExpression):SugarExpression{
+data class SugarSymbol(val name:String):SugarExpression{
     override fun desugar(): Expression {
-       return SugarSub(SugarSub(value, value), value).desugar()
+       return ESymbol(name)
     }
 
-}
-
-data class SugarSub2(val left:SugarExpression, val right:SugarExpression):SugarExpression{
-    override fun desugar(): Expression {
-       return EAdd(SugarNeg(left).desugar(), right.desugar())
-    }
 }

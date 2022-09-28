@@ -41,3 +41,33 @@ data class EAdd(val a:Expression, val b:Expression): Expression {
     }
 }
 
+data class ESymbol(val name:String):Expression{
+    override fun eval(): Expression {
+        return this
+    }
+
+    override fun unparse(): String {
+        return name
+    }
+}
+
+data class EFunDef(val name:ESymbol, val argument:ESymbol, val body:Expression):Expression{
+    override fun eval(): Expression {
+        return this
+    }
+
+    override fun unparse(): String {
+        return "[fun, [${name.unparse()}, ${argument.unparse()}], ${body.unparse()}]"
+    }
+}
+
+data class EFunCall(val name:ESymbol, val argument:Expression):Expression{
+    override fun eval(): Expression {
+        TODO("Not yet implemented")
+    }
+
+    override fun unparse(): String {
+        return "[${name.unparse()}, ${argument.unparse()}]"
+    }
+
+}

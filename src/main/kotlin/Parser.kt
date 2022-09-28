@@ -9,6 +9,9 @@ fun convert(obj:Any):SugarExpression{
    if(obj is Int){
        return SugarInt(obj)
    }
+    if(obj is String){
+        return SugarSymbol(obj)
+    }
     if(obj is ArrayList<*>){
         val operation= obj[0]
         if(operation == "add"){
