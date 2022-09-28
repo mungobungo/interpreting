@@ -26,3 +26,23 @@ data class SugarSub(val left:SugarExpression, val right: SugarExpression):SugarE
        return EAdd(left.desugar(),  EMul(EInt(-1), right.desugar() ))
     }
 }
+
+data class SugarNeg(val value:SugarExpression):SugarExpression{
+    override fun desugar(): Expression {
+       return EMul(EInt(-1), value.desugar())
+    }
+
+}
+
+data class SugarNeg2(val value:SugarExpression):SugarExpression{
+    override fun desugar(): Expression {
+       return SugarSub(SugarSub(value, value), value).desugar()
+    }
+
+}
+
+data class SugarSub2(val left:SugarExpression, val right:SugarExpression):SugarExpression{
+    override fun desugar(): Expression {
+       return EAdd(SugarNeg(left).desugar(), right.desugar())
+    }
+}
