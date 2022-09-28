@@ -26,6 +26,11 @@ fun convert(obj:Any):SugarExpression{
             val right = convert(obj[2])
             return SugarSub(left, right)
         }
+
+        if(operation =="neg"){
+            val value = convert(obj[1])
+            return SugarNeg(value)
+        }
     }
     return SugarInt(-42)
 }
