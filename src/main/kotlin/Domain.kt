@@ -63,7 +63,11 @@ data class ESymbol(val name:String):Expression{
 
     override fun substitute(symbol: ESymbol, env: Environment): Expression {
         if(symbol.name == name){
-            return env.get(symbol)
+
+            val initialExpression = env.get(symbol)
+            val evaluated = initialExpression.eval(env)
+            env.bindings[symbol] = evaluated
+            return evaluated
         }
         return this
     }

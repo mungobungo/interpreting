@@ -152,4 +152,20 @@ internal class DomainKtTest {
                 .unparse()
             )
     }
+    @Test
+    fun testComplicatedExpression(){
+        val complexEnv = Environment(hashMapOf(Pair(ESymbol("x"),
+            parse("[add, 10, 33]").desugar())))
+
+        assertEquals("[add, 43, 43]",
+        parse("[add, x, x]").desugar()
+            .substitute(ESymbol("x"), complexEnv)
+            .unparse())
+
+        assertEquals("86",
+            parse("[add, x, x]").desugar()
+                .substitute(ESymbol("x"), complexEnv)
+                .eval(Environment(hashMapOf()))
+                .unparse())
+    }
 }
