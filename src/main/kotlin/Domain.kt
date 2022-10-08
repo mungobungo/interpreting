@@ -40,7 +40,8 @@ data class EMul(val a:Expression, val b:Expression): Expression {
 
 data class EAdd(val a:Expression, val b:Expression): Expression {
     override fun eval(env:Environment): Expression {
-        val left = a.eval(env) as EInt
+        val leftExpression = a.eval(env)
+        val left = leftExpression as EInt
         val right = b.eval(env) as EInt
         return EInt(left.value + right.value)
 
@@ -59,7 +60,7 @@ data class EAdd(val a:Expression, val b:Expression): Expression {
      var evaluated = false
 
     override fun eval(env: Environment): Expression {
-        return this
+        return substitute(this, env)
     }
 
     override fun substitute(symbol: ESymbol, env: Environment): Expression {

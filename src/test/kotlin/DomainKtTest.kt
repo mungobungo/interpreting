@@ -146,7 +146,7 @@ internal class DomainKtTest {
         val complexEnv = Environment(hashMapOf(Pair(ESymbol("x"),
             parse("[mul, 11, [add, [add, 3, 4], 11]]").desugar())))
 
-        assertEquals("[add, [mul, 11, [add, [add, 3, 4], 11]], [mul, 11, [add, [add, 3, 4], 11]]]",
+        assertEquals("[add, 198, 198]",
             parse("[add, x, x]").desugar()
                 .substitute(ESymbol("x"), complexEnv)
                 .unparse()
@@ -167,5 +167,43 @@ internal class DomainKtTest {
                 .substitute(ESymbol("x"), complexEnv)
                 .eval(Environment(hashMapOf()))
                 .unparse())
+
+
+        val expression=parse("[add, x, x]").desugar()
+
+        assertEquals("86",
+                expression
+                .eval(complexEnv)
+                .unparse())
+
+        val anotherEnv = Environment(hashMapOf(Pair(ESymbol("x"),
+            parse("[add, 20, 1]").desugar())))
+
+        assertEquals("42",
+                expression
+                .eval(anotherEnv)
+                .unparse())
+
+    }
+    @Test
+    fun testingSameExpressionDifferentEnvironment(){
+        val firstEnv = Environment(hashMapOf(Pair(ESymbol("x"),
+            parse("[add, 10, 33]").desugar())))
+
+        val firstExpression=parse("[add, x, x]").desugar()
+
+        assertEquals("86",
+            firstExpression
+                .eval(firstEnv)
+                .unparse())
+
+        val secondEnv = Environment(hashMapOf(Pair(ESymbol("x"),
+            parse("[add, 20, 11]").desugar())))
+        val secondExpression=parse("[add, x, x]").desugar()
+        assertEquals("62",
+            secondExpression
+                .eval(secondEnv)
+                .unparse())
+
     }
 }
