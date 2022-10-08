@@ -206,4 +206,24 @@ internal class DomainKtTest {
                 .unparse())
 
     }
+    @Test
+    fun testingExactlySameExpressionDifferentEnvironment(){
+        val firstEnv = Environment(hashMapOf(Pair(ESymbol("x"),
+            parse("[add, 10, 33]").desugar())))
+
+        val expression=parse("[add, x, x]").desugar()
+
+        assertEquals("86",
+            expression
+                .eval(firstEnv)
+                .unparse())
+
+        val secondEnv = Environment(hashMapOf(Pair(ESymbol("x"),
+            parse("[add, 20, 11]").desugar())))
+        assertEquals("62",
+            expression
+                .eval(secondEnv)
+                .unparse())
+
+    }
 }
