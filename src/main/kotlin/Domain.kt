@@ -57,7 +57,7 @@ data class EAdd(val a:Expression, val b:Expression): Expression {
 }
 
  data class ESymbol(val name:String):Expression{
-     var evaluated = false
+     //var evaluated = false
 
     override fun eval(env: Environment): Expression {
         return substitute(this, env)
@@ -67,12 +67,12 @@ data class EAdd(val a:Expression, val b:Expression): Expression {
         if(symbol.name == name){
 
             val initialExpression = env.get(symbol)
-            if(this.evaluated){
-                return initialExpression
-            }
+       //     if(this.evaluated){
+         //       return initialExpression
+           // }
             val evaluatedSymbol = initialExpression.eval(env)
             env.bindings[symbol] = evaluatedSymbol
-            this.evaluated = true
+            //this.evaluated = true
             return evaluatedSymbol
         }
         return this
