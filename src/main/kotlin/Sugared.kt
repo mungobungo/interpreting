@@ -1,3 +1,4 @@
+
 interface SugarExpression{
     fun desugar():Expression
 }
