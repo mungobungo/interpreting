@@ -17,46 +17,46 @@ internal class ParserKtTest {
 
     @Test
     fun testSimpleInt(){
-        assertEquals(SugarInt(42), parse("42").expression!!)
+        assertEquals(SugarInt(42), parse("42").value!!)
     }
     @Test
     fun testSimpleAdd(){
-        assertEquals(SugarAdd(SugarInt(3), SugarInt(5)), parse("[add, 3, 5]").expression!!)
+        assertEquals(SugarAdd(SugarInt(3), SugarInt(5)), parse("[add, 3, 5]").value!!)
     }
     @Test
     fun testComplicatedAdd(){
         assertEquals(
             SugarAdd(SugarAdd(SugarInt(3), SugarInt(5)), SugarInt(42)),
-            parse("[add, [add, 3,5], 42]").expression!!)
+            parse("[add, [add, 3,5], 42]").value!!)
     }
     @Test
     fun testSimpleMultiplication(){
-        assertEquals(SugarMul(SugarInt(11), SugarInt(33)), parse("[mul, 11, 33]").expression!!)
+        assertEquals(SugarMul(SugarInt(11), SugarInt(33)), parse("[mul, 11, 33]").value!!)
     }
     @Test
     fun testComplicatedMultiplication(){
         assertEquals(
             SugarMul(SugarMul(SugarInt(3), SugarInt(5)), SugarInt(42)),
-            parse("[mul, [mul, 3,5], 42]").expression!!)
+            parse("[mul, [mul, 3,5], 42]").value!!)
     }
     @Test
     fun testMulAndAdd(){
          assertEquals(
             SugarMul(SugarAdd(SugarInt(22), SugarInt(11)), SugarInt(44)),
-            parse("[mul, [add, 22, 11], 44]").expression!!)
+            parse("[mul, [add, 22, 11], 44]").value!!)
     }
 
     @Test
     fun testSimpleIntUnparse(){
         assertEquals("42",SugarInt(42).desugar().unparse())
-        assertEquals("42", parse("42").expression!!.desugar().unparse())
+        assertEquals("42", parse("42").value!!.desugar().unparse())
     }
 
     @Test
     fun testSimpleAddUnparse(){
         val yaml = "[add, 3, 5]"
         assertEquals(yaml, SugarAdd(SugarInt(3), SugarInt(5)).desugar().unparse())
-        assertEquals(yaml, parse(yaml).expression!!.desugar().unparse())
+        assertEquals(yaml, parse(yaml).value!!.desugar().unparse())
     }
     @Test
     fun testComplicatedAddUnparse(){
@@ -64,14 +64,14 @@ internal class ParserKtTest {
         assertEquals(
             yaml,
             SugarAdd(SugarAdd(SugarInt(3), SugarInt(5)), SugarInt(42)).desugar().unparse())
-        assertEquals(yaml, parse(yaml).expression!!.desugar().unparse())
+        assertEquals(yaml, parse(yaml).value!!.desugar().unparse())
     }
     @Test
     fun testSimpleMultiplicationUnparse(){
         val yaml = "[mul, 11, 33]"
 
         assertEquals(yaml, SugarMul(SugarInt(11), SugarInt(33)).desugar().unparse())
-        assertEquals(yaml, parse(yaml).expression!!.desugar().unparse())
+        assertEquals(yaml, parse(yaml).value!!.desugar().unparse())
     }
     @Test
     fun testComplicatedMultiplicationUnparse(){
@@ -79,7 +79,7 @@ internal class ParserKtTest {
         assertEquals(
             yaml,
             SugarMul(SugarMul(SugarInt(3), SugarInt(5)), SugarInt(42)).desugar().unparse())
-        assertEquals(yaml, parse(yaml).expression!!.desugar().unparse())
+        assertEquals(yaml, parse(yaml).value!!.desugar().unparse())
     }
     @Test
     fun testMulAndAddUnparse(){
@@ -87,7 +87,7 @@ internal class ParserKtTest {
         assertEquals(
             yaml,
             SugarMul(SugarAdd(SugarInt(22), SugarInt(11)), SugarInt(44)).desugar().unparse())
-        assertEquals(yaml, parse(yaml).expression!!.desugar().unparse())
+        assertEquals(yaml, parse(yaml).value!!.desugar().unparse())
     }
 
     @Test
@@ -98,7 +98,7 @@ internal class ParserKtTest {
         assertEquals(
             desugared,
             SugarMul(SugarSub(SugarInt(22), SugarInt(11)), SugarInt(44)).desugar().unparse())
-        assertEquals(desugared, parse(yaml).expression!!.desugar().unparse())
+        assertEquals(desugared, parse(yaml).value!!.desugar().unparse())
     }
     @Test
     fun testNegUnparse()
@@ -106,7 +106,7 @@ internal class ParserKtTest {
         val yaml = "[neg, [mul, 2, 10]]"
         val desugared = "[mul, -1, [mul, 2, 10]]"
         assertEquals(desugared, SugarNeg(SugarMul(SugarInt(2), SugarInt(10))).desugar().unparse())
-        assertEquals(desugared, parse(yaml).expression!!.desugar().unparse())
+        assertEquals(desugared, parse(yaml).value!!.desugar().unparse())
     }
 
     @Test
@@ -114,16 +114,16 @@ internal class ParserKtTest {
     {
         val yaml = "x"
 
-        assertEquals(SugarSymbol("x"), parse(yaml).expression!!)
+        assertEquals(SugarSymbol("x"), parse(yaml).value!!)
     }
 
     @Test
     fun testOperationWithSymbol(){
-        assertEquals(SugarAdd(SugarSymbol("x"), SugarInt(5)), parse("[add, x, 5]").expression!!)
-        assertEquals(SugarAdd(SugarSymbol("x"), SugarSymbol("y")), parse("[add, x, y]").expression!!)
+        assertEquals(SugarAdd(SugarSymbol("x"), SugarInt(5)), parse("[add, x, 5]").value!!)
+        assertEquals(SugarAdd(SugarSymbol("x"), SugarSymbol("y")), parse("[add, x, y]").value!!)
 
         assertEquals(SugarAdd( SugarAdd(SugarSymbol("x"), SugarSymbol("y")), SugarSymbol("z")),
-            parse("[add, [add, x, y], z]").expression!!)
+            parse("[add, [add, x, y], z]").value!!)
 
     }
 }

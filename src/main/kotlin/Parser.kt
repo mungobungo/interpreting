@@ -1,52 +1,49 @@
 import org.yaml.snakeyaml.Yaml
-interface IParserError{
+interface ICoreError{
     val input : Any
     val message: String
-    val parent: IParserError?
+
 }
 
-data class UnsupportedExpression(
+data class UnsupportedPrimitiveError(
     override val input: Any,
     override val message: String,
-    override val parent: IParserError?,
-    ) : IParserError
+    ) : ICoreError
 
 data class YamlLoadError(
     override val input: Any,
     override val message: String,
-    override val parent: IParserError?
-    ) :IParserError
+
+    ) :ICoreError
 
 
-data class ParserResult(
+data class CoreResult<T>(
     val success: Boolean,
-    val expression: SugarExpression?,
-    val error: IParserError? = null
+    val value: T?,
+    val error: ICoreError?
+
 )
 
-fun parserSuccess(expression: SugarExpression) : ParserResult{
-    return ParserResult(true, expression, null)
+fun parserSuccess(expression: SugarExpression) : CoreResult<SugarExpression>{
+    return CoreResult(true, expression, null)
 }
 
-fun parserFailure(error: IParserError): ParserResult{
-    return ParserResult(false, null, error)
+fun parserFailure(error: ICoreError): CoreResult<SugarExpression>{
+    return CoreResult(false, null, error)
 }
-fun parse(input:String):ParserResult{
+fun parse(input:String):CoreResult<SugarExpression>{
     val yaml = Yaml()
     return try{
         val script = yaml.load<Any>(input)
         convert(script)
     }catch (e:Exception){
-        parserFailure(YamlLoadError(input, e.message!!, null))
+        parserFailure(YamlLoadError(input, e.message!!))
     }
 }
-fun convert(obj:Any):ParserResult{
+fun convert(obj:Any):CoreResult<SugarExpression>{
    if(obj is Int){
        return  parserSuccess( SugarInt(obj))
    }
-    if(obj is String){
-        return parserSuccess(SugarSymbol(obj))
-    }
     if(obj is ArrayList<*>){
         val operation= obj[0]
         if(operation == "add"){
@@ -58,7 +55,7 @@ fun convert(obj:Any):ParserResult{
             if(!right.success){
                 return right
             }
-            return parserSuccess( SugarAdd(left.expression!!, right.expression!!))
+            return parserSuccess( SugarAdd(left.value!!, right.value!!))
         }
         if(operation =="mul"){
             val left = convert(obj[1])
@@ -69,7 +66,7 @@ fun convert(obj:Any):ParserResult{
             if(!right.success){
                 return right
             }
-            return parserSuccess( SugarMul(left.expression!!, right.expression!!))
+            return parserSuccess( SugarMul(left.value!!, right.value!!))
         }
         if(operation =="sub"){
 
@@ -81,7 +78,7 @@ fun convert(obj:Any):ParserResult{
             if(!right.success){
                 return right
             }
-            return parserSuccess( SugarSub(left.expression!!, right.expression!!))
+            return parserSuccess( SugarSub(left.value!!, right.value!!))
         }
 
         if(operation =="neg"){
@@ -89,10 +86,10 @@ fun convert(obj:Any):ParserResult{
             if(!value.success){
                 return value
             }
-            return parserSuccess(SugarNeg(value.expression!!))
+            return parserSuccess(SugarNeg(value.value!!))
         }
     }
 
-    return parserFailure(UnsupportedExpression( obj,
-        "unsupported object `$obj` during parsing",null))
+    return parserFailure(UnsupportedPrimitiveError( obj,
+        "unsupported primitive `$obj` during parsing"))
 }
