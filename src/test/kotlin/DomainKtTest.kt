@@ -53,61 +53,61 @@ internal class DomainKtTest {
     @Test
     fun testComplicatedExpressionWithParsing() {
         assertEquals(EInt(10), (EMul(EMul(EInt(1), EInt(5)), EInt(2))).eval(emptyEnv))
-        assertEquals(EInt(10), parse("[mul, [mul, 1, 5], 2]").desugar().eval(emptyEnv))
+        assertEquals(EInt(10), parse("[mul, [mul, 1, 5], 2]").expression!!.desugar().eval(emptyEnv))
         assertEquals(EInt(12), (EMul(EAdd(EInt(1), EInt(5)), EInt(2))).eval(emptyEnv))
-        assertEquals(EInt(12), parse("[mul, [add, 1, 5], 2]").desugar().eval(emptyEnv))
+        assertEquals(EInt(12), parse("[mul, [add, 1, 5], 2]").expression!!.desugar().eval(emptyEnv))
 
     }
 
     @Test
     fun testSimpleIntegerWithParsing() {
-        assertEquals(EInt(5), parse("5").desugar().eval(emptyEnv))
-        assertEquals(EInt(-5),parse("-5").desugar().eval(emptyEnv))
-        assertEquals(EInt(0), parse("0").desugar().eval(emptyEnv))
+        assertEquals(EInt(5), parse("5").expression!!.desugar().eval(emptyEnv))
+        assertEquals(EInt(-5),parse("-5").expression!!.desugar().eval(emptyEnv))
+        assertEquals(EInt(0), parse("0").expression!!.desugar().eval(emptyEnv))
     }
 
     @Test
     fun testSimpleAdditionWithParsing() {
-        assertEquals(EInt(5), parse("[add, 5, 0]").desugar().eval(emptyEnv))
-        assertEquals(EInt(5), parse("[add, 0, 5]").desugar().eval(emptyEnv))
-        assertEquals(EInt(10),parse("[add, 7, 3]").desugar().eval(emptyEnv))
-        assertEquals(EInt(7), parse("[add, -3, 10]").desugar().eval(emptyEnv))
-        assertEquals(EInt(6), parse("[add, 10, -4]").desugar().eval(emptyEnv))
+        assertEquals(EInt(5), parse("[add, 5, 0]").expression!!.desugar().eval(emptyEnv))
+        assertEquals(EInt(5), parse("[add, 0, 5]").expression!!.desugar().eval(emptyEnv))
+        assertEquals(EInt(10),parse("[add, 7, 3]").expression!!.desugar().eval(emptyEnv))
+        assertEquals(EInt(7), parse("[add, -3, 10]").expression!!.desugar().eval(emptyEnv))
+        assertEquals(EInt(6), parse("[add, 10, -4]").expression!!.desugar().eval(emptyEnv))
     }
 
     @Test
     fun testComplexAdditionWithParsing() {
-        assertEquals(EInt(6),  parse("[add, 1, [add, 2,3]]").desugar().eval(emptyEnv))
+        assertEquals(EInt(6),  parse("[add, 1, [add, 2,3]]").expression!!.desugar().eval(emptyEnv))
     }
 
     @Test
     fun testSimpleMultiplicationWithParsing() {
-        assertEquals(EInt(0), parse("[mul, 0, 42]").desugar().eval(emptyEnv))
-        assertEquals(EInt(0), parse("[mul, 42, 0]").desugar().eval(emptyEnv))
-        assertEquals(EInt(42),parse("[mul, 1, 42]").desugar().eval(emptyEnv))
-        assertEquals(EInt(42), parse("[mul, 42, 1]").desugar().eval(emptyEnv))
-        assertEquals(EInt(4), parse("[mul, 2, 2]").desugar().eval(emptyEnv))
+        assertEquals(EInt(0), parse("[mul, 0, 42]").expression!!.desugar().eval(emptyEnv))
+        assertEquals(EInt(0), parse("[mul, 42, 0]").expression!!.desugar().eval(emptyEnv))
+        assertEquals(EInt(42),parse("[mul, 1, 42]").expression!!.desugar().eval(emptyEnv))
+        assertEquals(EInt(42), parse("[mul, 42, 1]").expression!!.desugar().eval(emptyEnv))
+        assertEquals(EInt(4), parse("[mul, 2, 2]").expression!!.desugar().eval(emptyEnv))
     }
 
     @Test
     fun testComplicatedMultiplicationWithParsing() {
-        assertEquals(EInt(10), parse("[mul, 1, [mul, 5, 2]]").desugar().eval(emptyEnv))
-        assertEquals(EInt(12), parse("[mul, 2, [add, 5, 1]]").desugar().eval(emptyEnv))
+        assertEquals(EInt(10), parse("[mul, 1, [mul, 5, 2]]").expression!!.desugar().eval(emptyEnv))
+        assertEquals(EInt(12), parse("[mul, 2, [add, 5, 1]]").expression!!.desugar().eval(emptyEnv))
 
-        assertEquals("10", parse("[mul, 1, [mul, 5, 2]]").desugar().eval(emptyEnv).unparse())
-        assertEquals("12", parse("[mul, 2, [add, 5, 1]]").desugar().eval(emptyEnv).unparse())
+        assertEquals("10", parse("[mul, 1, [mul, 5, 2]]").expression!!.desugar().eval(emptyEnv).unparse())
+        assertEquals("12", parse("[mul, 2, [add, 5, 1]]").expression!!.desugar().eval(emptyEnv).unparse())
     }
 
     @Test
     fun testMulAndSubEvaluationWithParsing(){
         val yaml = "[mul, [sub, 22, 11], 44]"
-        assertEquals("484", parse(yaml).desugar().eval(emptyEnv).unparse())
+        assertEquals("484", parse(yaml).expression!!.desugar().eval(emptyEnv).unparse())
     }
 
     @Test
     fun testNegationEvaluation(){
         val yaml = "[neg, [mul, [sub, 22, 11], 44]]"
-        assertEquals("-484", parse(yaml).desugar().eval(emptyEnv).unparse())
+        assertEquals("-484", parse(yaml).expression!!.desugar().eval(emptyEnv).unparse())
     }
 
     @Test
@@ -117,15 +117,15 @@ internal class DomainKtTest {
         assertEquals(ESymbol("y"), ESymbol("y").substitute(ESymbol("x"), env1))
 
         assertEquals("[add, 5, 5]",
-            parse("[add, x, x]").desugar()
+            parse("[add, x, x]").expression!!.desugar()
                 .substitute(ESymbol("x"), env1).unparse())
 
         assertEquals("[mul, 5, 5]",
-            parse("[mul, x, x]").desugar()
+            parse("[mul, x, x]").expression!!.desugar()
                 .substitute(ESymbol("x"), env1).unparse())
 
         assertEquals("[add, [mul, 5, 5], 5]",
-            parse("[add, [mul, x, x], x]").desugar()
+            parse("[add, [mul, x, x], x]").expression!!.desugar()
                 .substitute(ESymbol("x"), env1).unparse())
 
 
@@ -133,21 +133,21 @@ internal class DomainKtTest {
             Pair(ESymbol("y"), EInt(7))))
 
         assertEquals("[add, [mul, 5, y], 5]",
-            parse("[add, [mul, x, y], x]").desugar()
+            parse("[add, [mul, x, y], x]").expression!!.desugar()
                 .substitute(ESymbol("x"), env2).unparse())
 
 
         assertEquals("[add, [mul, 5, 7], 5]",
-            parse("[add, [mul, x, y], x]").desugar()
+            parse("[add, [mul, x, y], x]").expression!!.desugar()
                 .substitute(ESymbol("x"), env2)
                 .substitute(ESymbol("y"), env2)
                 .unparse())
 
         val complexEnv = Environment(hashMapOf(Pair(ESymbol("x"),
-            parse("[mul, 11, [add, [add, 3, 4], 11]]").desugar())))
+            parse("[mul, 11, [add, [add, 3, 4], 11]]").expression!!.desugar())))
 
         assertEquals("[add, 198, 198]",
-            parse("[add, x, x]").desugar()
+            parse("[add, x, x]").expression!!.desugar()
                 .substitute(ESymbol("x"), complexEnv)
                 .unparse()
             )
@@ -155,21 +155,21 @@ internal class DomainKtTest {
     @Test
     fun testComplicatedExpression(){
         val complexEnv = Environment(hashMapOf(Pair(ESymbol("x"),
-            parse("[add, 10, 33]").desugar())))
+            parse("[add, 10, 33]").expression!!.desugar())))
 
         assertEquals("[add, 43, 43]",
-        parse("[add, x, x]").desugar()
+        parse("[add, x, x]").expression!!.desugar()
             .substitute(ESymbol("x"), complexEnv)
             .unparse())
 
         assertEquals("86",
-            parse("[add, x, x]").desugar()
+            parse("[add, x, x]").expression!!.desugar()
                 .substitute(ESymbol("x"), complexEnv)
                 .eval(Environment(hashMapOf()))
                 .unparse())
 
 
-        val expression=parse("[add, x, x]").desugar()
+        val expression=parse("[add, x, x]").expression!!.desugar()
 
         assertEquals("86",
                 expression
@@ -177,7 +177,7 @@ internal class DomainKtTest {
                 .unparse())
 
         val anotherEnv = Environment(hashMapOf(Pair(ESymbol("x"),
-            parse("[add, 20, 1]").desugar())))
+            parse("[add, 20, 1]").expression!!.desugar())))
 
         assertEquals("42",
                 expression
@@ -188,10 +188,10 @@ internal class DomainKtTest {
     @Test
     fun testingSameExpressionDifferentEnvironment(){
 
-        val expression=parse("[add, x, x]").desugar()
+        val expression=parse("[add, x, x]").expression!!.desugar()
 
         val firstEnv = Environment(hashMapOf(Pair(ESymbol("x"),
-            parse("[add, 10, 33]").desugar())))
+            parse("[add, 10, 33]").expression!!.desugar())))
 
         assertEquals("86",
             expression
@@ -199,7 +199,7 @@ internal class DomainKtTest {
             .unparse())
 
         val secondEnv = Environment(hashMapOf(Pair(ESymbol("x"),
-            parse("[add, 20, 11]").desugar())))
+            parse("[add, 20, 11]").expression!!.desugar())))
 
         assertEquals("62",
                 expression
@@ -209,9 +209,9 @@ internal class DomainKtTest {
     @Test
     fun testingExactlySameExpressionDifferentEnvironment(){
         val firstEnv = Environment(hashMapOf(Pair(ESymbol("x"),
-            parse("[add, 10, 33]").desugar())))
+            parse("[add, 10, 33]").expression!!.desugar())))
 
-        val expression=parse("[add, x, x]").desugar()
+        val expression=parse("[add, x, x]").expression!!.desugar()
 
         assertEquals("86",
             expression
@@ -219,7 +219,7 @@ internal class DomainKtTest {
                 .unparse())
 
         val secondEnv = Environment(hashMapOf(Pair(ESymbol("x"),
-            parse("[add, 20, 11]").desugar())))
+            parse("[add, 20, 11]").expression!!.desugar())))
         assertEquals("62",
             expression
                 .eval(secondEnv)

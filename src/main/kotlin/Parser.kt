@@ -16,6 +16,8 @@ data class YamlLoadError(
     override val message: String,
     override val parent: IParserError?
     ) :IParserError
+
+
 data class ParserResult(
     val success: Boolean,
     val expression: SugarExpression?,
