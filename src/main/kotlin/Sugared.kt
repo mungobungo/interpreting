@@ -21,7 +21,11 @@ data class SugarMul(val left:SugarExpression, val right:SugarExpression): SugarE
        return EMul(left.desugar(), right.desugar())
     }
 }
-
+data class SugarDiv(val left:SugarExpression, val right:SugarExpression): SugarExpression{
+    override fun desugar(): Expression {
+        return EDiv(left.desugar(), right.desugar())
+    }
+}
 data class SugarSub(val left:SugarExpression, val right: SugarExpression):SugarExpression{
     override fun desugar(): Expression {
        return EAdd(left.desugar(),  EMul(EInt(-1), right.desugar() ))

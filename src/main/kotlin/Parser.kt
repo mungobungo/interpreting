@@ -68,6 +68,17 @@ fun convert(obj:Any):CoreResult<SugarExpression>{
             }
             return parserSuccess( SugarMul(left.value!!, right.value!!))
         }
+        if(operation =="div"){
+            val left = convert(obj[1])
+            if(!left.success){
+                return left
+            }
+            val right = convert(obj[2])
+            if(!right.success){
+                return right
+            }
+            return parserSuccess( SugarDiv(left.value!!, right.value!!))
+        }
         if(operation =="sub"){
 
             val left = convert(obj[1])

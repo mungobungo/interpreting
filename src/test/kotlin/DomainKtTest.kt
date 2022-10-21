@@ -89,6 +89,14 @@ internal class DomainKtTest {
         assertEquals(EInt(42), parse("[mul, 42, 1]").value!!.desugar().eval().value!!)
         assertEquals(EInt(4), parse("[mul, 2, 2]").value!!.desugar().eval().value!!)
     }
+    @Test
+    fun testSimpleDivisionWithParsing() {
+        assertEquals(EInt(0), parse("[div, 0, 42]").value!!.desugar().eval().value!!)
+        assertEquals(true, parse("[div, 42, 0]").value!!.desugar().eval().error is DivisionByZeroError)
+        assertEquals(true, parse("[div, 42, [add, -1, 1]]").value!!.desugar().eval().error is DivisionByZeroError)
+        assertEquals(EInt(42),parse("[div, 42, 1]").value!!.desugar().eval().value!!)
+        assertEquals(EInt(1), parse("[div, 2, 2]").value!!.desugar().eval().value!!)
+    }
 
     @Test
     fun testComplicatedMultiplicationWithParsing() {

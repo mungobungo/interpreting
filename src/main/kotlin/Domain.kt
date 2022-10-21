@@ -105,6 +105,49 @@ data class EAdd(val left:Expression, val right: Expression): Expression {
     }
 }
 
+data class DivisionByZeroError(
+    override val input: Any,
+    override val message: String,
+) : ICoreError
+data class EDiv(val left:Expression, val right: Expression): Expression {
+    override fun eval(): CoreResult<Expression> {
+        val leftResult = left.eval();
+        if(!leftResult.success){
+            return leftResult
+        }
+        if(leftResult.value !is EInt){
+            return evalTypeError(left, "type error while evaluating left argument of 'div'," +
+                    " expected an integer value, but got `${leftResult.value!!.unparse()}`")
+        }
+
+        val l = leftResult.value!! as EInt
+
+        val rightResult = right.eval()
+        if(!rightResult.success){
+            return rightResult
+        }
+        if(rightResult.value !is EInt){
+            return evalTypeError(left, "type error while evaluating right argument of 'div'," +
+                    " expected an integer value, but got `${rightResult.value!!.unparse()}`")
+        }
+        val r = rightResult.value!! as EInt
+
+        if(r.value == 0){
+            return CoreResult(false, null,
+                DivisionByZeroError(this, "division by zero"))
+        }
+        return evalSuccess( EInt(l.value / r.value))
+
+    }
+
+    override fun substitute(symbol: ESymbol, env: Environment): Expression {
+        return EAdd(left.substitute(symbol, env), right.substitute(symbol,env))
+    }
+
+    override fun unparse(): String {
+        return "[add, ${left.unparse()}, ${right.unparse()}]"
+    }
+}
  data class ESymbol(val name:String):Expression{
      //var evaluated = false
 
