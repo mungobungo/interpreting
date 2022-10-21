@@ -1,10 +1,10 @@
 interface Expression{
-    fun eval(env:Environment):Expression
+    fun eval():Expression
     fun substitute(symbol:ESymbol, env:Environment):Expression
     fun unparse():String
 }
 data class EInt(val value:Int):Expression {
-    override fun eval(env:Environment): Expression {
+    override fun eval(): Expression {
         return this
     }
 
@@ -19,12 +19,12 @@ data class EInt(val value:Int):Expression {
 
 val zeroInt = EInt(0)
 data class EMul(val a:Expression, val b:Expression): Expression {
-    override fun eval(env:Environment): Expression {
-        val left = a.eval(env) as EInt
+    override fun eval(): Expression {
+        val left = a.eval() as EInt
         if (left.value == 0){
             return zeroInt
         }
-        val right = b.eval(env) as EInt
+        val right = b.eval() as EInt
         return EInt(left.value * right.value)
     }
 
@@ -39,10 +39,10 @@ data class EMul(val a:Expression, val b:Expression): Expression {
 }
 
 data class EAdd(val a:Expression, val b:Expression): Expression {
-    override fun eval(env:Environment): Expression {
-        val leftExpression = a.eval(env)
+    override fun eval(): Expression {
+        val leftExpression = a.eval()
         val left = leftExpression as EInt
-        val right = b.eval(env) as EInt
+        val right = b.eval() as EInt
         return EInt(left.value + right.value)
 
     }
@@ -59,8 +59,11 @@ data class EAdd(val a:Expression, val b:Expression): Expression {
  data class ESymbol(val name:String):Expression{
      //var evaluated = false
 
-    override fun eval(env: Environment): Expression {
-        return substitute(this, env)
+    override fun eval(): Expression {
+
+    return this;
+    //return substitute(this )
+
     }
 
     override fun substitute(symbol: ESymbol, env: Environment): Expression {
@@ -70,7 +73,7 @@ data class EAdd(val a:Expression, val b:Expression): Expression {
        //     if(this.evaluated){
          //       return initialExpression
            // }
-            val evaluatedSymbol = initialExpression.eval(env)
+            val evaluatedSymbol = initialExpression.eval()
             env.bindings[symbol] = evaluatedSymbol
             //this.evaluated = true
             return evaluatedSymbol
@@ -85,7 +88,7 @@ data class EAdd(val a:Expression, val b:Expression): Expression {
 
 data class EFunDef(val name:ESymbol, val argument:ESymbol, val body:Expression):Expression{
 
-    override fun eval(env: Environment): Expression {
+    override fun eval(): Expression {
         TODO("Not yet implemented")
     }
 
@@ -100,7 +103,7 @@ data class EFunDef(val name:ESymbol, val argument:ESymbol, val body:Expression):
 
 data class EFunCall(val name:ESymbol, val argument:Expression):Expression{
 
-    override fun eval(env: Environment): Expression {
+    override fun eval(): Expression {
         TODO("Not yet implemented")
     }
 
