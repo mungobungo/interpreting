@@ -100,9 +100,11 @@ private fun parseBinaryAction(operation:String, obj: ArrayList<*>): CoreResult<S
         "fmul" -> return parserSuccess(SugarFMul(l,r))
         "div" -> return parserSuccess(SugarDiv(l,r))
         "idiv" -> return parserSuccess(SugarIDiv(l,r))
+        "fdiv"  -> return parserSuccess(SugarFDiv(l,r))
         "sub" -> return parserSuccess(SugarSub(l,r))
         "isub"-> return parserSuccess(SugarISub(l,r))
 
+        "fsub"  -> return parserSuccess(SugarFSub(l,r))
     }
     return CoreResult(false, null, UnsupportedBinaryOperation(operation, "$operation is not defined as binary operation"))
 }

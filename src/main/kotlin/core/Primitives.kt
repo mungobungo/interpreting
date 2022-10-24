@@ -1,8 +1,5 @@
 package core
 
-import kotlin.contracts.Effect
-
-
 val binaryFloatPrimitives = hashMapOf(
     "fadd" to {a:Double, b:Double -> a +b},
     "add" to {a:Double, b: Double-> a+b},
@@ -140,35 +137,25 @@ data class EIntMul(val left:Expression, val right:Expression): Expression {
     }
 }
 
-data class EMul(val left:Expression, val right:Expression): Expression {
+data class EBinaryNumericOp(val operationName:String, val left:Expression, val right:Expression): Expression {
     override fun eval(): CoreResult<Expression> {
-        return evalBinaryNumeric("mul", left, right)
+        return evalBinaryNumeric(operationName, left, right)
     }
 
     override fun unparse(): String {
-        return "[mul, ${left.unparse()}, ${right.unparse()}]".format()
+        return "[$operationName, ${left.unparse()}, ${right.unparse()}]".format()
     }
 }
-data class EFloatMul(val left:Expression, val right: Expression): Expression {
+
+data class EBinaryFloatOp(val operationName:String, val left:Expression, val right: Expression): Expression {
     override fun eval(): CoreResult<Expression> {
 
-        return evalBinaryFloat("fmul", left, right)
+        return evalBinaryFloat(operationName, left, right)
     }
 
 
     override fun unparse(): String {
-        return "[fmul, ${left.unparse()}, ${right.unparse()}]"
-    }
-}
-data class EFloatAdd(val left:Expression, val right: Expression): Expression {
-    override fun eval(): CoreResult<Expression> {
-
-        return evalBinaryFloat("fadd", left, right)
-    }
-
-
-    override fun unparse(): String {
-        return "[fadd, ${left.unparse()}, ${right.unparse()}]"
+        return "[$operationName, ${left.unparse()}, ${right.unparse()}]"
     }
 }
 data class EIntAdd(val left:Expression, val right: Expression): Expression {
@@ -183,34 +170,15 @@ data class EIntAdd(val left:Expression, val right: Expression): Expression {
     }
 }
 
-data class EAdd(val left:Expression, val right: Expression): Expression {
-    override fun eval(): CoreResult<Expression> {
-        return evalBinaryNumeric("add", left, right)
-    }
 
-
-    override fun unparse(): String {
-        return "[add, ${left.unparse()}, ${right.unparse()}]"
-    }
-}
 data class EIntDiv(val left:Expression, val right: Expression): Expression {
     override fun eval(): CoreResult<Expression> {
-        return evalBinaryNumeric("idiv", left, right)
+        return evalBinaryInteger("idiv", left, right)
     }
     override fun unparse(): String {
         return "[idiv, ${left.unparse()}, ${right.unparse()}]"
     }
 }
-data class EDiv(val left:Expression, val right: Expression): Expression {
-    override fun eval(): CoreResult<Expression> {
-        return evalBinaryNumeric("div", left, right)
-    }
-
-    override fun unparse(): String {
-        return "[div, ${left.unparse()}, ${right.unparse()}]"
-    }
-}
-
 
 data class EIsInt(val v:Expression):Expression{
     override fun eval(): CoreResult<Expression> {

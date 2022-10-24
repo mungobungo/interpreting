@@ -134,7 +134,7 @@ internal class ParserKtTest {
     fun testMulAndSubUnparse() {
 
         val yaml = "[mul, [sub, 22, 11], 44]"
-        val desugared = "[mul, [add, 22, [mul, -1, 11]], 44]"
+        val desugared = "[mul, [sub, 22, 11], 44]"
         assertEquals(
             desugared,
             SugarMul(SugarSub(SugarInt(22), SugarInt(11)), SugarInt(44)).desugar().unparse()
@@ -180,7 +180,6 @@ internal class ParserKtTest {
     @Test
     fun testFloatAddUnparse(){
         val yaml = "[fadd, 2.0, 4.0]"
-        val g = parse(yaml)
         assertEquals(yaml, parse(yaml).value!!.desugar().unparse())
     }
 }

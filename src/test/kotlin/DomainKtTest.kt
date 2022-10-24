@@ -185,11 +185,14 @@ internal class DomainKtTest {
         yamlToYaml("3", "[add, 1, 2]")
         yamlToYaml("3", "[iadd, 1, 2]")
         yamlToYaml("3.0", "[fadd, 1,2]")
-
         yamlToYaml("3.0", "[add, 1.0, 2]")
-
         yamlToYaml("3.0", "[add, 1, 2.0]")
-
         yamlToYaml("3.0", "[add, 1.0, 2.0]")
+        yamlToYaml("-1", "[sub, 1, 2]")
+        yamlToYaml("-1", "[isub, 1, 2]")
+        yamlToYaml("-1.0", "[fsub, 1,2]")
+        yamlToYaml("-1.0", "[sub, 1.0, 2]")
+        yamlToYaml("-1.0", "[sub, 1, 2.0]")
+        yamlToYaml("-1.0", "[sub, 1.0, 2.0]")
     }
 }
