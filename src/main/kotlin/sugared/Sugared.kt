@@ -1,3 +1,5 @@
+package sugared
+
 import core.*
 
 interface SugarExpression{

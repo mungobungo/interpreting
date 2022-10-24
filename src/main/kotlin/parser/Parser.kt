@@ -1,5 +1,8 @@
+package parser
+
 import core.CoreResult
 import core.ICoreError
+import sugared.*
 import org.yaml.snakeyaml.Yaml
 
 
@@ -38,7 +41,7 @@ fun convert(obj:Any):CoreResult<SugarExpression>{
    }
     if(obj is ArrayList<*>){
         val operation= obj[0]
-        if(operation == "add"){
+        if(operation == "add" || operation =="iadd"){
             val left = convert(obj[1])
             if(!left.success){
                 return left
@@ -49,7 +52,7 @@ fun convert(obj:Any):CoreResult<SugarExpression>{
             }
             return parserSuccess( SugarAdd(left.value!!, right.value!!))
         }
-        if(operation =="mul"){
+        if(operation =="mul" || operation =="imul"){
             val left = convert(obj[1])
             if(!left.success){
                 return left
@@ -60,7 +63,7 @@ fun convert(obj:Any):CoreResult<SugarExpression>{
             }
             return parserSuccess( SugarMul(left.value!!, right.value!!))
         }
-        if(operation =="div"){
+        if(operation =="div" || operation == "idiv"){
             val left = convert(obj[1])
             if(!left.success){
                 return left
@@ -71,7 +74,7 @@ fun convert(obj:Any):CoreResult<SugarExpression>{
             }
             return parserSuccess( SugarDiv(left.value!!, right.value!!))
         }
-        if(operation =="sub"){
+        if(operation =="sub" || operation =="isub"){
 
             val left = convert(obj[1])
             if(!left.success){
@@ -84,7 +87,7 @@ fun convert(obj:Any):CoreResult<SugarExpression>{
             return parserSuccess( SugarSub(left.value!!, right.value!!))
         }
 
-        if(operation =="neg"){
+        if(operation =="neg" || operation == "ineg"){
             val value = convert(obj[1])
             if(!value.success){
                 return value

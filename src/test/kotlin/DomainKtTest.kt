@@ -1,4 +1,5 @@
 import core.*
+import parser.*
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 
@@ -25,37 +26,37 @@ internal class DomainKtTest {
 
     @Test
     fun testSimpleAddition() {
-        assertEquals(EInt(5), EAdd(EInt(5), EInt(0)).eval().value!!)
-        assertEquals(EInt(5), (EAdd(EInt(0), EInt(5))).eval().value!!)
-        assertEquals(EInt(10),(EAdd(EInt(7), EInt(3))).eval().value!!)
-        assertEquals(EInt(7), (EAdd(EInt(-3), EInt(10))).eval().value!!)
-        assertEquals(EInt(6), (EAdd(EInt(10), EInt(-4))).eval().value!!)
+        assertEquals(EInt(5), EIntAdd(EInt(5), EInt(0)).eval().value!!)
+        assertEquals(EInt(5), (EIntAdd(EInt(0), EInt(5))).eval().value!!)
+        assertEquals(EInt(10),(EIntAdd(EInt(7), EInt(3))).eval().value!!)
+        assertEquals(EInt(7), (EIntAdd(EInt(-3), EInt(10))).eval().value!!)
+        assertEquals(EInt(6), (EIntAdd(EInt(10), EInt(-4))).eval().value!!)
     }
 
     @Test
     fun testComplexAddition() {
-        assertEquals(EInt(6), (EAdd(EInt(1), EAdd(EInt(2), EInt(3)))).eval().value!!)
+        assertEquals(EInt(6), (EIntAdd(EInt(1), EIntAdd(EInt(2), EInt(3)))).eval().value!!)
     }
 
     @Test
     fun testSimpleMultiplication() {
-        assertEquals(EInt(0), (EMul(EInt(0), EInt(42))).eval().value!!)
-        assertEquals(EInt(0), (EMul(EInt(42), EInt(0))).eval().value!!)
-        assertEquals(EInt(42),(EMul(EInt(1), EInt(42))).eval().value!!)
-        assertEquals(EInt(42), (EMul(EInt(42), EInt(1))).eval().value!!)
-        assertEquals(EInt(4), (EMul(EInt(2), EInt(2))).eval().value!!)
+        assertEquals(EInt(0), (EIntMul(EInt(0), EInt(42))).eval().value!!)
+        assertEquals(EInt(0), (EIntMul(EInt(42), EInt(0))).eval().value!!)
+        assertEquals(EInt(42),(EIntMul(EInt(1), EInt(42))).eval().value!!)
+        assertEquals(EInt(42), (EIntMul(EInt(42), EInt(1))).eval().value!!)
+        assertEquals(EInt(4), (EIntMul(EInt(2), EInt(2))).eval().value!!)
     }
 
     @Test
     fun testComplicatedMultiplication() {
-        assertEquals(EInt(10), (EMul(EMul(EInt(1), EInt(5)), EInt(2))).eval().value!!)
-        assertEquals(EInt(12), (EMul(EAdd(EInt(1), EInt(5)), EInt(2))).eval().value!!)
+        assertEquals(EInt(10), (EIntMul(EIntMul(EInt(1), EInt(5)), EInt(2))).eval().value!!)
+        assertEquals(EInt(12), (EIntMul(EIntAdd(EInt(1), EInt(5)), EInt(2))).eval().value!!)
     }
     @Test
     fun testComplicatedExpressionWithParsing() {
-        assertEquals(EInt(10), (EMul(EMul(EInt(1), EInt(5)), EInt(2))).eval().value!!)
+        assertEquals(EInt(10), (EIntMul(EIntMul(EInt(1), EInt(5)), EInt(2))).eval().value!!)
         assertEquals(EInt(10), parse("[mul, [mul, 1, 5], 2]").value!!.desugar().eval().value!!)
-        assertEquals(EInt(12), (EMul(EAdd(EInt(1), EInt(5)), EInt(2))).eval().value!!)
+        assertEquals(EInt(12), (EIntMul(EIntAdd(EInt(1), EInt(5)), EInt(2))).eval().value!!)
         assertEquals(EInt(12), parse("[mul, [add, 1, 5], 2]").value!!.desugar().eval().value!!)
 
     }

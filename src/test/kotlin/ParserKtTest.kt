@@ -1,4 +1,5 @@
-
+import parser.*
+import sugared.*
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 
@@ -22,6 +23,7 @@ internal class ParserKtTest {
     @Test
     fun testSimpleAdd(){
         assertEquals(SugarAdd(SugarInt(3), SugarInt(5)), parse("[add, 3, 5]").value!!)
+        assertEquals(SugarAdd(SugarInt(3), SugarInt(5)), parse("[iadd, 3, 5]").value!!)
     }
     @Test
     fun testComplicatedAdd(){
@@ -70,7 +72,7 @@ internal class ParserKtTest {
     fun testSimpleMultiplicationUnparse(){
         val yaml = "[mul, 11, 33]"
 
-        assertEquals(yaml, SugarMul(SugarInt(11), SugarInt(33)).desugar().unparse())
+        assertEquals(yaml,SugarMul(SugarInt(11), SugarInt(33)).desugar().unparse())
         assertEquals(yaml, parse(yaml).value!!.desugar().unparse())
     }
     @Test
@@ -109,21 +111,4 @@ internal class ParserKtTest {
         assertEquals(desugared, parse(yaml).value!!.desugar().unparse())
     }
 
-    @Test
-    fun testSymbolParsing()
-    {
-        val yaml = "x"
-
-        assertEquals(SugarSymbol("x"), parse(yaml).value!!)
-    }
-
-    @Test
-    fun testOperationWithSymbol(){
-        assertEquals(SugarAdd(SugarSymbol("x"), SugarInt(5)), parse("[add, x, 5]").value!!)
-        assertEquals(SugarAdd(SugarSymbol("x"), SugarSymbol("y")), parse("[add, x, y]").value!!)
-
-        assertEquals(SugarAdd( SugarAdd(SugarSymbol("x"), SugarSymbol("y")), SugarSymbol("z")),
-            parse("[add, [add, x, y], z]").value!!)
-
-    }
 }
