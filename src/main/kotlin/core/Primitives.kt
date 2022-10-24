@@ -1,5 +1,7 @@
 package core
 
+import kotlin.math.abs
+
 val binaryFloatPrimitives = hashMapOf(
     "fadd" to {a:Double, b:Double -> a +b},
     "add" to {a:Double, b: Double-> a+b},
@@ -10,6 +12,15 @@ val binaryFloatPrimitives = hashMapOf(
     "fdiv" to {a:Double, b:Double -> a /b},
     "div" to {a:Double, b:Double -> a/b},
 )
+data class EBinaryFloatOp(val operationName:String, val left:Expression, val right: Expression): Expression {
+    override fun eval(): CoreResult<Expression> {
+
+        return evalBinaryFloat(operationName, left, right)
+    }
+    override fun unparse(): String {
+        return "[$operationName, ${left.unparse()}, ${right.unparse()}]"
+    }
+}
 fun evalBinaryFloat(operationName:String, leftExpression:Expression, rightExpression:Expression,
                       ):CoreResult<Expression>{
 
@@ -49,6 +60,66 @@ fun evalBinaryFloat(operationName:String, leftExpression:Expression, rightExpres
 
     return evalSuccess(EFloat(op((left as EFloat).value, (right as EFloat).value)))
 }
+
+val binaryFloatBoolPrimitives = hashMapOf(
+    "lt" to {a:Double, b:Double -> a <b},
+    "lte" to {a:Double, b: Double-> a<=b},
+    "gt" to {a:Double, b:Double -> a >b},
+    "gte" to {a:Double, b:Double -> a>=b},
+    "eq" to {a:Double, b:Double -> abs(a -b) <0.0000001 },
+    "neq" to {a:Double, b:Double -> abs(a-b) >0.0000001},
+)
+data class EBinaryFloatBoolOp(val operationName:String, val left:Expression, val right: Expression): Expression {
+    override fun eval(): CoreResult<Expression> {
+
+        return evalBinaryFloatBool(operationName, left, right)
+    }
+    override fun unparse(): String {
+        return "[$operationName, ${left.unparse()}, ${right.unparse()}]"
+    }
+}
+fun evalBinaryFloatBool(operationName:String, leftExpression:Expression, rightExpression:Expression,
+):CoreResult<Expression>{
+
+    val leftResult = leftExpression.eval()
+    if(!leftResult.success){
+        return leftResult
+    }
+
+    if(leftResult.value !is EFloat && leftResult.value !is EInt){
+        return evalTypeError(leftExpression, "type error while evaluating left argument of '${operationName}'," +
+                " expected a float  or integer value, but got `${leftResult.value!!.unparse()}`")
+    }
+
+    val left = leftResult.value!!
+
+    val rightResult = rightExpression.eval()
+    if(!rightResult.success){
+        return rightResult
+    }
+    if(rightResult.value !is EInt && rightResult.value !is EFloat){
+        return evalTypeError(left, "type error while evaluating right argument of '${operationName}'," +
+                " expected a float or integer value, but got `${rightResult.value!!.unparse()}`")
+    }
+    val right = rightResult.value!!
+
+    val op = binaryFloatBoolPrimitives[operationName]!!
+    if(left is EInt && right is EInt){
+        return evalSuccess(EBool(op(left.value.toDouble(), right.value.toDouble())))
+    }
+    if(left is EInt && right is EFloat){
+        return evalSuccess(EBool(op(left.value.toDouble(), right.value)))
+    }
+
+    if(left is EFloat && right is EInt){
+        return evalSuccess(EBool(op(left.value, right.value.toDouble())))
+    }
+
+    return evalSuccess(EBool(op((left as EFloat).value, (right as EFloat).value)))
+}
+
+
+
 val binaryIntPrimitives = hashMapOf(
     "iadd" to {a:Int, b:Int -> a +b},
     "add" to {a:Int, b:Int -> a+b},
@@ -59,6 +130,15 @@ val binaryIntPrimitives = hashMapOf(
     "idiv" to {a:Int, b:Int -> a /b},
     "div" to {a:Int, b:Int -> a/b},
     )
+data class EBinaryIntegerOp(val operationName: String, val left:Expression, val right:Expression): Expression {
+    override fun eval(): CoreResult<Expression> {
+        return evalBinaryInteger(operationName, left, right)
+    }
+
+    override fun unparse(): String {
+        return "[$operationName, ${left.unparse()}, ${right.unparse()}]".format()
+    }
+}
 fun evalBinaryInteger(operationName:String, leftExpression:Expression, rightExpression:Expression):CoreResult<Expression>{
 
     val leftResult = leftExpression.eval()
@@ -92,6 +172,59 @@ fun evalBinaryInteger(operationName:String, leftExpression:Expression, rightExpr
     return evalSuccess(EInt(op(left.value, right.value)))
 }
 
+val binaryIntBoolPrimitives = hashMapOf(
+    "lt" to {a:Int, b:Int -> a < b},
+    "lte" to {a:Int, b:Int -> a<=b},
+    "gt" to {a:Int, b:Int -> a >b},
+    "gte" to {a:Int, b:Int -> a>=b},
+    "eq" to {a:Int, b:Int -> a ==b},
+    "neq" to {a:Int, b:Int -> a != b},
+)
+data class EBinaryIntegerBoolOp(val operationName: String, val left:Expression, val right:Expression): Expression {
+    override fun eval(): CoreResult<Expression> {
+        return evalBinaryIntegerBool(operationName, left, right)
+    }
+
+    override fun unparse(): String {
+        return "[$operationName, ${left.unparse()}, ${right.unparse()}]".format()
+    }
+}
+fun evalBinaryIntegerBool(operationName:String, leftExpression:Expression, rightExpression:Expression):CoreResult<Expression>{
+
+    val leftResult = leftExpression.eval()
+    if(!leftResult.success){
+        return leftResult
+    }
+
+    if(leftResult.value !is EInt){
+        return evalTypeError(leftExpression, "type error while evaluating left argument of '${operationName}'," +
+                " expected an integer value, but got `${leftResult.value!!.unparse()}`")
+    }
+
+    val left = leftResult.value!! as EInt
+
+    val rightResult = rightExpression.eval()
+    if(!rightResult.success){
+        return rightResult
+    }
+    if(rightResult.value !is EInt){
+        return evalTypeError(left, "type error while evaluating right argument of '${operationName}'," +
+                " expected an integer value, but got `${rightResult.value!!.unparse()}`")
+    }
+    val right = rightResult.value!! as EInt
+
+    val op = binaryIntBoolPrimitives[operationName]!!
+    return evalSuccess(EBool(op(left.value, right.value)))
+}
+data class EBinaryNumericOp(val operationName:String, val left:Expression, val right:Expression): Expression {
+    override fun eval(): CoreResult<Expression> {
+        return evalBinaryNumeric(operationName, left, right)
+    }
+
+    override fun unparse(): String {
+        return "[$operationName, ${left.unparse()}, ${right.unparse()}]".format()
+    }
+}
 fun evalBinaryNumeric(operationName:String, leftExpression:Expression, rightExpression:Expression):CoreResult<Expression>{
     val leftResult = leftExpression.eval()
     if(!leftResult.success){
@@ -127,37 +260,53 @@ fun evalBinaryNumeric(operationName:String, leftExpression:Expression, rightExpr
 
     return evalBinaryFloat(operationName, left, right)
 }
-data class EBinaryIntegerOp(val operationName: String, val left:Expression, val right:Expression): Expression {
+
+
+data class EBinaryNumericBoolOp(val operationName:String, val left:Expression, val right:Expression): Expression {
     override fun eval(): CoreResult<Expression> {
-        return evalBinaryInteger(operationName, left, right)
+        return evalBinaryNumericBool(operationName, left, right)
     }
 
     override fun unparse(): String {
         return "[$operationName, ${left.unparse()}, ${right.unparse()}]".format()
     }
 }
-
-data class EBinaryNumericOp(val operationName:String, val left:Expression, val right:Expression): Expression {
-    override fun eval(): CoreResult<Expression> {
-        return evalBinaryNumeric(operationName, left, right)
+fun evalBinaryNumericBool(operationName:String, leftExpression:Expression, rightExpression:Expression):CoreResult<Expression>{
+    val leftResult = leftExpression.eval()
+    if(!leftResult.success){
+        return leftResult
     }
 
-    override fun unparse(): String {
-        return "[$operationName, ${left.unparse()}, ${right.unparse()}]".format()
+    if(leftResult.value !is EFloat && leftResult.value !is EInt) {
+        return evalTypeError(leftExpression, "type error while evaluating left argument of '${operationName}'," +
+                " expected a numeric value, but got `${leftResult.value!!.unparse()}`")
     }
+
+    val left = leftResult.value!!
+
+    val rightResult = rightExpression.eval()
+    if(!rightResult.success){
+        return rightResult
+    }
+    if(rightResult.value !is EInt && rightResult.value !is EFloat){
+        return evalTypeError(left, "type error while evaluating right argument of '${operationName}'," +
+                " expected a numeric value, but got `${rightResult.value!!.unparse()}`")
+    }
+    val right = rightResult.value!!
+
+    if(left is EInt && right is EInt){
+        return evalBinaryIntegerBool(operationName, left, right)
+    }
+    if(left is EFloat && right is EInt){
+        return evalBinaryFloatBool(operationName, left, EFloat((right).value.toDouble()))
+    }
+    if(left is EInt && right is EFloat){
+        return evalBinaryFloatBool(operationName, EFloat(left.value.toDouble()), right)
+    }
+
+    return evalBinaryFloatBool(operationName, left, right)
 }
 
-data class EBinaryFloatOp(val operationName:String, val left:Expression, val right: Expression): Expression {
-    override fun eval(): CoreResult<Expression> {
-
-        return evalBinaryFloat(operationName, left, right)
-    }
-
-
-    override fun unparse(): String {
-        return "[$operationName, ${left.unparse()}, ${right.unparse()}]"
-    }
-}
 
 data class EIsInt(val v:Expression):Expression{
     override fun eval(): CoreResult<Expression> {

@@ -1,9 +1,6 @@
 package parser
 
-import core.CoreResult
-import core.ICoreError
-import core.binaryFloatPrimitives
-import core.binaryIntPrimitives
+import core.*
 import sugared.*
 import org.yaml.snakeyaml.Yaml
 
@@ -63,7 +60,10 @@ fun convert(obj:Any):CoreResult<SugarExpression>{
 
     if(obj is ArrayList<*>){
         val operation= obj[0]
-        if(operation is String &&  obj.count() == 3 && (operation in binaryIntPrimitives.keys || operation in binaryFloatPrimitives)){
+        if(operation is String &&  obj.count() == 3 && (operation in binaryIntPrimitives.keys
+                    || operation in binaryFloatPrimitives
+                    || operation in binaryFloatBoolPrimitives
+                    || operation in binaryIntBoolPrimitives)){
             return parseBinaryAction(operation, obj)
         }
 
@@ -103,8 +103,13 @@ private fun parseBinaryAction(operation:String, obj: ArrayList<*>): CoreResult<S
         "fdiv"  -> return parserSuccess(SugarFDiv(l,r))
         "sub" -> return parserSuccess(SugarSub(l,r))
         "isub"-> return parserSuccess(SugarISub(l,r))
-
         "fsub"  -> return parserSuccess(SugarFSub(l,r))
+        "lt" -> return parserSuccess(SugarNumericLt(l,r))
+        "lte" -> return parserSuccess(SugarNumericLte(l,r))
+        "gt" -> return parserSuccess(SugarNumericGt(l,r))
+        "gte" -> return parserSuccess(SugarNumericGte(l,r))
+        "eq" -> return parserSuccess(SugarNumericEq(l,r))
+        "neq" -> return parserSuccess(SugarNumericNeq(l,r))
     }
     return CoreResult(false, null, UnsupportedBinaryOperation(operation, "$operation is not defined as binary operation"))
 }

@@ -215,4 +215,95 @@ internal class DomainKtTest {
         yamlToYaml("Infinity", "[div, 10, 0.0]")
         yamlToYaml("Infinity", "[div, 10.0, 0]")
     }
+    @Test
+   fun testNumericBinaryBoolOperations(){
+
+        yamlToYaml("true","[lt, 1, 2]")
+        yamlToYaml("true","[lte, 1, 2]")
+        yamlToYaml("false","[gt, 1, 2]")
+        yamlToYaml("false","[gte, 1, 2]")
+        yamlToYaml("false","[eq, 1, 2]")
+        yamlToYaml("true","[neq, 1, 2]")
+
+        yamlToYaml("true","[lt, 1.0, 2]")
+        yamlToYaml("true","[lte, 1.0, 2]")
+        yamlToYaml("false","[gt, 1.0, 2]")
+        yamlToYaml("false","[gte, 1.0, 2]")
+        yamlToYaml("false","[eq, 1.0, 2]")
+        yamlToYaml("true","[neq, 1.0, 2]")
+
+        yamlToYaml("true","[lt, 1, 2.0]")
+        yamlToYaml("true","[lte, 1, 2.0]")
+        yamlToYaml("false","[gt, 1, 2.0]")
+        yamlToYaml("false","[gte, 1, 2.0]")
+        yamlToYaml("false","[eq, 1, 2.0]")
+        yamlToYaml("true","[neq, 1, 2.0]")
+
+        yamlToYaml("true","[lt, 1.0, 2.0]")
+        yamlToYaml("true","[lte, 1.0, 2.0]")
+        yamlToYaml("false","[gt, 1.0, 2.0]")
+        yamlToYaml("false","[gte, 1.0, 2.0]")
+        yamlToYaml("false","[eq, 1.0, 2.0]")
+        yamlToYaml("true","[neq, 1.0, 2.0]")
+
+
+        yamlToYaml("false","[lt, 1, 1]")
+        yamlToYaml("true","[lte, 1, 1]")
+        yamlToYaml("false","[gt, 1, 1]")
+        yamlToYaml("true","[gte, 1, 1]")
+        yamlToYaml("true","[eq, 1, 1]")
+        yamlToYaml("false","[neq, 1, 1]")
+
+        yamlToYaml("false","[lt, 1.0, 1]")
+        yamlToYaml("true","[lte, 1.0, 1]")
+        yamlToYaml("false","[gt, 1.0, 1]")
+        yamlToYaml("true","[gte, 1.0, 1]")
+        yamlToYaml("true","[eq, 1.0, 1]")
+        yamlToYaml("false","[neq, 1.0, 1]")
+
+        yamlToYaml("false","[lt, 1, 1.0]")
+        yamlToYaml("true","[lte, 1, 1.0]")
+        yamlToYaml("false","[gt, 1, 1.0]")
+        yamlToYaml("true","[gte, 1, 1.0]")
+        yamlToYaml("true","[eq, 1, 1.0]")
+        yamlToYaml("false","[neq, 1, 1.0]")
+
+        yamlToYaml("false","[lt, 1.0, 1.0]")
+        yamlToYaml("true","[lte, 1.0, 1.0]")
+        yamlToYaml("false","[gt, 1.0, 1.0]")
+        yamlToYaml("true","[gte, 1.0, 1.0]")
+        yamlToYaml("true","[eq, 1.0, 1.0]")
+        yamlToYaml("false","[neq, 1.0, 1.0]")
+
+
+        yamlToYaml("false","[lt, 2, 1]")
+        yamlToYaml("false","[lte, 2, 1]")
+        yamlToYaml("true","[gt, 2, 1]")
+        yamlToYaml("true","[gte, 2, 1]")
+        yamlToYaml("false","[eq, 2, 1]")
+        yamlToYaml("true","[neq, 2, 1]")
+
+        yamlToYaml("false","[lt, 2.0, 1]")
+        yamlToYaml("false","[lte, 2.0, 1]")
+        yamlToYaml("true","[gt, 2.0, 1]")
+        yamlToYaml("true","[gte, 2.0, 1]")
+        yamlToYaml("false","[eq, 2.0, 1]")
+        yamlToYaml("true","[neq, 2.0, 1]")
+
+        yamlToYaml("false","[lt, 2, 1.0]")
+        yamlToYaml("false","[lte, 2, 1.0]")
+        yamlToYaml("true","[gt, 2, 1.0]")
+        yamlToYaml("true","[gte, 2, 1.0]")
+        yamlToYaml("false","[eq, 2, 1.0]")
+        yamlToYaml("true","[neq, 2, 1.0]")
+
+        yamlToYaml("false","[lt, 2.0, 1.0]")
+        yamlToYaml("false","[lte, 2.0, 1.0]")
+        yamlToYaml("true","[gt, 2.0, 1.0]")
+        yamlToYaml("true","[gte, 2.0, 1.0]")
+        yamlToYaml("false","[eq, 2.0, 1.0]")
+        yamlToYaml("true","[neq, 2.0, 1.0]")
+   }
+
+
 }

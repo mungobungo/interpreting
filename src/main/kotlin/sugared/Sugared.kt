@@ -31,20 +31,16 @@ data class SugarAdd(val left:SugarExpression, val right:SugarExpression) : Sugar
     override fun desugar(): Expression {
        return EBinaryNumericOp("add", left.desugar(), right.desugar())
     }
-
 }
-
 data class SugarFAdd(val left:SugarExpression, val right:SugarExpression) : SugarExpression{
     override fun desugar(): Expression {
         return EBinaryFloatOp("fadd", left.desugar(), right.desugar())
     }
-
 }
 data class SugarIAdd(val left:SugarExpression, val right:SugarExpression) : SugarExpression{
     override fun desugar(): Expression {
         return EBinaryIntegerOp("iadd",left.desugar(), right.desugar())
     }
-
 }
 data class SugarMul(val left:SugarExpression, val right:SugarExpression): SugarExpression{
     override fun desugar(): Expression {
@@ -130,4 +126,38 @@ data class SugarSymbol(val name:String):SugarExpression{
        return ESymbol(name)
     }
 
+}
+data class SugarNumericLt(val left:SugarExpression, val right:SugarExpression) : SugarExpression{
+    override fun desugar(): Expression {
+        return EBinaryNumericBoolOp("lt",left.desugar(), right.desugar())
+    }
+}
+data class SugarNumericLte(val left:SugarExpression, val right:SugarExpression) : SugarExpression{
+    override fun desugar(): Expression {
+        return EBinaryNumericBoolOp("lte",left.desugar(), right.desugar())
+    }
+}
+
+
+data class SugarNumericGt(val left:SugarExpression, val right:SugarExpression) : SugarExpression{
+    override fun desugar(): Expression {
+        return EBinaryNumericBoolOp("gt",left.desugar(), right.desugar())
+    }
+}
+data class SugarNumericGte(val left:SugarExpression, val right:SugarExpression) : SugarExpression{
+    override fun desugar(): Expression {
+        return EBinaryNumericBoolOp("gte",left.desugar(), right.desugar())
+    }
+}
+data class SugarNumericEq(val left:SugarExpression, val right:SugarExpression) : SugarExpression{
+    override fun desugar(): Expression {
+        return EBinaryNumericBoolOp("eq",left.desugar(), right.desugar())
+    }
+}
+
+
+data class SugarNumericNeq(val left:SugarExpression, val right:SugarExpression) : SugarExpression{
+    override fun desugar(): Expression {
+        return EBinaryNumericBoolOp("neq",left.desugar(), right.desugar())
+    }
 }

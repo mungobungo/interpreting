@@ -5,6 +5,9 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import parser.parse
 import sugared.*
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 internal class ParserKtTest {
 
@@ -181,5 +184,62 @@ internal class ParserKtTest {
     fun testFloatAddUnparse(){
         val yaml = "[fadd, 2.0, 4.0]"
         assertEquals(yaml, parse(yaml).value!!.desugar().unparse())
+    }
+
+    @Test
+    fun testFloatMulUnparse(){
+        val yaml = "[fmul, 2.0, 4.0]"
+        assertEquals(yaml, parse(yaml).value!!.desugar().unparse())
+    }
+
+    @Test
+    fun testFloatSubUnparse(){
+        val yaml = "[fsub, 2.0, 4.0]"
+        assertEquals(yaml, parse(yaml).value!!.desugar().unparse())
+    }
+
+    @Test
+    fun testFloatDivUnparse(){
+        val yaml = "[fdiv, 2.0, 4.0]"
+        assertEquals(yaml, parse(yaml).value!!.desugar().unparse())
+        testConsistency("[fdiv, 2.0, 4.0]")
+    }
+
+private fun testConsistency(yaml:String){
+    val parsed = parse(yaml)
+    assertTrue { parsed.success }
+    assertNotNull(parsed.value)
+    assertNull(parsed.error)
+    assertEquals(yaml, parsed.value!!.desugar().unparse())
+}
+    @Test
+    fun testNumericBoolOperations(){
+        testConsistency("[lt, 1, 2]")
+        testConsistency("[lte, 1, 2]")
+        testConsistency("[gt, 1, 2]")
+        testConsistency("[gte, 1, 2]")
+        testConsistency("[eq, 1, 2]")
+        testConsistency("[neq, 1, 2]")
+
+        testConsistency("[lt, 1.0, 2]")
+        testConsistency("[lte, 1.0, 2]")
+        testConsistency("[gt, 1.0, 2]")
+        testConsistency("[gte, 1.0, 2]")
+        testConsistency("[eq, 1.0, 2]")
+        testConsistency("[neq, 1.0, 2]")
+
+        testConsistency("[lt, 1, 2.0]")
+        testConsistency("[lte, 1, 2.0]")
+        testConsistency("[gt, 1, 2.0]")
+        testConsistency("[gte, 1, 2.0]")
+        testConsistency("[eq, 1, 2.0]")
+        testConsistency("[neq, 1, 2.0]")
+
+        testConsistency("[lt, 1.0, 2.0]")
+        testConsistency("[lte, 1.0, 2.0]")
+        testConsistency("[gt, 1.0, 2.0]")
+        testConsistency("[gte, 1.0, 2.0]")
+        testConsistency("[eq, 1.0, 2.0]")
+        testConsistency("[neq, 1.0, 2.0]")
     }
 }
