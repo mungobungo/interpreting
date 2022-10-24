@@ -63,7 +63,8 @@ fun convert(obj:Any):CoreResult<SugarExpression>{
         if(operation is String &&  obj.count() == 3 && (operation in binaryIntPrimitives.keys
                     || operation in binaryFloatPrimitives
                     || operation in binaryFloatBoolPrimitives
-                    || operation in binaryIntBoolPrimitives)){
+                    || operation in binaryIntBoolPrimitives
+                    || operation in binaryBoolPrimitives)){
             return parseBinaryAction(operation, obj)
         }
 
@@ -110,6 +111,9 @@ private fun parseBinaryAction(operation:String, obj: ArrayList<*>): CoreResult<S
         "gte" -> return parserSuccess(SugarNumericGte(l,r))
         "eq" -> return parserSuccess(SugarNumericEq(l,r))
         "neq" -> return parserSuccess(SugarNumericNeq(l,r))
+        "and" -> return parserSuccess(SugarAnd(l,r))
+        "or" -> return parserSuccess(SugarOr(l,r))
+        "xor" -> return parserSuccess(SugarXor(l,r))
     }
     return CoreResult(false, null, UnsupportedBinaryOperation(operation, "$operation is not defined as binary operation"))
 }

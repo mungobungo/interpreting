@@ -69,15 +69,6 @@ val binaryFloatBoolPrimitives = hashMapOf(
     "eq" to {a:Double, b:Double -> abs(a -b) <0.0000001 },
     "neq" to {a:Double, b:Double -> abs(a-b) >0.0000001},
 )
-data class EBinaryFloatBoolOp(val operationName:String, val left:Expression, val right: Expression): Expression {
-    override fun eval(): CoreResult<Expression> {
-
-        return evalBinaryFloatBool(operationName, left, right)
-    }
-    override fun unparse(): String {
-        return "[$operationName, ${left.unparse()}, ${right.unparse()}]"
-    }
-}
 fun evalBinaryFloatBool(operationName:String, leftExpression:Expression, rightExpression:Expression,
 ):CoreResult<Expression>{
 
@@ -180,15 +171,6 @@ val binaryIntBoolPrimitives = hashMapOf(
     "eq" to {a:Int, b:Int -> a ==b},
     "neq" to {a:Int, b:Int -> a != b},
 )
-data class EBinaryIntegerBoolOp(val operationName: String, val left:Expression, val right:Expression): Expression {
-    override fun eval(): CoreResult<Expression> {
-        return evalBinaryIntegerBool(operationName, left, right)
-    }
-
-    override fun unparse(): String {
-        return "[$operationName, ${left.unparse()}, ${right.unparse()}]".format()
-    }
-}
 fun evalBinaryIntegerBool(operationName:String, leftExpression:Expression, rightExpression:Expression):CoreResult<Expression>{
 
     val leftResult = leftExpression.eval()
@@ -340,3 +322,45 @@ data class EIsBool(val v:Expression):Expression{
     }
 
 }
+val binaryBoolPrimitives = hashMapOf(
+    "and" to {a:Boolean, b:Boolean -> a &&b},
+    "or" to {a:Boolean, b:Boolean -> a||b},
+    "xor" to {a:Boolean, b:Boolean -> a xor b},
+)
+data class EBinaryBoolOp(val operationName: String, val left:Expression, val right:Expression): Expression {
+    override fun eval(): CoreResult<Expression> {
+        return evalBinaryBool(operationName, left, right)
+    }
+
+    override fun unparse(): String {
+        return "[$operationName, ${left.unparse()}, ${right.unparse()}]".format()
+    }
+}
+fun evalBinaryBool(operationName:String, leftExpression:Expression, rightExpression:Expression):CoreResult<Expression>{
+
+    val leftResult = leftExpression.eval()
+    if(!leftResult.success){
+        return leftResult
+    }
+
+    if(leftResult.value !is EBool){
+        return evalTypeError(leftExpression, "type error while evaluating left argument of '${operationName}'," +
+                " expected a boolean value, but got `${leftResult.value!!.unparse()}`")
+    }
+
+    val left = leftResult.value!! as EBool
+
+    val rightResult = rightExpression.eval()
+    if(!rightResult.success){
+        return rightResult
+    }
+    if(rightResult.value !is EBool){
+        return evalTypeError(left, "type error while evaluating right argument of '${operationName}'," +
+                " expected a boolean value, but got `${rightResult.value!!.unparse()}`")
+    }
+    val right = rightResult.value!! as EBool
+
+    val op = binaryBoolPrimitives[operationName]!!
+    return evalSuccess(EBool(op(left.value, right.value)))
+}
+

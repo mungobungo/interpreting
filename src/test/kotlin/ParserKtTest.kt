@@ -242,4 +242,11 @@ private fun testConsistency(yaml:String){
         testConsistency("[eq, 1.0, 2.0]")
         testConsistency("[neq, 1.0, 2.0]")
     }
+
+    @Test
+    fun testBinaryBooleanOperations(){
+       testConsistency("[and, true, false]")
+       testConsistency("[or, false, true]")
+       testConsistency("[xor, true, false]")
+    }
 }

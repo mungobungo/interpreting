@@ -161,3 +161,18 @@ data class SugarNumericNeq(val left:SugarExpression, val right:SugarExpression) 
         return EBinaryNumericBoolOp("neq",left.desugar(), right.desugar())
     }
 }
+data class SugarAnd(val left:SugarExpression, val right:SugarExpression) : SugarExpression{
+    override fun desugar(): Expression {
+        return EBinaryBoolOp("and",left.desugar(), right.desugar())
+    }
+}
+data class SugarOr(val left:SugarExpression, val right:SugarExpression) : SugarExpression{
+    override fun desugar(): Expression {
+        return EBinaryBoolOp("or",left.desugar(), right.desugar())
+    }
+}
+data class SugarXor(val left:SugarExpression, val right:SugarExpression) : SugarExpression{
+    override fun desugar(): Expression {
+        return EBinaryBoolOp("xor",left.desugar(), right.desugar())
+    }
+}
