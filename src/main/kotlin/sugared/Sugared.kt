@@ -77,6 +77,32 @@ data class SugarNeg(val value:SugarExpression):SugarExpression{
 
 }
 
+data class SugarINeg(val value:SugarExpression):SugarExpression{
+    override fun desugar(): Expression {
+        return EIntMul(EInt(-1), value.desugar())
+    }
+
+}
+data class SugarIsInt(val value:SugarExpression):SugarExpression{
+    override fun desugar(): Expression {
+       return EIsInt(value.desugar())
+    }
+
+}
+
+
+data class SugarIsBool(val value:SugarExpression):SugarExpression{
+    override fun desugar(): Expression {
+        return EIsBool(value.desugar())
+    }
+
+}
+data class SugarIsFloat(val value:SugarExpression):SugarExpression{
+    override fun desugar(): Expression {
+        return EIsFloat(value.desugar())
+    }
+
+}
 data class SugarSymbol(val name:String):SugarExpression{
     override fun desugar(): Expression {
        return ESymbol(name)

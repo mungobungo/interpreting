@@ -145,3 +145,37 @@ data class EDiv(val left:Expression, val right: Expression): Expression {
         return "[div, ${left.unparse()}, ${right.unparse()}]"
     }
 }
+
+
+data class EIsInt(val v:Expression):Expression{
+    override fun eval(): CoreResult<Expression> {
+        return  evalSuccess(EBool( v is EInt))
+    }
+
+    override fun unparse(): String {
+        return "[is_int, ${v.unparse()}]"
+    }
+
+}
+
+
+data class EIsFloat(val v:Expression):Expression{
+    override fun eval(): CoreResult<Expression> {
+        return  evalSuccess(EBool( v is EInt))
+    }
+
+    override fun unparse(): String {
+        return "[is_float, ${v.unparse()}]"
+    }
+
+}
+data class EIsBool(val v:Expression):Expression{
+    override fun eval(): CoreResult<Expression> {
+        return  evalSuccess(EBool( v is EInt))
+    }
+
+    override fun unparse(): String {
+        return "[is_bool, ${v.unparse()}]"
+    }
+
+}

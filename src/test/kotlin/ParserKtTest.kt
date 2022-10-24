@@ -85,10 +85,10 @@ internal class ParserKtTest {
     }
     @Test
     fun testComplicatedAddUnparse(){
-        val yaml = "[add, [add, 3, 5], 42]"
+        val yaml = "[iadd, [add, 3, 5], 42]"
         assertEquals(
             yaml,
-            SugarAdd(SugarAdd(SugarInt(3), SugarInt(5)), SugarInt(42)).desugar().unparse())
+            SugarIAdd(SugarAdd(SugarInt(3), SugarInt(5)), SugarInt(42)).desugar().unparse())
         assertEquals(yaml, parse(yaml).value!!.desugar().unparse())
     }
     @Test
@@ -129,9 +129,35 @@ internal class ParserKtTest {
     fun testNegUnparse()
     {
         val yaml = "[neg, [mul, 2, 10]]"
+        val g = parse((yaml))
         val desugared = "[mul, -1, [mul, 2, 10]]"
         assertEquals(desugared, SugarNeg(SugarMul(SugarInt(2), SugarInt(10))).desugar().unparse())
         assertEquals(desugared, parse(yaml).value!!.desugar().unparse())
     }
+    @Test
+    fun testIsIntUnparse(){
+        val yaml = "[is_int, [imul, 1, 20]]"
+        val desugared = "[is_int, [imul, 1, 20]]"
+        assertEquals(desugared,SugarIsInt(SugarIMul(SugarInt(1), SugarInt(20))).desugar().unparse())
 
+        assertEquals(desugared, parse(yaml).value!!.desugar().unparse())
+    }
+
+    @Test
+    fun testIsFloatUnparse(){
+        val yaml = "[is_float, [imul, 1, 20]]"
+        val desugared = "[is_float, [imul, 1, 20]]"
+        assertEquals(desugared,SugarIsFloat(SugarIMul(SugarInt(1), SugarInt(20))).desugar().unparse())
+
+        assertEquals(desugared, parse(yaml).value!!.desugar().unparse())
+    }
+
+    @Test
+    fun testIsBoolUnparse(){
+        val yaml = "[is_bool, [is_int, 1]]"
+        val desugared = "[is_bool, [is_int, 1]]"
+        assertEquals(desugared,SugarIsBool(SugarIsInt(SugarInt(1))).desugar().unparse())
+
+        assertEquals(desugared, parse(yaml).value!!.desugar().unparse())
+    }
 }

@@ -23,7 +23,11 @@ data class UnsupportedBinaryOperation(
     override val message: String,
 
     ) :ICoreError
+data class UnsupportedUnaryOperation(
+    override val input: Any,
+    override val message: String,
 
+    ) :ICoreError
 fun parserSuccess(expression: SugarExpression) : CoreResult<SugarExpression> {
     return CoreResult(true, expression, null)
 }
@@ -40,7 +44,7 @@ fun parse(input:String):CoreResult<SugarExpression>{
         parserFailure(YamlLoadError(input, e.message!!))
     }
 }
-
+val unaryPrimitives = hashSetOf<String>("neg", "ineg", "is_int", "is_bool", "is_float")
 val binaryPrimitives = hashSetOf<String>("mul","imul", "add", "iadd", "div", "idiv", "sub", "isub")
 fun convert(obj:Any):CoreResult<SugarExpression>{
    if(obj is Int){
@@ -62,13 +66,10 @@ fun convert(obj:Any):CoreResult<SugarExpression>{
             return parseBinaryAction(operation, obj)
         }
 
-        if(operation =="neg" || operation == "ineg"){
-            val value = convert(obj[1])
-            if(!value.success){
-                return value
-            }
-            return parserSuccess(SugarNeg(value.value!!))
+        if(operation is String && obj.count() == 2 && operation in unaryPrimitives){
+            return parseUnaryAction(operation, obj)
         }
+
     }
 
     return parserFailure(UnsupportedPrimitiveError( obj,
@@ -101,4 +102,21 @@ private fun parseBinaryAction(operation:String, obj: ArrayList<*>): CoreResult<S
 
     }
     return CoreResult(false, null, UnsupportedBinaryOperation(operation, "$operation is not defined as binary operation"))
+}
+
+private fun parseUnaryAction(operation:String, obj: ArrayList<*>): CoreResult<SugarExpression>{
+    val op = convert(obj[1])
+    if(!op.success){
+        return op
+    }
+
+    val v = op.value!!
+    when(operation){
+        "neg" -> return parserSuccess(SugarNeg(v))
+        "ineg" -> return parserSuccess(SugarINeg(v))
+        "is_int" -> return parserSuccess(SugarIsInt(v))
+        "is_bool" -> return parserSuccess(SugarIsBool(v))
+        "is_float" -> return parserSuccess(SugarIsFloat(v))
+    }
+    return CoreResult(false, null, UnsupportedUnaryOperation(op, "$operation is not not defined as unary operation"))
 }
