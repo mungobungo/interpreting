@@ -2,6 +2,8 @@ package parser
 
 import core.CoreResult
 import core.ICoreError
+import core.binaryFloatPrimitives
+import core.binaryIntPrimitives
 import sugared.*
 import org.yaml.snakeyaml.Yaml
 
@@ -45,7 +47,6 @@ fun parse(input:String):CoreResult<SugarExpression>{
     }
 }
 val unaryPrimitives = hashSetOf<String>("neg", "ineg", "is_int", "is_bool", "is_float")
-val binaryPrimitives = hashSetOf<String>("mul","imul", "add", "iadd", "div", "idiv", "sub", "isub")
 fun convert(obj:Any):CoreResult<SugarExpression>{
    if(obj is Int){
        return  parserSuccess( SugarInt(obj))
@@ -62,7 +63,7 @@ fun convert(obj:Any):CoreResult<SugarExpression>{
 
     if(obj is ArrayList<*>){
         val operation= obj[0]
-        if(operation is String &&  obj.count() == 3 && operation in binaryPrimitives){
+        if(operation is String &&  obj.count() == 3 && (operation in binaryIntPrimitives.keys || operation in binaryFloatPrimitives)){
             return parseBinaryAction(operation, obj)
         }
 
@@ -93,8 +94,10 @@ private fun parseBinaryAction(operation:String, obj: ArrayList<*>): CoreResult<S
     when(operation){
         "add" -> return parserSuccess(SugarAdd(l,r))
         "iadd"  -> return parserSuccess(SugarIAdd(l,r))
+        "fadd"  -> return parserSuccess(SugarFAdd(l,r))
         "mul" -> return parserSuccess(SugarMul(l,r))
         "imul" -> return parserSuccess(SugarIMul(l,r))
+        "fmul" -> return parserSuccess(SugarFMul(l,r))
         "div" -> return parserSuccess(SugarDiv(l,r))
         "idiv" -> return parserSuccess(SugarIDiv(l,r))
         "sub" -> return parserSuccess(SugarSub(l,r))

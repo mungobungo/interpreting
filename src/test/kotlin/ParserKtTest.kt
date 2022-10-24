@@ -177,4 +177,10 @@ internal class ParserKtTest {
 
         assertEquals(desugared, parse(yaml).value!!.desugar().unparse())
     }
+    @Test
+    fun testFloatAddUnparse(){
+        val yaml = "[fadd, 2.0, 4.0]"
+        val g = parse(yaml)
+        assertEquals(yaml, parse(yaml).value!!.desugar().unparse())
+    }
 }

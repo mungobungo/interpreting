@@ -179,4 +179,17 @@ internal class DomainKtTest {
         yamlToYaml("false", "[is_bool, 10]")
         yamlToYaml("true", "[is_bool, true]")
     }
+
+    @Test
+    fun testBinaryNumericEvaluation(){
+        yamlToYaml("3", "[add, 1, 2]")
+        yamlToYaml("3", "[iadd, 1, 2]")
+        yamlToYaml("3.0", "[fadd, 1,2]")
+
+        yamlToYaml("3.0", "[add, 1.0, 2]")
+
+        yamlToYaml("3.0", "[add, 1, 2.0]")
+
+        yamlToYaml("3.0", "[add, 1.0, 2.0]")
+    }
 }

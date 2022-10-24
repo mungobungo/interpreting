@@ -33,6 +33,12 @@ data class SugarAdd(val left:SugarExpression, val right:SugarExpression) : Sugar
 
 }
 
+data class SugarFAdd(val left:SugarExpression, val right:SugarExpression) : SugarExpression{
+    override fun desugar(): Expression {
+        return EFloatAdd(left.desugar(), right.desugar())
+    }
+
+}
 data class SugarIAdd(val left:SugarExpression, val right:SugarExpression) : SugarExpression{
     override fun desugar(): Expression {
         return EIntAdd(left.desugar(), right.desugar())
@@ -47,6 +53,11 @@ data class SugarMul(val left:SugarExpression, val right:SugarExpression): SugarE
 data class SugarIMul(val left:SugarExpression, val right:SugarExpression): SugarExpression{
     override fun desugar(): Expression {
         return EIntMul(left.desugar(), right.desugar())
+    }
+}
+data class SugarFMul(val left:SugarExpression, val right:SugarExpression): SugarExpression{
+    override fun desugar(): Expression {
+        return EFloatMul(left.desugar(), right.desugar())
     }
 }
 data class SugarDiv(val left:SugarExpression, val right:SugarExpression): SugarExpression{
