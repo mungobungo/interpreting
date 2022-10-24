@@ -2,7 +2,6 @@ import java.util.StringJoiner
 
 interface Expression{
     fun eval():CoreResult<Expression>
-    fun substitute(symbol:ESymbol, env:Environment):Expression
     fun unparse():String
 }
 fun evalSuccess(expression: Expression): CoreResult<Expression>{
@@ -19,10 +18,6 @@ fun evalTypeError(expression: Expression, error:String):CoreResult<Expression>{
 data class EInt(val value:Int):Expression {
     override fun eval(): CoreResult<Expression> {
         return evalSuccess(this)
-    }
-
-    override fun substitute(symbol: ESymbol, env: Environment): Expression {
-        return this
     }
 
     override fun unparse(): String {
@@ -61,9 +56,6 @@ data class EMul(val left:Expression, val right:Expression): Expression {
     }
 
 
-    override fun substitute(symbol: ESymbol, env: Environment): Expression {
-        return EMul(left.substitute(symbol, env), right.substitute(symbol, env))
-    }
 
     override fun unparse(): String {
         return "[mul, ${left.unparse()}, ${right.unparse()}]".format()
@@ -96,9 +88,6 @@ data class EAdd(val left:Expression, val right: Expression): Expression {
 
     }
 
-    override fun substitute(symbol: ESymbol, env: Environment): Expression {
-        return EAdd(left.substitute(symbol, env), right.substitute(symbol,env))
-    }
 
     override fun unparse(): String {
         return "[add, ${left.unparse()}, ${right.unparse()}]"
@@ -140,9 +129,6 @@ data class EDiv(val left:Expression, val right: Expression): Expression {
 
     }
 
-    override fun substitute(symbol: ESymbol, env: Environment): Expression {
-        return EAdd(left.substitute(symbol, env), right.substitute(symbol,env))
-    }
 
     override fun unparse(): String {
         return "[add, ${left.unparse()}, ${right.unparse()}]"
@@ -158,55 +144,10 @@ data class EDiv(val left:Expression, val right: Expression): Expression {
 
     }
 
-    override fun substitute(symbol: ESymbol, env: Environment): Expression {
-        if(symbol.name == name){
-
-            val initialExpression = env.get(symbol)
-       //     if(this.evaluated){
-         //       return initialExpression
-           // }
-            val evaluatedSymbol = initialExpression.eval().value!!
-            env.bindings[symbol] = evaluatedSymbol
-            //this.evaluated = true
-            return evaluatedSymbol
-        }
-        return this
-    }
 
     override fun unparse(): String {
         return name
     }
-}
-
-data class EFunDef(val name:ESymbol, val argument:ESymbol, val body:Expression):Expression{
-
-    override fun eval(): CoreResult<Expression> {
-        TODO("Not yet implemented")
-    }
-
-    override fun substitute(symbol: ESymbol, env: Environment): Expression {
-        TODO("Not yet implemented")
-    }
-
-    override fun unparse(): String {
-        return "[fun, [${name.unparse()}, ${argument.unparse()}], ${body.unparse()}]"
-    }
-}
-
-data class EFunCall(val name:ESymbol, val argument:Expression):Expression{
-
-    override fun eval(): CoreResult< Expression> {
-        TODO("Not yet implemented")
-    }
-
-    override fun substitute(symbol: ESymbol, env: Environment): Expression {
-        TODO("Not yet implemented")
-    }
-
-    override fun unparse(): String {
-        return "[${name.unparse()}, ${argument.unparse()}]"
-    }
-
 }
 
 data class Environment(val bindings:HashMap<ESymbol, Expression>){
