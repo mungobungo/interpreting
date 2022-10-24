@@ -127,13 +127,13 @@ fun evalBinaryNumeric(operationName:String, leftExpression:Expression, rightExpr
 
     return evalBinaryFloat(operationName, left, right)
 }
-data class EIntMul(val left:Expression, val right:Expression): Expression {
+data class EBinaryIntegerOp(val operationName: String, val left:Expression, val right:Expression): Expression {
     override fun eval(): CoreResult<Expression> {
-        return evalBinaryInteger("imul", left, right)
+        return evalBinaryInteger(operationName, left, right)
     }
 
     override fun unparse(): String {
-        return "[imul, ${left.unparse()}, ${right.unparse()}]".format()
+        return "[$operationName, ${left.unparse()}, ${right.unparse()}]".format()
     }
 }
 
@@ -156,27 +156,6 @@ data class EBinaryFloatOp(val operationName:String, val left:Expression, val rig
 
     override fun unparse(): String {
         return "[$operationName, ${left.unparse()}, ${right.unparse()}]"
-    }
-}
-data class EIntAdd(val left:Expression, val right: Expression): Expression {
-    override fun eval(): CoreResult<Expression> {
-
-        return evalBinaryInteger("iadd", left, right)
-    }
-
-
-    override fun unparse(): String {
-        return "[iadd, ${left.unparse()}, ${right.unparse()}]"
-    }
-}
-
-
-data class EIntDiv(val left:Expression, val right: Expression): Expression {
-    override fun eval(): CoreResult<Expression> {
-        return evalBinaryInteger("idiv", left, right)
-    }
-    override fun unparse(): String {
-        return "[idiv, ${left.unparse()}, ${right.unparse()}]"
     }
 }
 

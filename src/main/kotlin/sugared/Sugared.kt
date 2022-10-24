@@ -42,7 +42,7 @@ data class SugarFAdd(val left:SugarExpression, val right:SugarExpression) : Suga
 }
 data class SugarIAdd(val left:SugarExpression, val right:SugarExpression) : SugarExpression{
     override fun desugar(): Expression {
-        return EIntAdd(left.desugar(), right.desugar())
+        return EBinaryIntegerOp("iadd",left.desugar(), right.desugar())
     }
 
 }
@@ -53,7 +53,7 @@ data class SugarMul(val left:SugarExpression, val right:SugarExpression): SugarE
 }
 data class SugarIMul(val left:SugarExpression, val right:SugarExpression): SugarExpression{
     override fun desugar(): Expression {
-        return EIntMul(left.desugar(), right.desugar())
+        return EBinaryIntegerOp("imul",left.desugar(), right.desugar())
     }
 }
 data class SugarFMul(val left:SugarExpression, val right:SugarExpression): SugarExpression{
@@ -73,7 +73,7 @@ data class SugarFDiv(val left:SugarExpression, val right:SugarExpression): Sugar
 }
 data class SugarIDiv(val left:SugarExpression, val right:SugarExpression): SugarExpression{
     override fun desugar(): Expression {
-        return EIntDiv(left.desugar(), right.desugar())
+        return EBinaryIntegerOp("idiv",left.desugar(), right.desugar())
     }
 }
 data class SugarSub(val left:SugarExpression, val right: SugarExpression):SugarExpression{
@@ -89,7 +89,7 @@ data class SugarFSub(val left:SugarExpression, val right: SugarExpression):Sugar
 }
 data class SugarISub(val left:SugarExpression, val right: SugarExpression):SugarExpression{
     override fun desugar(): Expression {
-        return EIntAdd(left.desugar(),  EIntMul(EInt(-1), right.desugar() ))
+        return EBinaryIntegerOp("isub", left.desugar(),  right.desugar())
     }
 }
 data class SugarNeg(val value:SugarExpression):SugarExpression{
@@ -101,7 +101,7 @@ data class SugarNeg(val value:SugarExpression):SugarExpression{
 
 data class SugarINeg(val value:SugarExpression):SugarExpression{
     override fun desugar(): Expression {
-        return EIntMul(EInt(-1), value.desugar())
+        return EBinaryIntegerOp("imul", EInt(-1), value.desugar())
     }
 
 }

@@ -4,7 +4,6 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import parser.parse
-import kotlin.math.exp
 
 internal class DomainKtTest {
 
@@ -53,40 +52,40 @@ internal class DomainKtTest {
 
     @Test
     fun testSimpleAddition() {
-        expressionToExpression(EInt(5), EIntAdd(EInt(5), EInt(0)))
-        expressionToExpression(EInt(5), (EIntAdd(EInt(0), EInt(5))))
-        expressionToExpression(EInt(10), (EIntAdd(EInt(7), EInt(3))))
-        expressionToExpression(EInt(7), (EIntAdd(EInt(-3), EInt(10))))
-        expressionToExpression(EInt(6), (EIntAdd(EInt(10), EInt(-4))))
+        expressionToExpression(EInt(5), EBinaryIntegerOp("add", EInt(5), EInt(0)))
+        expressionToExpression(EInt(5), EBinaryIntegerOp( "add",EInt(0), EInt(5)))
+        expressionToExpression(EInt(10), EBinaryIntegerOp("add",EInt(7), EInt(3)))
+        expressionToExpression(EInt(7), EBinaryIntegerOp("add",EInt(-3), EInt(10)))
+        expressionToExpression(EInt(6), EBinaryIntegerOp("add",EInt(10), EInt(-4)))
     }
 
     @Test
     fun testComplexAddition() {
-        expressionToExpression(EInt(6), (EIntAdd(EInt(1), EIntAdd(EInt(2), EInt(3)))))
+        expressionToExpression(EInt(6), EBinaryIntegerOp("add", EInt(1), EBinaryIntegerOp("add", EInt(2), EInt(3))))
     }
 
     @Test
     fun testSimpleMultiplication() {
-        expressionToExpression(EInt(0), (EIntMul(EInt(0), EInt(42))))
-        expressionToExpression(EInt(0), (EIntMul(EInt(42), EInt(0))))
-        expressionToExpression(EInt(42), (EIntMul(EInt(1), EInt(42))))
-        expressionToExpression(EInt(42), (EIntMul(EInt(42), EInt(1))))
-        expressionToExpression(EInt(4), (EIntMul(EInt(2), EInt(2))))
+        expressionToExpression(EInt(0), EBinaryIntegerOp("mul",EInt(0), EInt(42)))
+        expressionToExpression(EInt(0), EBinaryIntegerOp("mul",EInt(42), EInt(0)))
+        expressionToExpression(EInt(42), EBinaryIntegerOp("mul", EInt(1), EInt(42)))
+        expressionToExpression(EInt(42), EBinaryIntegerOp("mul",EInt(42), EInt(1)))
+        expressionToExpression(EInt(4), EBinaryIntegerOp("mul",EInt(2), EInt(2)))
     }
 
     @Test
     fun testComplicatedMultiplication() {
-        expressionToExpression(EInt(10), (EIntMul(EIntMul(EInt(1), EInt(5)), EInt(2))))
-        expressionToExpression(EInt(12), (EIntMul(EIntAdd(EInt(1), EInt(5)), EInt(2))))
+        expressionToExpression(EInt(10), (EBinaryIntegerOp( "mul", (EBinaryIntegerOp("mul", EInt(1), EInt(5))), EInt(2))))
+        expressionToExpression(EInt(12), (EBinaryIntegerOp("mul", EBinaryIntegerOp("add", EInt(1), EInt(5)), EInt(2))))
     }
 
 
     @Test
     fun testComplicatedExpressionWithParsing() {
-        expressionToExpression(EInt(10), (EIntMul(EIntMul(EInt(1), EInt(5)), EInt(2))))
+        expressionToExpression(EInt(10), (EBinaryIntegerOp("mul", EBinaryIntegerOp("mul",EInt(1), EInt(5)), EInt(2))))
         yamlToExpression(EInt(10), "[mul, [mul, 1, 5], 2]")
         yamlToYaml("10", "[mul, [mul, 1, 5], 2]")
-        expressionToExpression(EInt(12), (EIntMul(EIntAdd(EInt(1), EInt(5)), EInt(2))))
+        expressionToExpression(EInt(12), (EBinaryIntegerOp("mul",EBinaryIntegerOp("add",EInt(1), EInt(5)), EInt(2))))
         yamlToYaml("12", "[mul, [add, 1, 5], 2]")
     }
 
