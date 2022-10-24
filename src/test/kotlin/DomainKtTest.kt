@@ -1,10 +1,10 @@
 import core.*
-import parser.*
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.BeforeEach
-
 import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import parser.parse
+import kotlin.math.exp
 
 internal class DomainKtTest {
 
@@ -17,107 +17,166 @@ internal class DomainKtTest {
     }
 
     private val emptyEnv = Environment(hashMapOf())
+
+    private fun expressionToExpression(evaluated:Expression, input:Expression){
+        val res = input.eval()
+        assertTrue(res.success)
+        assertNull(res.error)
+        assertNotNull(res.value)
+        assertEquals(evaluated, res.value!!)
+    }
+    private fun yamlToExpression(expression: Expression, yaml: String) {
+        assertEquals(expression, parse(yaml).value!!.desugar().eval().value!!)
+    }
+
+    private fun yamlToYaml(evaluated: String, yaml: String) {
+        assertEquals(evaluated, parse(yaml).value!!.desugar().eval().value!!.unparse())
+    }
+
+    private fun failsWithError(yaml: String) {
+
+        val res = parse(yaml).value!!.desugar().eval()
+        assertEquals(false, res.success)
+        assertFalse(res.error == null)
+        assertTrue(res.value == null)
+        assertTrue(res.error is ICoreError)
+    }
     @Test
     fun testSimpleInteger() {
-        assertEquals(EInt(5), EInt(5).eval().value!!)
-        assertEquals(EInt(-5),(EInt(-5)).eval().value!!)
-        assertEquals(EInt(0), EInt(0).eval().value!!)
+        expressionToExpression(EInt(5), EInt(5))
+
+        expressionToExpression(EInt(-5), EInt(-5))
+
+        expressionToExpression(EInt(0), EInt(0))
+
     }
 
     @Test
     fun testSimpleAddition() {
-        assertEquals(EInt(5), EIntAdd(EInt(5), EInt(0)).eval().value!!)
-        assertEquals(EInt(5), (EIntAdd(EInt(0), EInt(5))).eval().value!!)
-        assertEquals(EInt(10),(EIntAdd(EInt(7), EInt(3))).eval().value!!)
-        assertEquals(EInt(7), (EIntAdd(EInt(-3), EInt(10))).eval().value!!)
-        assertEquals(EInt(6), (EIntAdd(EInt(10), EInt(-4))).eval().value!!)
+        expressionToExpression(EInt(5), EIntAdd(EInt(5), EInt(0)))
+        expressionToExpression(EInt(5), (EIntAdd(EInt(0), EInt(5))))
+        expressionToExpression(EInt(10), (EIntAdd(EInt(7), EInt(3))))
+        expressionToExpression(EInt(7), (EIntAdd(EInt(-3), EInt(10))))
+        expressionToExpression(EInt(6), (EIntAdd(EInt(10), EInt(-4))))
     }
 
     @Test
     fun testComplexAddition() {
-        assertEquals(EInt(6), (EIntAdd(EInt(1), EIntAdd(EInt(2), EInt(3)))).eval().value!!)
+        expressionToExpression(EInt(6), (EIntAdd(EInt(1), EIntAdd(EInt(2), EInt(3)))))
     }
 
     @Test
     fun testSimpleMultiplication() {
-        assertEquals(EInt(0), (EIntMul(EInt(0), EInt(42))).eval().value!!)
-        assertEquals(EInt(0), (EIntMul(EInt(42), EInt(0))).eval().value!!)
-        assertEquals(EInt(42),(EIntMul(EInt(1), EInt(42))).eval().value!!)
-        assertEquals(EInt(42), (EIntMul(EInt(42), EInt(1))).eval().value!!)
-        assertEquals(EInt(4), (EIntMul(EInt(2), EInt(2))).eval().value!!)
+        expressionToExpression(EInt(0), (EIntMul(EInt(0), EInt(42))))
+        expressionToExpression(EInt(0), (EIntMul(EInt(42), EInt(0))))
+        expressionToExpression(EInt(42), (EIntMul(EInt(1), EInt(42))))
+        expressionToExpression(EInt(42), (EIntMul(EInt(42), EInt(1))))
+        expressionToExpression(EInt(4), (EIntMul(EInt(2), EInt(2))))
     }
 
     @Test
     fun testComplicatedMultiplication() {
-        assertEquals(EInt(10), (EIntMul(EIntMul(EInt(1), EInt(5)), EInt(2))).eval().value!!)
-        assertEquals(EInt(12), (EIntMul(EIntAdd(EInt(1), EInt(5)), EInt(2))).eval().value!!)
+        expressionToExpression(EInt(10), (EIntMul(EIntMul(EInt(1), EInt(5)), EInt(2))))
+        expressionToExpression(EInt(12), (EIntMul(EIntAdd(EInt(1), EInt(5)), EInt(2))))
     }
+
+
     @Test
     fun testComplicatedExpressionWithParsing() {
-        assertEquals(EInt(10), (EIntMul(EIntMul(EInt(1), EInt(5)), EInt(2))).eval().value!!)
-        assertEquals(EInt(10), parse("[mul, [mul, 1, 5], 2]").value!!.desugar().eval().value!!)
-        assertEquals(EInt(12), (EIntMul(EIntAdd(EInt(1), EInt(5)), EInt(2))).eval().value!!)
-        assertEquals(EInt(12), parse("[mul, [add, 1, 5], 2]").value!!.desugar().eval().value!!)
-
+        expressionToExpression(EInt(10), (EIntMul(EIntMul(EInt(1), EInt(5)), EInt(2))))
+        yamlToExpression(EInt(10), "[mul, [mul, 1, 5], 2]")
+        yamlToYaml("10", "[mul, [mul, 1, 5], 2]")
+        expressionToExpression(EInt(12), (EIntMul(EIntAdd(EInt(1), EInt(5)), EInt(2))))
+        yamlToYaml("12", "[mul, [add, 1, 5], 2]")
     }
 
     @Test
     fun testSimpleIntegerWithParsing() {
-        assertEquals(EInt(5), parse("5").value!!.desugar().eval().value!!)
-        assertEquals(EInt(-5),parse("-5").value!!.desugar().eval().value!!)
-        assertEquals(EInt(0), parse("0").value!!.desugar().eval().value!!)
+        yamlToExpression(EInt(5), "5")
+        yamlToYaml("5", "5")
+        yamlToExpression(EInt(-5), "-5")
+        yamlToYaml("-5", "-5")
+        yamlToExpression(EInt(0), "0")
+        yamlToYaml("0", "0")
     }
 
     @Test
     fun testSimpleAdditionWithParsing() {
-        assertEquals(EInt(5), parse("[add, 5, 0]").value!!.desugar().eval().value!!)
-        assertEquals(EInt(5), parse("[add, 0, 5]").value!!.desugar().eval().value!!)
-        assertEquals(EInt(10),parse("[add, 7, 3]").value!!.desugar().eval().value!!)
-        assertEquals(EInt(7), parse("[add, -3, 10]").value!!.desugar().eval().value!!)
-        assertEquals(EInt(6), parse("[add, 10, -4]").value!!.desugar().eval().value!!)
+        yamlToYaml("5", "[add, 5, 0]")
+        yamlToYaml("5", "[add, 0, 5]")
+        yamlToYaml("10", "[add, 7, 3]")
+        yamlToYaml("7", "[add, -3, 10]")
+        yamlToYaml("6", "[add, 10, -4]")
+        yamlToYaml("5", "[iadd, 5, 0]")
+        yamlToYaml("5", "[iadd, 0, 5]")
+        yamlToYaml("10", "[iadd, 7, 3]")
+        yamlToYaml("7", "[iadd, -3, 10]")
+        yamlToYaml("6", "[iadd, 10, -4]")
     }
 
     @Test
     fun testComplexAdditionWithParsing() {
-        assertEquals(EInt(6),  parse("[add, 1, [add, 2,3]]").value!!.desugar().eval().value!!)
+        yamlToYaml("6", "[add, 1, [add, 2, 3]]")
+        yamlToYaml("6", "[add, 1, [iadd, 2, 3]]")
+        yamlToYaml("6", "[iadd, 1, [add, 2, 3]]")
     }
 
     @Test
     fun testSimpleMultiplicationWithParsing() {
-        assertEquals(EInt(0), parse("[mul, 0, 42]").value!!.desugar().eval().value!!)
-        assertEquals(EInt(0), parse("[mul, 42, 0]").value!!.desugar().eval().value!!)
-        assertEquals(EInt(42),parse("[mul, 1, 42]").value!!.desugar().eval().value!!)
-        assertEquals(EInt(42), parse("[mul, 42, 1]").value!!.desugar().eval().value!!)
-        assertEquals(EInt(4), parse("[mul, 2, 2]").value!!.desugar().eval().value!!)
+        yamlToYaml("0", "[mul, 0, 42]")
+        yamlToYaml("0", "[mul, 42, 0]")
+        yamlToYaml("42", "[mul, 1, 42]")
+        yamlToYaml("42", "[mul, 42,1]")
+        yamlToYaml("4", "[mul, 2, 2]")
+        yamlToYaml("4", "[mul, -2, -2]")
     }
+
     @Test
     fun testSimpleDivisionWithParsing() {
-        assertEquals(EInt(0), parse("[div, 0, 42]").value!!.desugar().eval().value!!)
-        assertEquals(true, parse("[div, 42, 0]").value!!.desugar().eval().error is DivisionByZeroError)
-        assertEquals(true, parse("[div, 42, [add, -1, 1]]").value!!.desugar().eval().error is DivisionByZeroError)
-        assertEquals(EInt(42),parse("[div, 42, 1]").value!!.desugar().eval().value!!)
-        assertEquals(EInt(1), parse("[div, 2, 2]").value!!.desugar().eval().value!!)
+        yamlToYaml("0", "[div, 0, 42]")
+        failsWithError("[div, 42,0]")
+        failsWithError("[div, [add, -1, 1],0]")
+        yamlToYaml("42", "[div, 42, 1]")
+        yamlToYaml("1", "[div, 2,2]")
     }
 
     @Test
     fun testComplicatedMultiplicationWithParsing() {
-        assertEquals(EInt(10), parse("[mul, 1, [mul, 5, 2]]").value!!.desugar().eval().value!!)
-        assertEquals(EInt(12), parse("[mul, 2, [add, 5, 1]]").value!!.desugar().eval().value!!)
-
-        assertEquals("10", parse("[mul, 1, [mul, 5, 2]]").value!!.desugar().eval().value!!.unparse())
-        assertEquals("12", parse("[mul, 2, [add, 5, 1]]").value!!.desugar().eval().value!!.unparse())
+        yamlToYaml("10", "[mul, 1, [mul, 5,2]]")
+        yamlToYaml("12", "[mul, 2, [add, 5,1]]")
     }
 
     @Test
-    fun testMulAndSubEvaluationWithParsing(){
-        val yaml = "[mul, [sub, 22, 11], 44]"
-        assertEquals("484", parse(yaml).value!!.desugar().eval().value!!.unparse())
+    fun testMulAndSubEvaluationWithParsing() {
+        yamlToYaml("484", "[mul, [sub, 22,11], 44]")
     }
 
     @Test
-    fun testNegationEvaluation(){
-        val yaml = "[neg, [mul, [sub, 22, 11], 44]]"
-        assertEquals("-484", parse(yaml).value!!.desugar().eval().value!!.unparse())
+    fun testNegationEvaluation() {
+        yamlToYaml("-484", "[neg, [mul, [sub, 22,11], 44]]")
     }
 
+    @Test
+    fun testIsIntEvaluation() {
+        yamlToYaml("true", "[is_int, 10]")
+        yamlToYaml("false", "[is_int, 10.0]")
+        yamlToYaml("false", "[is_int, true]")
+    }
+
+
+    @Test
+    fun testIsFloatEvaluation() {
+        yamlToYaml("true", "[is_float, 10.1]")
+        yamlToYaml("false", "[is_float, 10]")
+        yamlToYaml("false", "[is_float, true]")
+    }
+
+
+    @Test
+    fun testIsBoolEvaluation() {
+
+        yamlToYaml("false", "[is_bool, 10.1]")
+        yamlToYaml("false", "[is_bool, 10]")
+        yamlToYaml("true", "[is_bool, true]")
+    }
 }

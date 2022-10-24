@@ -1,8 +1,8 @@
-import org.junit.jupiter.api.Test
-
+import core.EInt
+import core.ESymbol
+import core.Environment
 import org.junit.jupiter.api.Assertions.*
-
-import core.*
+import org.junit.jupiter.api.Test
 
 internal class EnvironmentTest {
 
@@ -10,9 +10,10 @@ internal class EnvironmentTest {
     fun isDefined() {
         val env = Environment(hashMapOf())
         assertFalse(env.isDefined(ESymbol("x")))
-        val env2 = Environment(hashMapOf( Pair(ESymbol("x"), EInt(5))))
+        val env2 = Environment(hashMapOf(Pair(ESymbol("x"), EInt(5))))
         assertTrue(env2.isDefined(ESymbol("x")))
     }
+
     @Test
     fun addBinding() {
         val env = Environment(hashMapOf())

@@ -161,7 +161,7 @@ data class EIsInt(val v:Expression):Expression{
 
 data class EIsFloat(val v:Expression):Expression{
     override fun eval(): CoreResult<Expression> {
-        return  evalSuccess(EBool( v is EInt))
+        return  evalSuccess(EBool( v is EFloat))
     }
 
     override fun unparse(): String {
@@ -171,7 +171,7 @@ data class EIsFloat(val v:Expression):Expression{
 }
 data class EIsBool(val v:Expression):Expression{
     override fun eval(): CoreResult<Expression> {
-        return  evalSuccess(EBool( v is EInt))
+        return  evalSuccess(EBool( v is EBool))
     }
 
     override fun unparse(): String {
