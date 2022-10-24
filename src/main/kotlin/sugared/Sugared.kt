@@ -1,6 +1,7 @@
+import core.*
 
 interface SugarExpression{
-    fun desugar():Expression
+    fun desugar(): Expression
 }
 
 data class SugarInt(val v:Int):SugarExpression{

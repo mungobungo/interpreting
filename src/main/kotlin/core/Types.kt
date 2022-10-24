@@ -1,19 +1,5 @@
-import java.util.StringJoiner
+package core
 
-interface Expression{
-    fun eval():CoreResult<Expression>
-    fun unparse():String
-}
-fun evalSuccess(expression: Expression): CoreResult<Expression>{
-    return CoreResult(true, expression, null)
-}
-data class OperationTypeMismatchError(
-    override val input: Any,
-    override val message: String,
-) : ICoreError
-fun evalTypeError(expression: Expression, error:String):CoreResult<Expression>{
-    return CoreResult(false, null, OperationTypeMismatchError(expression, error))
-}
 
 data class EInt(val value:Int):Expression {
     override fun eval(): CoreResult<Expression> {
@@ -94,10 +80,6 @@ data class EAdd(val left:Expression, val right: Expression): Expression {
     }
 }
 
-data class DivisionByZeroError(
-    override val input: Any,
-    override val message: String,
-) : ICoreError
 data class EDiv(val left:Expression, val right: Expression): Expression {
     override fun eval(): CoreResult<Expression> {
         val leftResult = left.eval();
@@ -123,7 +105,8 @@ data class EDiv(val left:Expression, val right: Expression): Expression {
 
         if(r.value == 0){
             return CoreResult(false, null,
-                DivisionByZeroError(this, "division by zero"))
+                DivisionByZeroError(this, "division by zero")
+            )
         }
         return evalSuccess( EInt(l.value / r.value))
 
@@ -134,30 +117,18 @@ data class EDiv(val left:Expression, val right: Expression): Expression {
         return "[add, ${left.unparse()}, ${right.unparse()}]"
     }
 }
- data class ESymbol(val name:String):Expression{
-     //var evaluated = false
+data class ESymbol(val name:String):Expression{
+    //var evaluated = false
 
     override fun eval(): CoreResult<Expression> {
 
-    return evalSuccess(this)
-    //return substitute(this )
+        return evalSuccess(this)
+        //return substitute(this )
 
     }
 
 
     override fun unparse(): String {
         return name
-    }
-}
-
-data class Environment(val bindings:HashMap<ESymbol, Expression>){
-    fun addBinding( name:ESymbol,  value:Expression){
-        bindings[name] = value
-    }
-    fun isDefined(name:ESymbol): Boolean{
-        return bindings.containsKey(name)
-    }
-    fun get(name:ESymbol):Expression{
-        return bindings[name]!!
     }
 }

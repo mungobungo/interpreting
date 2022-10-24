@@ -1,9 +1,7 @@
+import core.CoreResult
+import core.ICoreError
 import org.yaml.snakeyaml.Yaml
-interface ICoreError{
-    val input : Any
-    val message: String
 
-}
 
 data class UnsupportedPrimitiveError(
     override val input: Any,
@@ -17,14 +15,8 @@ data class YamlLoadError(
     ) :ICoreError
 
 
-data class CoreResult<T>(
-    val success: Boolean,
-    val value: T?,
-    val error: ICoreError?
 
-)
-
-fun parserSuccess(expression: SugarExpression) : CoreResult<SugarExpression>{
+fun parserSuccess(expression: SugarExpression) : CoreResult<SugarExpression> {
     return CoreResult(true, expression, null)
 }
 
