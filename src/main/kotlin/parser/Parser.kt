@@ -18,6 +18,11 @@ data class YamlLoadError(
     ) :ICoreError
 
 
+data class UnsupportedBinaryOperation(
+    override val input: Any,
+    override val message: String,
+
+    ) :ICoreError
 
 fun parserSuccess(expression: SugarExpression) : CoreResult<SugarExpression> {
     return CoreResult(true, expression, null)
@@ -35,6 +40,8 @@ fun parse(input:String):CoreResult<SugarExpression>{
         parserFailure(YamlLoadError(input, e.message!!))
     }
 }
+
+val binaryPrimitives = hashSetOf<String>("mul","imul", "add", "iadd", "div", "idiv", "sub", "isub")
 fun convert(obj:Any):CoreResult<SugarExpression>{
    if(obj is Int){
        return  parserSuccess( SugarInt(obj))
@@ -51,50 +58,8 @@ fun convert(obj:Any):CoreResult<SugarExpression>{
 
     if(obj is ArrayList<*>){
         val operation= obj[0]
-        if(operation == "add" || operation =="iadd"){
-            val left = convert(obj[1])
-            if(!left.success){
-                return left
-            }
-            val right = convert(obj[2])
-            if(!right.success){
-                return right
-            }
-            return parserSuccess( SugarAdd(left.value!!, right.value!!))
-        }
-        if(operation =="mul" || operation =="imul"){
-            val left = convert(obj[1])
-            if(!left.success){
-                return left
-            }
-            val right = convert(obj[2])
-            if(!right.success){
-                return right
-            }
-            return parserSuccess( SugarMul(left.value!!, right.value!!))
-        }
-        if(operation =="div" || operation == "idiv"){
-            val left = convert(obj[1])
-            if(!left.success){
-                return left
-            }
-            val right = convert(obj[2])
-            if(!right.success){
-                return right
-            }
-            return parserSuccess( SugarDiv(left.value!!, right.value!!))
-        }
-        if(operation =="sub" || operation =="isub"){
-
-            val left = convert(obj[1])
-            if(!left.success){
-                return left
-            }
-            val right = convert(obj[2])
-            if(!right.success){
-                return right
-            }
-            return parserSuccess( SugarSub(left.value!!, right.value!!))
+        if(operation is String &&  obj.count() == 3 && operation in binaryPrimitives){
+            return parseBinaryAction(operation, obj)
         }
 
         if(operation =="neg" || operation == "ineg"){
@@ -108,4 +73,32 @@ fun convert(obj:Any):CoreResult<SugarExpression>{
 
     return parserFailure(UnsupportedPrimitiveError( obj,
         "unsupported primitive `$obj` during parsing"))
+}
+
+private fun parseBinaryAction(operation:String, obj: ArrayList<*>): CoreResult<SugarExpression> {
+
+    val left = convert(obj[1])
+    if (!left.success) {
+        return left
+    }
+
+    val right = convert(obj[2])
+    if (!right.success) {
+        return right
+    }
+
+    val l = left.value!!
+    val r = right.value!!
+    when(operation){
+        "add" -> return parserSuccess(SugarAdd(l,r))
+        "iadd"  -> return parserSuccess(SugarIAdd(l,r))
+        "mul" -> return parserSuccess(SugarMul(l,r))
+        "imul" -> return parserSuccess(SugarIMul(l,r))
+        "div" -> return parserSuccess(SugarDiv(l,r))
+        "idiv" -> return parserSuccess(SugarIDiv(l,r))
+        "sub" -> return parserSuccess(SugarSub(l,r))
+        "isub"-> return parserSuccess(SugarISub(l,r))
+
+    }
+    return CoreResult(false, null, UnsupportedBinaryOperation(operation, "$operation is not defined as binary operation"))
 }

@@ -33,14 +33,30 @@ data class SugarAdd(val left:SugarExpression, val right:SugarExpression) : Sugar
 
 }
 
+data class SugarIAdd(val left:SugarExpression, val right:SugarExpression) : SugarExpression{
+    override fun desugar(): Expression {
+        return EIntAdd(left.desugar(), right.desugar())
+    }
+
+}
 data class SugarMul(val left:SugarExpression, val right:SugarExpression): SugarExpression{
     override fun desugar(): Expression {
        return EMul(left.desugar(), right.desugar())
     }
 }
+data class SugarIMul(val left:SugarExpression, val right:SugarExpression): SugarExpression{
+    override fun desugar(): Expression {
+        return EIntMul(left.desugar(), right.desugar())
+    }
+}
 data class SugarDiv(val left:SugarExpression, val right:SugarExpression): SugarExpression{
     override fun desugar(): Expression {
         return EDiv(left.desugar(), right.desugar())
+    }
+}
+data class SugarIDiv(val left:SugarExpression, val right:SugarExpression): SugarExpression{
+    override fun desugar(): Expression {
+        return EIntDiv(left.desugar(), right.desugar())
     }
 }
 data class SugarSub(val left:SugarExpression, val right: SugarExpression):SugarExpression{
@@ -49,6 +65,11 @@ data class SugarSub(val left:SugarExpression, val right: SugarExpression):SugarE
     }
 }
 
+data class SugarISub(val left:SugarExpression, val right: SugarExpression):SugarExpression{
+    override fun desugar(): Expression {
+        return EIntAdd(left.desugar(),  EIntMul(EInt(-1), right.desugar() ))
+    }
+}
 data class SugarNeg(val value:SugarExpression):SugarExpression{
     override fun desugar(): Expression {
        return EMul(EInt(-1), value.desugar())

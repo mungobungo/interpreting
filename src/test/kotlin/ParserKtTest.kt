@@ -43,7 +43,7 @@ internal class ParserKtTest {
     @Test
     fun testSimpleAdd(){
         assertEquals(SugarAdd(SugarInt(3), SugarInt(5)), parse("[add, 3, 5]").value!!)
-        assertEquals(SugarAdd(SugarInt(3), SugarInt(5)), parse("[iadd, 3, 5]").value!!)
+        assertEquals(SugarIAdd(SugarInt(3), SugarInt(5)), parse("[iadd, 3, 5]").value!!)
     }
     @Test
     fun testComplicatedAdd(){
@@ -57,6 +57,9 @@ internal class ParserKtTest {
     }
     @Test
     fun testComplicatedMultiplication(){
+        val data =
+            parse("[mul, [mul, 3,5], 42]")
+        data.toString()
         assertEquals(
             SugarMul(SugarMul(SugarInt(3), SugarInt(5)), SugarInt(42)),
             parse("[mul, [mul, 3,5], 42]").value!!)
