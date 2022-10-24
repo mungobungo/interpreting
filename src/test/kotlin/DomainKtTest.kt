@@ -306,7 +306,7 @@ internal class DomainKtTest {
    }
 
     @Test
-    fun testBinaryBoolOperatoions(){
+    fun testBinaryBoolOperations(){
         yamlToYaml("true", "[and, true, true]")
         yamlToYaml("false", "[and, true, false]")
         yamlToYaml("false", "[and, false, true]")
@@ -321,4 +321,12 @@ internal class DomainKtTest {
         yamlToYaml("false", "[xor, false, false]")
     }
 
+    @Test
+    fun testBooleanNot(){
+        yamlToYaml("true", "[not, false]")
+        yamlToYaml("true", "[not, [not, true]]")
+
+        yamlToYaml("false", "[not, [not, false]]")
+
+    }
 }

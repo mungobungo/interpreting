@@ -176,3 +176,10 @@ data class SugarXor(val left:SugarExpression, val right:SugarExpression) : Sugar
         return EBinaryBoolOp("xor",left.desugar(), right.desugar())
     }
 }
+
+
+data class SugarNot(val left:SugarExpression) : SugarExpression{
+    override fun desugar(): Expression {
+        return ENot(left.desugar())
+    }
+}

@@ -43,7 +43,7 @@ fun parse(input:String):CoreResult<SugarExpression>{
         parserFailure(YamlLoadError(input, e.message!!))
     }
 }
-val unaryPrimitives = hashSetOf<String>("neg", "ineg", "is_int", "is_bool", "is_float")
+val unaryPrimitives = hashSetOf<String>("neg", "ineg", "is_int", "is_bool", "is_float", "not")
 fun convert(obj:Any):CoreResult<SugarExpression>{
    if(obj is Int){
        return  parserSuccess( SugarInt(obj))
@@ -131,6 +131,7 @@ private fun parseUnaryAction(operation:String, obj: ArrayList<*>): CoreResult<Su
         "is_int" -> return parserSuccess(SugarIsInt(v))
         "is_bool" -> return parserSuccess(SugarIsBool(v))
         "is_float" -> return parserSuccess(SugarIsFloat(v))
+        "not" -> return parserSuccess(SugarNot(v))
     }
     return CoreResult(false, null, UnsupportedUnaryOperation(op, "$operation is not not defined as unary operation"))
 }

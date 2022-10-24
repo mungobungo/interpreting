@@ -322,6 +322,26 @@ data class EIsBool(val v:Expression):Expression{
     }
 
 }
+data class ENot(val v:Expression):Expression{
+    override fun eval(): CoreResult<Expression> {
+        val evaluated = v.eval()
+        if(!evaluated.success){
+            return evaluated
+        }
+        val res = evaluated.value!!
+        if(res !is EBool){
+
+            return evalTypeError(v, "type error while evaluating  argument of 'not'," +
+                    " expected a boolean value, but got `${res.unparse()}`")
+        }
+        return  evalSuccess(EBool( !res.value))
+    }
+
+    override fun unparse(): String {
+        return "[not, ${v.unparse()}]"
+    }
+
+}
 val binaryBoolPrimitives = hashMapOf(
     "and" to {a:Boolean, b:Boolean -> a &&b},
     "or" to {a:Boolean, b:Boolean -> a||b},
