@@ -12,6 +12,20 @@ data class SugarInt(val v:Int):SugarExpression{
     }
 }
 
+
+data class SugarFloat(val v:Double):SugarExpression{
+    override fun desugar(): Expression {
+        return EFloat(v)
+    }
+}
+
+
+data class SugarBool(val v:Boolean):SugarExpression{
+    override fun desugar(): Expression {
+        return EBool(v)
+    }
+}
+
 data class SugarAdd(val left:SugarExpression, val right:SugarExpression) : SugarExpression{
     override fun desugar(): Expression {
        return EAdd(left.desugar(), right.desugar())

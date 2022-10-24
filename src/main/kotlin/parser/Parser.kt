@@ -39,6 +39,16 @@ fun convert(obj:Any):CoreResult<SugarExpression>{
    if(obj is Int){
        return  parserSuccess( SugarInt(obj))
    }
+    if(obj is Double){
+        return parserSuccess(SugarFloat(obj))
+    }
+    if(obj is Float){
+        return parserSuccess(SugarFloat(obj.toDouble()))
+    }
+    if(obj is Boolean){
+        return parserSuccess(SugarBool(obj))
+    }
+
     if(obj is ArrayList<*>){
         val operation= obj[0]
         if(operation == "add" || operation =="iadd"){

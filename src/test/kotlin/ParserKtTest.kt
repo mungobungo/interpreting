@@ -19,6 +19,26 @@ internal class ParserKtTest {
     @Test
     fun testSimpleInt(){
         assertEquals(SugarInt(42), parse("42").value!!)
+        assertEquals(SugarInt(-42), parse("-42").value!!)
+    }
+
+    @Test
+    fun testSimpleFloat(){
+        assertEquals(SugarFloat(42.0), parse("42.0").value!!)
+        assertEquals(SugarFloat(42.1), parse("42.1").value!!)
+        assertEquals(SugarFloat(-42.0), parse("-42.0").value!!)
+        assertEquals(SugarFloat(-42.1), parse("-42.1").value!!)
+    }
+
+
+    @Test
+    fun testSimpleBool(){
+        assertEquals(SugarBool(true), parse("True").value!!)
+        assertEquals(SugarBool(true), parse("true").value!!)
+        assertFalse(parse("tRuE").success)
+        assertEquals(SugarBool(false), parse("False").value!!)
+        assertEquals(SugarBool(false), parse("false").value!!)
+        assertFalse(parse("fAlSe").success)
     }
     @Test
     fun testSimpleAdd(){
