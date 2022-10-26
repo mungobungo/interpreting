@@ -1,4 +1,5 @@
 import parser.parse
+import kotlin.system.measureTimeMillis
 
 fun main(args: Array<String>) {
     println("REPL v0.1")
@@ -10,17 +11,23 @@ fun main(args: Array<String>) {
         {
             return
         }
+        val parseStart = System.nanoTime()
         val parsed = parse(input)
+        val parserTime = System.nanoTime() - parseStart
         if(!parsed.success ){
             println("Parsing error: " + parsed.error!!.message  + "\n ${parsed.error!!.input}")
             continue
         }
+        val evalStart = System.nanoTime()
+
         val evaluated = parsed.value!!.desugar().eval()
+        val evalTime = System.nanoTime() - evalStart
         if(!evaluated.success){
             println("Eval error: " + evaluated.error!!.message + "\n ${evaluated.error!!.input}")
         }else{
             println(evaluated.value!!.unparse())
         }
+        println("parser: ${parserTime/1000000.0}ms, eval: ${evalTime/1000000.0}ms")
     }
     // Try adding program arguments via Run/Debug configuration.
     // Learn more about running applications: https://www.jetbrains.com/help/idea/running-applications.html.
