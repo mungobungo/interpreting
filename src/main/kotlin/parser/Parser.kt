@@ -105,6 +105,35 @@ fun convert(obj:Any):CoreResult<SugarExpression>{
             }
             return parserSuccess(SugarLet(name, value.value!!, body.value!!))
         }
+        if(operation == "let*"){
+            if(obj.size <4 ){
+
+                return parserFailure(ParsingError(obj, "incorrect number of parameters for 'let*', \n expected at least one binding  in \n$obj"))
+            }
+            if(obj.size %2 != 0){
+                return parserFailure(ParsingError(obj, "incorrect number of parameters for 'let*', \n expected even number of bindings, got ${obj.size}  in \n$obj"))
+            }
+
+            val bindings = mutableListOf<Pair<String, SugarExpression>>()
+            for(i in 0 .. -1+(obj.size-2)/2){
+
+                val name = obj[i*2+1]
+
+                if(name !is String){
+                    return parserFailure(ParsingError(name, "name inside of 'let*' should be a string, got \n $name"))
+                }
+                val value= convert(obj[i*2+2])
+                if(!value.success){
+                    return value
+                }
+                bindings.add(Pair(name, value.value!!))
+            }
+            val body = convert(obj.last())
+            if(!body.success){
+                return body
+            }
+            return parserSuccess(SugarLetStar(bindings, body.value!!))
+        }
         if(operation is String &&  obj.count() == 3 && (operation in binaryIntPrimitives.keys
                     || operation in binaryFloatPrimitives
                     || operation in binaryFloatBoolPrimitives

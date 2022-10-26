@@ -219,3 +219,16 @@ data class SugarLet(val name:String, val value:SugarExpression, val body:SugarEx
     }
 
 }
+
+data class SugarLetStar(val bindings:List<Pair<String, SugarExpression>>, val body:SugarExpression):SugarExpression{
+    override fun desugar(): Expression {
+
+       val reversed = bindings.reversed()
+        var initial = SugarLet(reversed[0].first, reversed[0].second, body)
+       for(i in 1 until reversed.size){
+           initial = SugarLet(reversed[i].first, reversed[i].second, initial)
+       }
+        return initial.desugar()
+    }
+
+}
