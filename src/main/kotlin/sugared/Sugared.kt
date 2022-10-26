@@ -212,3 +212,10 @@ data class SugarDo(val expressions:List<SugarExpression>):SugarExpression{
         return EDo(expressions.map { it.desugar() })
     }
 }
+
+data class SugarLet(val name:String, val value:SugarExpression, val body:SugarExpression):SugarExpression{
+    override fun desugar(): Expression {
+       return EDo(listOf(ESetVar(name, value.desugar()), body.desugar()))
+    }
+
+}

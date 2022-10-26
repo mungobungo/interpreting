@@ -86,6 +86,25 @@ fun convert(obj:Any):CoreResult<SugarExpression>{
             }
             return parserSuccess( SugarDo(expressions.map { it.value!! }))
         }
+        if(operation == "let"){
+            if(obj.size != 4){
+                return parserFailure(ParsingError(obj, "incorrect number of parameters for 'let', \n expected 3, got ${obj.size}  in \n$obj"))
+            }
+            val name = obj[1]
+
+            if(name !is String){
+                return parserFailure(ParsingError(name, "name inside of 'let' should be a string, got \n $name"))
+            }
+            val value= convert(obj[2])
+            if(!value.success){
+                return value
+            }
+            val body = convert(obj[3])
+            if(!body.success){
+                return body
+            }
+            return parserSuccess(SugarLet(name, value.value!!, body.value!!))
+        }
         if(operation is String &&  obj.count() == 3 && (operation in binaryIntPrimitives.keys
                     || operation in binaryFloatPrimitives
                     || operation in binaryFloatBoolPrimitives
