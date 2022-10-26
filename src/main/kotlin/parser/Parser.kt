@@ -27,6 +27,8 @@ data class UnsupportedUnaryOperation(
     override val message: String,
 
     ) :ICoreError
+
+data class ParsingError(override val input: Any, override val message: String) :ICoreError
 fun parserSuccess(expression: SugarExpression) : CoreResult<SugarExpression> {
     return CoreResult(true, expression, null)
 }
@@ -70,7 +72,8 @@ fun convert(obj:Any):CoreResult<SugarExpression>{
                     || operation in binaryFloatPrimitives
                     || operation in binaryFloatBoolPrimitives
                     || operation in binaryIntBoolPrimitives
-                    || operation in binaryBoolPrimitives)){
+                    || operation in binaryBoolPrimitives
+                    || operation == "setvar")){
             return parseBinaryAction(operation, obj)
         }
 
@@ -120,6 +123,12 @@ private fun parseBinaryAction(operation:String, obj: ArrayList<*>): CoreResult<S
         "and" -> return parserSuccess(SugarAnd(l,r))
         "or" -> return parserSuccess(SugarOr(l,r))
         "xor" -> return parserSuccess(SugarXor(l,r))
+    }
+    if(operation == "setvar"){
+    if(l !is SugarSymbol){
+     return CoreResult(false, null, ParsingError(l, "setvar expects a string as variable name, but got \n $l"))
+    }
+    return parserSuccess(SugarSetVar((l as SugarSymbol).name, r))
     }
     return CoreResult(false, null, UnsupportedBinaryOperation(operation, "$operation is not defined as binary operation"))
 }

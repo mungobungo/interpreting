@@ -1,16 +1,11 @@
-import core.Context
-import core.EInt
-import core.Environment
-import core.Expression
+import core.*
 import parser.parse
-import kotlin.system.measureTimeMillis
 
 fun main(args: Array<String>) {
     println("REPL v0.1")
     val variables = hashMapOf<String, Expression>(
         "x" to EInt(3),
-        "y" to EInt(10)
-
+        "y" to EInt(10),
     )
     val context = Context(Environment(variables))
 
@@ -37,9 +32,7 @@ fun main(args: Array<String>) {
         }else{
             println(evaluated.value!!.unparse())
         }
-        println("parser: ${parserTime/1000000.0}ms, eval: ${evalTime/1000000.0}ms")
+        println("parser: ${parserTime/1e6f}ms, eval: ${evalTime/1e6f}ms")
     }
-    // Try adding program arguments via Run/Debug configuration.
-    // Learn more about running applications: https://www.jetbrains.com/help/idea/running-applications.html.
 
 }

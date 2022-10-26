@@ -193,3 +193,9 @@ data class SugarOnes(val number:Int): SugarExpression{
         return initial
     }
 }
+
+data class SugarSetVar(val name:String, val value:SugarExpression): SugarExpression{
+    override fun desugar(): Expression {
+       return ESetVar(name, value.desugar())
+    }
+}

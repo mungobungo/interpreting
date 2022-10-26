@@ -31,7 +31,6 @@ data class EBool(val value:Boolean):Expression {
         return value.toString()
     }
 }
-val zeroInt = EInt(0)
 data class ESymbol(val name:String):Expression{
     //var evaluated = false
 

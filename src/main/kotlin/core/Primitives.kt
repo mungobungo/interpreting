@@ -393,3 +393,19 @@ context: Context):CoreResult<Expression>{
     return evalSuccess(EBool(op(left.value, right.value)))
 }
 
+data class ESetVar(val name:String, val variableValue:Expression):Expression{
+    override fun eval(context: Context): CoreResult<Expression>{
+        val valueResult = variableValue.eval(context)
+        if(!valueResult.success){
+            return valueResult
+        }
+        context.variables.bindings[name] = valueResult.value!!
+        return evalSuccess( valueResult.value!!)
+    }
+
+    override fun unparse(): String {
+        return "[setvar, $name, ${variableValue.unparse()}]"
+    }
+
+}
+
