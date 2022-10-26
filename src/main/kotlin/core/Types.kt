@@ -41,8 +41,6 @@ data class ESymbol(val name:String):Expression{
         //return substitute(this )
 
     }
-
-
     override fun unparse(): String {
         return name
     }

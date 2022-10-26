@@ -1,5 +1,7 @@
 package core
 
+import javax.swing.Icon
+
 interface Expression{
     fun eval():CoreResult<Expression>
     fun unparse():String
@@ -20,14 +22,18 @@ interface ICoreError{
 
 }
 
-data class Environment(val bindings:HashMap<ESymbol, Expression>){
-    fun addBinding( name:ESymbol,  value:Expression){
+data class VariableNotFoundError(override val input: Any, override val message: String) :ICoreError
+data class Environment(val bindings:HashMap<String, Expression>){
+    fun addBinding( name:String, value:Expression){
         bindings[name] = value
     }
-    fun isDefined(name:ESymbol): Boolean{
+    fun isDefined(name:String): Boolean{
         return bindings.containsKey(name)
     }
-    fun get(name:ESymbol):Expression{
-        return bindings[name]!!
+    fun get(name:String): CoreResult<Expression>{
+        if(bindings.containsKey(name)){
+            return CoreResult(true, bindings[name]!!, null)
+        }
+        return CoreResult(false, null, VariableNotFoundError(name, "variable '$name' not found in env: \n $this"))
     }
 }

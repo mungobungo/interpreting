@@ -57,6 +57,9 @@ fun convert(obj:Any):CoreResult<SugarExpression>{
     if(obj is Boolean){
         return parserSuccess(SugarBool(obj))
     }
+    if(obj is String){
+        return parserSuccess(SugarSymbol(obj))
+    }
 
     if(obj is ArrayList<*>){
         val operation= obj[0]
