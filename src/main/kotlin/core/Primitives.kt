@@ -1,5 +1,6 @@
 package core
 
+import java.beans.beancontext.BeanContextServiceAvailableEvent
 import kotlin.math.abs
 
 val binaryFloatPrimitives = hashMapOf(
@@ -13,18 +14,18 @@ val binaryFloatPrimitives = hashMapOf(
     "div" to {a:Double, b:Double -> a/b},
 )
 data class EBinaryFloatOp(val operationName:String, val left:Expression, val right: Expression): Expression {
-    override fun eval(): CoreResult<Expression> {
+    override fun eval(context:Context): CoreResult<Expression> {
 
-        return evalBinaryFloat(operationName, left, right)
+        return evalBinaryFloat(operationName, left, right, context)
     }
     override fun unparse(): String {
         return "[$operationName, ${left.unparse()}, ${right.unparse()}]"
     }
 }
 fun evalBinaryFloat(operationName:String, leftExpression:Expression, rightExpression:Expression,
-                      ):CoreResult<Expression>{
+                      context: Context):CoreResult<Expression>{
 
-    val leftResult = leftExpression.eval()
+    val leftResult = leftExpression.eval(context)
     if(!leftResult.success){
         return leftResult
     }
@@ -36,7 +37,7 @@ fun evalBinaryFloat(operationName:String, leftExpression:Expression, rightExpres
 
     val left = leftResult.value!!
 
-    val rightResult = rightExpression.eval()
+    val rightResult = rightExpression.eval(context)
     if(!rightResult.success){
         return rightResult
     }
@@ -70,9 +71,10 @@ val binaryFloatBoolPrimitives = hashMapOf(
     "neq" to {a:Double, b:Double -> abs(a-b) >0.0000001},
 )
 fun evalBinaryFloatBool(operationName:String, leftExpression:Expression, rightExpression:Expression,
+                        context: Context
 ):CoreResult<Expression>{
 
-    val leftResult = leftExpression.eval()
+    val leftResult = leftExpression.eval(context)
     if(!leftResult.success){
         return leftResult
     }
@@ -84,7 +86,7 @@ fun evalBinaryFloatBool(operationName:String, leftExpression:Expression, rightEx
 
     val left = leftResult.value!!
 
-    val rightResult = rightExpression.eval()
+    val rightResult = rightExpression.eval(context)
     if(!rightResult.success){
         return rightResult
     }
@@ -122,17 +124,19 @@ val binaryIntPrimitives = hashMapOf(
     "div" to {a:Int, b:Int -> a/b},
     )
 data class EBinaryIntegerOp(val operationName: String, val left:Expression, val right:Expression): Expression {
-    override fun eval(): CoreResult<Expression> {
-        return evalBinaryInteger(operationName, left, right)
+    override fun eval(context: Context): CoreResult<Expression> {
+        return evalBinaryInteger(operationName, left, right,context)
     }
 
     override fun unparse(): String {
         return "[$operationName, ${left.unparse()}, ${right.unparse()}]".format()
     }
 }
-fun evalBinaryInteger(operationName:String, leftExpression:Expression, rightExpression:Expression):CoreResult<Expression>{
+fun evalBinaryInteger(operationName:String, leftExpression:Expression, rightExpression:Expression,
+                        context:Context
+                      ):CoreResult<Expression>{
 
-    val leftResult = leftExpression.eval()
+    val leftResult = leftExpression.eval(context)
     if(!leftResult.success){
         return leftResult
     }
@@ -144,7 +148,7 @@ fun evalBinaryInteger(operationName:String, leftExpression:Expression, rightExpr
 
     val left = leftResult.value!! as EInt
 
-    val rightResult = rightExpression.eval()
+    val rightResult = rightExpression.eval(context)
     if(!rightResult.success){
         return rightResult
     }
@@ -171,9 +175,11 @@ val binaryIntBoolPrimitives = hashMapOf(
     "eq" to {a:Int, b:Int -> a ==b},
     "neq" to {a:Int, b:Int -> a != b},
 )
-fun evalBinaryIntegerBool(operationName:String, leftExpression:Expression, rightExpression:Expression):CoreResult<Expression>{
+fun evalBinaryIntegerBool(operationName:String, leftExpression:Expression, rightExpression:Expression,
+context: Context
+                          ):CoreResult<Expression>{
 
-    val leftResult = leftExpression.eval()
+    val leftResult = leftExpression.eval(context)
     if(!leftResult.success){
         return leftResult
     }
@@ -185,7 +191,7 @@ fun evalBinaryIntegerBool(operationName:String, leftExpression:Expression, right
 
     val left = leftResult.value!! as EInt
 
-    val rightResult = rightExpression.eval()
+    val rightResult = rightExpression.eval(context)
     if(!rightResult.success){
         return rightResult
     }
@@ -199,16 +205,17 @@ fun evalBinaryIntegerBool(operationName:String, leftExpression:Expression, right
     return evalSuccess(EBool(op(left.value, right.value)))
 }
 data class EBinaryNumericOp(val operationName:String, val left:Expression, val right:Expression): Expression {
-    override fun eval(): CoreResult<Expression> {
-        return evalBinaryNumeric(operationName, left, right)
+    override fun eval(context: Context): CoreResult<Expression> {
+        return evalBinaryNumeric(operationName, left, right,context)
     }
 
     override fun unparse(): String {
         return "[$operationName, ${left.unparse()}, ${right.unparse()}]".format()
     }
 }
-fun evalBinaryNumeric(operationName:String, leftExpression:Expression, rightExpression:Expression):CoreResult<Expression>{
-    val leftResult = leftExpression.eval()
+fun evalBinaryNumeric(operationName:String, leftExpression:Expression, rightExpression:Expression,
+context: Context):CoreResult<Expression>{
+    val leftResult = leftExpression.eval(context)
     if(!leftResult.success){
         return leftResult
     }
@@ -220,7 +227,7 @@ fun evalBinaryNumeric(operationName:String, leftExpression:Expression, rightExpr
 
     val left = leftResult.value!!
 
-    val rightResult = rightExpression.eval()
+    val rightResult = rightExpression.eval(context)
     if(!rightResult.success){
         return rightResult
     }
@@ -231,30 +238,31 @@ fun evalBinaryNumeric(operationName:String, leftExpression:Expression, rightExpr
     val right = rightResult.value!!
 
     if(left is EInt && right is EInt){
-        return evalBinaryInteger(operationName, left, right)
+        return evalBinaryInteger(operationName, left, right, context)
     }
     if(left is EFloat && right is EInt){
-        return evalBinaryFloat(operationName, left, EFloat((right).value.toDouble()))
+        return evalBinaryFloat(operationName, left, EFloat((right).value.toDouble()), context)
     }
     if(left is EInt && right is EFloat){
-        return evalBinaryFloat(operationName, EFloat(left.value.toDouble()), right)
+        return evalBinaryFloat(operationName, EFloat(left.value.toDouble()), right, context)
     }
 
-    return evalBinaryFloat(operationName, left, right)
+    return evalBinaryFloat(operationName, left, right,context)
 }
 
 
 data class EBinaryNumericBoolOp(val operationName:String, val left:Expression, val right:Expression): Expression {
-    override fun eval(): CoreResult<Expression> {
-        return evalBinaryNumericBool(operationName, left, right)
+    override fun eval(context: Context): CoreResult<Expression> {
+        return evalBinaryNumericBool(operationName, left, right, context)
     }
 
     override fun unparse(): String {
         return "[$operationName, ${left.unparse()}, ${right.unparse()}]".format()
     }
 }
-fun evalBinaryNumericBool(operationName:String, leftExpression:Expression, rightExpression:Expression):CoreResult<Expression>{
-    val leftResult = leftExpression.eval()
+fun evalBinaryNumericBool(operationName:String, leftExpression:Expression, rightExpression:Expression,
+context: Context):CoreResult<Expression>{
+    val leftResult = leftExpression.eval(context)
     if(!leftResult.success){
         return leftResult
     }
@@ -266,7 +274,7 @@ fun evalBinaryNumericBool(operationName:String, leftExpression:Expression, right
 
     val left = leftResult.value!!
 
-    val rightResult = rightExpression.eval()
+    val rightResult = rightExpression.eval(context)
     if(!rightResult.success){
         return rightResult
     }
@@ -277,21 +285,21 @@ fun evalBinaryNumericBool(operationName:String, leftExpression:Expression, right
     val right = rightResult.value!!
 
     if(left is EInt && right is EInt){
-        return evalBinaryIntegerBool(operationName, left, right)
+        return evalBinaryIntegerBool(operationName, left, right, context)
     }
     if(left is EFloat && right is EInt){
-        return evalBinaryFloatBool(operationName, left, EFloat((right).value.toDouble()))
+        return evalBinaryFloatBool(operationName, left, EFloat((right).value.toDouble()), context)
     }
     if(left is EInt && right is EFloat){
-        return evalBinaryFloatBool(operationName, EFloat(left.value.toDouble()), right)
+        return evalBinaryFloatBool(operationName, EFloat(left.value.toDouble()), right,context)
     }
 
-    return evalBinaryFloatBool(operationName, left, right)
+    return evalBinaryFloatBool(operationName, left, right, context)
 }
 
 
 data class EIsInt(val v:Expression):Expression{
-    override fun eval(): CoreResult<Expression> {
+    override fun eval(context: Context): CoreResult<Expression> {
         return  evalSuccess(EBool( v is EInt))
     }
 
@@ -303,7 +311,7 @@ data class EIsInt(val v:Expression):Expression{
 
 
 data class EIsFloat(val v:Expression):Expression{
-    override fun eval(): CoreResult<Expression> {
+    override fun eval(context: Context): CoreResult<Expression> {
         return  evalSuccess(EBool( v is EFloat))
     }
 
@@ -313,7 +321,7 @@ data class EIsFloat(val v:Expression):Expression{
 
 }
 data class EIsBool(val v:Expression):Expression{
-    override fun eval(): CoreResult<Expression> {
+    override fun eval(context: Context): CoreResult<Expression> {
         return  evalSuccess(EBool( v is EBool))
     }
 
@@ -323,8 +331,8 @@ data class EIsBool(val v:Expression):Expression{
 
 }
 data class ENot(val v:Expression):Expression{
-    override fun eval(): CoreResult<Expression> {
-        val evaluated = v.eval()
+    override fun eval(context: Context): CoreResult<Expression> {
+        val evaluated = v.eval(context)
         if(!evaluated.success){
             return evaluated
         }
@@ -348,17 +356,18 @@ val binaryBoolPrimitives = hashMapOf(
     "xor" to {a:Boolean, b:Boolean -> a xor b},
 )
 data class EBinaryBoolOp(val operationName: String, val left:Expression, val right:Expression): Expression {
-    override fun eval(): CoreResult<Expression> {
-        return evalBinaryBool(operationName, left, right)
+    override fun eval(context: Context): CoreResult<Expression> {
+        return evalBinaryBool(operationName, left, right, context)
     }
 
     override fun unparse(): String {
         return "[$operationName, ${left.unparse()}, ${right.unparse()}]".format()
     }
 }
-fun evalBinaryBool(operationName:String, leftExpression:Expression, rightExpression:Expression):CoreResult<Expression>{
+fun evalBinaryBool(operationName:String, leftExpression:Expression, rightExpression:Expression,
+context: Context):CoreResult<Expression>{
 
-    val leftResult = leftExpression.eval()
+    val leftResult = leftExpression.eval(context)
     if(!leftResult.success){
         return leftResult
     }
@@ -370,7 +379,7 @@ fun evalBinaryBool(operationName:String, leftExpression:Expression, rightExpress
 
     val left = leftResult.value!! as EBool
 
-    val rightResult = rightExpression.eval()
+    val rightResult = rightExpression.eval(context)
     if(!rightResult.success){
         return rightResult
     }

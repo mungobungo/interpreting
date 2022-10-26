@@ -16,25 +16,26 @@ internal class DomainKtTest {
     }
 
     private val emptyEnv = Environment(hashMapOf())
+    private val emptyContext = Context(emptyEnv)
 
     private fun expressionToExpression(evaluated:Expression, input:Expression){
-        val res = input.eval()
+        val res = input.eval(emptyContext)
         assertTrue(res.success)
         assertNull(res.error)
         assertNotNull(res.value)
         assertEquals(evaluated, res.value!!)
     }
     private fun yamlToExpression(expression: Expression, yaml: String) {
-        assertEquals(expression, parse(yaml).value!!.desugar().eval().value!!)
+        assertEquals(expression, parse(yaml).value!!.desugar().eval(emptyContext).value!!)
     }
 
     private fun yamlToYaml(evaluated: String, yaml: String) {
-        assertEquals(evaluated, parse(yaml).value!!.desugar().eval().value!!.unparse())
+        assertEquals(evaluated, parse(yaml).value!!.desugar().eval(emptyContext).value!!.unparse())
     }
 
     private fun failsWithError(yaml: String) {
 
-        val res = parse(yaml).value!!.desugar().eval()
+        val res = parse(yaml).value!!.desugar().eval(emptyContext)
         assertEquals(false, res.success)
         assertFalse(res.error == null)
         assertTrue(res.value == null)

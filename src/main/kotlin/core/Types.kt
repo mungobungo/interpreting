@@ -2,7 +2,7 @@ package core
 
 
 data class EInt(val value:Int):Expression {
-    override fun eval(): CoreResult<Expression> {
+    override fun eval(context: Context): CoreResult<Expression> {
         return evalSuccess(this)
     }
 
@@ -12,7 +12,7 @@ data class EInt(val value:Int):Expression {
 }
 
 data class EFloat(val value:Double):Expression {
-    override fun eval(): CoreResult<Expression> {
+    override fun eval(context: Context): CoreResult<Expression> {
         return evalSuccess(this)
     }
 
@@ -23,7 +23,7 @@ data class EFloat(val value:Double):Expression {
 
 
 data class EBool(val value:Boolean):Expression {
-    override fun eval(): CoreResult<Expression> {
+    override fun eval(context: Context): CoreResult<Expression> {
         return evalSuccess(this)
     }
 
@@ -35,11 +35,13 @@ val zeroInt = EInt(0)
 data class ESymbol(val name:String):Expression{
     //var evaluated = false
 
-    override fun eval(): CoreResult<Expression> {
+    override fun eval(context: Context): CoreResult<Expression> {
 
-        return evalSuccess(this)
-        //return substitute(this )
-
+        if(context.variables.bindings.containsKey(name)){
+            return evalSuccess(context.variables.bindings[name]!!)
+        }
+        return CoreResult<Expression>(false, null,
+            VariableNotFoundError(name, "variable '$name' not found in context:\n$context"))
     }
     override fun unparse(): String {
         return name

@@ -9,20 +9,16 @@ internal class EnvironmentTest {
     @Test
     fun isDefined() {
         val env = Environment(hashMapOf())
-        assertFalse(env.isDefined(ESymbol("x")))
-        val env2 = Environment(hashMapOf(Pair(ESymbol("x"), EInt(5))))
-        assertTrue(env2.isDefined(ESymbol("x")))
+        assertFalse(env.isDefined("x"))
+        val env2 = Environment(hashMapOf(Pair("x", EInt(5))))
+        assertTrue(env2.isDefined("x"))
     }
 
     @Test
     fun addBinding() {
         val env = Environment(hashMapOf())
-        env.addBinding(ESymbol("x"), EInt(5))
-        assertTrue(env.isDefined(ESymbol("x")))
-        assertEquals(EInt(5), env.bindings[ESymbol("x")])
-        assertEquals(EInt(5), env.get(ESymbol("x")))
-
+        env.addBinding("x", EInt(5))
+        assertTrue(env.isDefined("x"))
+        assertEquals(EInt(5), env.bindings["x"])
     }
-
-
 }

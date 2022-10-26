@@ -1,8 +1,11 @@
+import core.Context
+import core.Environment
 import parser.parse
 import kotlin.system.measureTimeMillis
 
 fun main(args: Array<String>) {
     println("REPL v0.1")
+    val context = Context(Environment(hashMapOf()))
 
     while (true){
         print(">> ")
@@ -20,7 +23,7 @@ fun main(args: Array<String>) {
         }
         val evalStart = System.nanoTime()
 
-        val evaluated = parsed.value!!.desugar().eval()
+        val evaluated = parsed.value!!.desugar().eval(context)
         val evalTime = System.nanoTime() - evalStart
         if(!evaluated.success){
             println("Eval error: " + evaluated.error!!.message + "\n ${evaluated.error!!.input}")

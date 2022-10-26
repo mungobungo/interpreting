@@ -3,7 +3,7 @@ package core
 import javax.swing.Icon
 
 interface Expression{
-    fun eval():CoreResult<Expression>
+    fun eval(context: Context):CoreResult<Expression>
     fun unparse():String
 }
 
@@ -34,6 +34,8 @@ data class Environment(val bindings:HashMap<String, Expression>){
         if(bindings.containsKey(name)){
             return CoreResult(true, bindings[name]!!, null)
         }
-        return CoreResult(false, null, VariableNotFoundError(name, "variable '$name' not found in env: \n $this"))
+        return CoreResult(false, null, VariableNotFoundError(name, "'$name' is not found in env: \n $this"))
     }
 }
+
+data class Context(val variables: Environment)

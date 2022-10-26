@@ -38,10 +38,10 @@ internal class ParserKtTest {
     fun testSimpleBool() {
         assertEquals(SugarBool(true), parse("True").value!!)
         assertEquals(SugarBool(true), parse("true").value!!)
-        assertFalse(parse("tRuE").success)
+        assertEquals(SugarSymbol("tRuE"), parse("tRuE").value!!)
         assertEquals(SugarBool(false), parse("False").value!!)
         assertEquals(SugarBool(false), parse("false").value!!)
-        assertFalse(parse("fAlSe").success)
+        assertEquals(SugarSymbol("fAlSe"), parse("fAlSe").value!!)
     }
 
     @Test
