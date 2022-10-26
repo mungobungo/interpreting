@@ -36,8 +36,12 @@ data class ESymbol(val name:String):Expression{
 
     override fun eval(context: Context): CoreResult<Expression> {
 
-        if(context.variables.bindings.containsKey(name)){
-            return evalSuccess(context.variables.bindings[name]!!)
+        var currentContext:Context? = context
+        while (currentContext != null) {
+            if (currentContext.variables.bindings.containsKey(name)) {
+                return evalSuccess(currentContext.variables.bindings[name]!!)
+            }
+            currentContext = currentContext.parent
         }
         return CoreResult<Expression>(false, null,
             VariableNotFoundError(name, "variable '$name' not found in context:\n$context"))
