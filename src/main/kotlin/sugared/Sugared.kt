@@ -183,3 +183,13 @@ data class SugarNot(val left:SugarExpression) : SugarExpression{
         return ENot(left.desugar())
     }
 }
+
+data class SugarOnes(val number:Int): SugarExpression{
+    override fun desugar(): Expression {
+        var initial = EBinaryIntegerOp("add", EInt(1), EInt(1))
+        for (a in 1..number ){
+            initial = EBinaryIntegerOp("add", initial, EInt(1))
+        }
+        return initial
+    }
+}

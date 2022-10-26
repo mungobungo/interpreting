@@ -60,6 +60,9 @@ fun convert(obj:Any):CoreResult<SugarExpression>{
 
     if(obj is ArrayList<*>){
         val operation= obj[0]
+        if(operation == "ones"){
+            return parserSuccess(SugarOnes(obj[1] as Int))
+        }
         if(operation is String &&  obj.count() == 3 && (operation in binaryIntPrimitives.keys
                     || operation in binaryFloatPrimitives
                     || operation in binaryFloatBoolPrimitives
