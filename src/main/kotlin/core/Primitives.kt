@@ -1,8 +1,6 @@
 package core
 
-import java.beans.beancontext.BeanContextServiceAvailableEvent
 import kotlin.math.abs
-import kotlin.math.exp
 
 val binaryFloatPrimitives = hashMapOf(
     "fadd" to {a:Double, b:Double -> a +b},
@@ -411,7 +409,8 @@ data class ESetVar(val name:String, val variableValue:Expression):Expression{
 }
 data class EDo(val expressions:List<Expression>): Expression{
     override fun eval(context: Context): CoreResult<Expression> {
-        val res = EList(expressions).eval(context)
+        val localContext = context.expand()
+        val res = EList(expressions).eval(localContext)
         if(!res.success){
             return res
         }

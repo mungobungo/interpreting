@@ -38,4 +38,9 @@ data class Environment(val bindings:HashMap<String, Expression>){
     }
 }
 
-data class Context(val variables: Environment)
+data class Context(val variables: Environment, val parent:Context? = null){
+    fun expand():Context{
+        return Context(Environment(hashMapOf()), this)
+    }
+
+}
