@@ -46,3 +46,23 @@ data class ESymbol(val name:String):Expression{
         return name
     }
 }
+
+data class EList(val elems: List<Expression>):Expression{
+    override fun eval(context: Context): CoreResult<Expression> {
+        val res = mutableListOf<Expression>()
+        for(e:Expression in elems){
+            val eResult = e.eval(context)
+            if(!eResult.success){
+                return eResult
+            }
+            res.add(eResult.value!!)
+        }
+        return evalSuccess(EList(res))
+
+    }
+
+    override fun unparse(): String {
+        return "[list, ${elems.joinToString(", ") { it.unparse() }}]"
+    }
+
+}

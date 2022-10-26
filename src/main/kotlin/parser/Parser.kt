@@ -68,6 +68,24 @@ fun convert(obj:Any):CoreResult<SugarExpression>{
         if(operation == "ones"){
             return parserSuccess(SugarOnes(obj[1] as Int))
         }
+        if(operation =="list"){
+            val elems = obj.takeLast(obj.size -1)
+            val expressions = elems.map { convert(it) }
+            if(expressions.any{ !it.success }){
+                val broken = expressions.filter { !it.success }.map { it.error!! }.joinToString { "\n" }
+                return parserFailure(ParsingError(obj, "error during parsing 'list' $obj\n $broken" ))
+            }
+            return parserSuccess( SugarList(expressions.map { it.value!! }))
+        }
+        if(operation =="do"){
+            val elems = obj.takeLast(obj.size -1)
+            val expressions = elems.map { convert(it) }
+            if(expressions.any{ !it.success }){
+                val broken = expressions.filter { !it.success }.map { it.error!! }.joinToString { "\n" }
+                return parserFailure(ParsingError(obj, "error during parsing 'do' $obj\n $broken" ))
+            }
+            return parserSuccess( SugarDo(expressions.map { it.value!! }))
+        }
         if(operation is String &&  obj.count() == 3 && (operation in binaryIntPrimitives.keys
                     || operation in binaryFloatPrimitives
                     || operation in binaryFloatBoolPrimitives

@@ -199,3 +199,16 @@ data class SugarSetVar(val name:String, val value:SugarExpression): SugarExpress
        return ESetVar(name, value.desugar())
     }
 }
+
+data class SugarList(val expressions: List<SugarExpression>): SugarExpression{
+    override fun desugar(): Expression {
+
+        return EList(expressions.map { it.desugar() })
+    }
+
+}
+data class SugarDo(val expressions:List<SugarExpression>):SugarExpression{
+    override fun desugar(): Expression {
+        return EDo(expressions.map { it.desugar() })
+    }
+}
