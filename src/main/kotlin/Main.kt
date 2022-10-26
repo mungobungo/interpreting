@@ -1,11 +1,18 @@
 import core.Context
+import core.EInt
 import core.Environment
+import core.Expression
 import parser.parse
 import kotlin.system.measureTimeMillis
 
 fun main(args: Array<String>) {
     println("REPL v0.1")
-    val context = Context(Environment(hashMapOf()))
+    val variables = hashMapOf<String, Expression>(
+        "x" to EInt(3),
+        "y" to EInt(10)
+
+    )
+    val context = Context(Environment(variables))
 
     while (true){
         print(">> ")
