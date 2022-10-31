@@ -122,16 +122,7 @@ val binaryIntPrimitives = hashMapOf(
     "idiv" to {a:Int, b:Int -> a /b},
     "div" to {a:Int, b:Int -> a/b},
     )
-data class EBinaryIntegerOp(val operationName: String, val left:Expression, val right:Expression): Expression {
-    override fun eval(context: Context): CoreResult<Expression> {
-        return evalBinaryInteger(operationName, left, right,context)
-    }
-
-    override fun unparse(): String {
-        return "[$operationName, ${left.unparse()}, ${right.unparse()}]".format()
-    }
-}
-fun evalBinaryInteger(operationName:String, leftExpression:Expression, rightExpression:Expression,
+fun evalBinaryInteger(operationName:String, leftExpression: Expression, rightExpression: Expression,
                         context:Context
                       ):CoreResult<Expression>{
 
@@ -203,17 +194,16 @@ context: Context
     val op = binaryIntBoolPrimitives[operationName]!!
     return evalSuccess(EBool(op(left.value, right.value)))
 }
-data class EBinaryNumericOp(val operationName:String, val left:Expression, val right:Expression): Expression {
-    override fun eval(context: Context): CoreResult<Expression> {
-        return evalBinaryNumeric(operationName, left, right,context)
-    }
-
-    override fun unparse(): String {
-        return "[$operationName, ${left.unparse()}, ${right.unparse()}]".format()
-    }
-}
-fun evalBinaryNumeric(operationName:String, leftExpression:Expression, rightExpression:Expression,
+fun evalBinaryNumeric(operationName:String, params:List<Expression>,
 context: Context):CoreResult<Expression>{
+
+    if(params.size !=2){
+        return evalArgumentCountError(params,
+            "parameter count mismatch for $operationName, expected 2, got ${params.size} \n" +
+                    params.joinToString(", ") { it.unparse() })
+    }
+    val leftExpression = params[0]!!
+    val rightExpression = params[1]!!
     val leftResult = leftExpression.eval(context)
     if(!leftResult.success){
         return leftResult

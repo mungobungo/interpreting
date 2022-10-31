@@ -15,6 +15,14 @@ fun evalTypeError(expression: Expression, error:String): CoreResult<Expression> 
 }
 
 
+data class ArgumentCountError(
+    override val input: Any,
+    override val message: String,
+) : ICoreError
+
+fun evalArgumentCountError(arguments: List<Expression>, error:String): CoreResult<Expression> {
+    return CoreResult(false, null, ArgumentCountError(arguments, error))
+}
 data class DivisionByZeroError(
     override val input: Any,
     override val message: String,

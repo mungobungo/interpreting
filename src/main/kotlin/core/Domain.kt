@@ -7,6 +7,10 @@ interface Expression{
     fun unparse():String
 }
 
+interface IFunction : Expression{
+    fun call(params:List<Expression>, context: Context): CoreResult<Expression>
+}
+
 
 data class CoreResult<T>(
     val success: Boolean,
