@@ -83,6 +83,24 @@ fun convert(obj:Any):CoreResult<SugarExpression>{
 
             return parserSuccess( SugarLambda(paramNames.map { it.toString() }, body.value!!))
         }
+        if(operation == "fun"){
+
+            val functionName = obj[1]
+            if(functionName !is String){
+                return parserFailure(ParsingError(obj, "function name should be a string, but got $functionName"))
+            }
+            val paramNames = obj.slice(2 ..obj.size -2)
+            if(paramNames.any{ it !is String }) {
+                val broken = paramNames.filter { it !is String }.joinToString { "\n" }
+                return parserFailure(ParsingError(obj, "error during parsing 'lambda' parameter names $obj\n $broken"))
+            }
+            val body = convert(obj.last())
+            if(!body.success){
+                return body
+            }
+
+            return parserSuccess( SugarFun(functionName, paramNames.map { it.toString() }, body.value!!))
+        }
         if(operation =="list"){
             val elems = obj.takeLast(obj.size -1)
             val expressions = elems.map { convert(it) }
