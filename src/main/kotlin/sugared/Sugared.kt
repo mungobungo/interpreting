@@ -125,3 +125,10 @@ data class SugarLetStar(val bindings:List<Pair<String, SugarExpression>>, val bo
     }
 
 }
+
+data class SugarLambda(val paramNames:List<String>, val body:SugarExpression):SugarExpression{
+    override fun desugar(): Expression {
+        return ELambda(paramNames, body.desugar())
+    }
+
+}

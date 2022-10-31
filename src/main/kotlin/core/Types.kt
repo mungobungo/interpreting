@@ -287,3 +287,26 @@ data class ECall(val func:Expression, val params:List<Expression>) : Expression{
 
 }
 
+data class ELambda(val paramNames: List<String>, val body:Expression) : Expression, IFunction{
+    override fun call(params: List<Expression>, context: Context): CoreResult<Expression> {
+        if(params.size != paramNames.size){
+            return evalArgumentCountError(params, "argument count does not match number of parameters, ${params.size} != ${paramNames.size} in ${this.unparse()}")
+        }
+        val bindings = mutableListOf<Expression>()
+        for(v in paramNames.zip(params)){
+            bindings.add(ESetVar(v.first, v.second))
+        }
+        bindings.add(body)
+        return  EDo(bindings).eval(context)
+    }
+
+    override fun eval(context: Context): CoreResult<Expression> {
+        return  evalSuccess(this)
+    }
+
+    override fun unparse(): String {
+        return "[lambda, ${paramNames.joinToString(",") { it }}, ${body.unparse()}]"
+    }
+
+}
+
