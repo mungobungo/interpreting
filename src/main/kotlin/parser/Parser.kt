@@ -65,6 +65,7 @@ fun convert(obj:Any):CoreResult<SugarExpression>{
 
     if(obj is ArrayList<*>){
         val operation= obj[0]
+
         if(operation == "ones"){
             return parserSuccess(SugarOnes(obj[1] as Int))
         }
@@ -166,6 +167,21 @@ fun convert(obj:Any):CoreResult<SugarExpression>{
 
         if(operation is String && obj.count() == 2 && operation in unaryPrimitives){
             return parseUnaryAction(operation, obj)
+        }
+
+        val convertedOp = convert(operation)
+
+        if(!convertedOp.success){
+            return convertedOp
+        }
+        if(convertedOp.value!! is SugarLambda || convertedOp.value!! is SugarSymbol){
+            val elems = obj.takeLast(obj.size -1)
+            val expressions = elems.map { convert(it) }
+            if(expressions.any{ !it.success }){
+                val broken = expressions.filter { !it.success }.map { it.error!! }.joinToString { "\n" }
+                return parserFailure(ParsingError(obj, "error during parsing 'func' $obj\n $broken" ))
+            }
+            return parserSuccess(SugarCall(convertedOp.value!!, expressions.map { it.value!! }))
         }
 
     }

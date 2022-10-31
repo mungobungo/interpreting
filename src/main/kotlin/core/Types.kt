@@ -272,12 +272,20 @@ data class EPrimitive(val name:String, val implementation:((List<Expression>, Co
 
 data class ECall(val func:Expression, val params:List<Expression>) : Expression{
     override fun eval(context: Context): CoreResult<Expression> {
-        if(func !is EPrimitive){
-            return evalTypeError(func, "function during call should be a function, but got ${func.unparse()}")
+        var funcRef = func
+        if(func is ESymbol){ // if it is a symbol, we would try to find it in the env
+            val f = func.eval(context)
+            if(!f.success){
+                return evalTypeError(func, "function $func is not found in the context, $context")
+            }
+            funcRef = f.value!!
         }
-        val primitive = func as IFunction
+        if(funcRef !is EPrimitive && funcRef !is ELambda){
+            return evalTypeError(funcRef, "function during call should be a primitive or a lambda, but got ${funcRef.unparse()}")
+        }
 
-        return func.call(params, context)
+
+        return (funcRef as IFunction).call(params, context)
     }
 
     override fun unparse(): String {
