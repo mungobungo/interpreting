@@ -300,12 +300,13 @@ data class ELambda(val paramNames: List<String>, val body:Expression) : Expressi
         if(params.size != paramNames.size){
             return evalArgumentCountError(params, "argument count does not match number of parameters, ${params.size} != ${paramNames.size} in ${this.unparse()}")
         }
-        val bindings = mutableListOf<Expression>()
+        val expandedContext = context.expand()
         for(v in paramNames.zip(params)){
-            bindings.add(ESetVar(v.first, v.second))
+
+            expandedContext.variables.addBinding(v.first, v.second)
         }
-        bindings.add(body)
-        return  EDo(bindings).eval(context)
+
+        return  body.eval(expandedContext)
     }
 
     override fun eval(context: Context): CoreResult<Expression> {
