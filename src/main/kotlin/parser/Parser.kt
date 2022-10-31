@@ -149,25 +149,25 @@ fun convert(obj:Any):CoreResult<SugarExpression>{
             }
             return parserSuccess(SugarLetStar(bindings, body.value!!))
         }
-        if(operation is String && operation in primitives){
+       // if(operation is String && operation in primitives){
 
-            val elems = obj.takeLast(obj.size -1)
-            val expressions = elems.map { convert(it) }
-            if(expressions.any{ !it.success }){
-                val broken = expressions.filter { !it.success }.map { it.error!! }.joinToString { "\n" }
-                return parserFailure(ParsingError(obj, "error during parsing $operation $obj\n $broken" ))
-            }
-            return parserSuccess(SugarPrimitive(operation, expressions.map { it.value!! }))
-        }
+        //    val elems = obj.takeLast(obj.size -1)
+        //    val expressions = elems.map { convert(it) }
+            //   if(expressions.any{ !it.success }){
+           //     val broken = expressions.filter { !it.success }.map { it.error!! }.joinToString { "\n" }
+           //     return parserFailure(ParsingError(obj, "error during parsing $operation $obj\n $broken" ))
+           // }
+           // return parserSuccess(SugarPrimitive(operation, expressions.map { it.value!! }))
+       // }
         if(operation is String &&  obj.count() == 3 && (
                     operation in hashSetOf("eq", "neq", "lt", "lte", "gt", "gte") ||
                      operation == "setvar")){
             return parseBinaryAction(operation, obj)
         }
 
-        if(operation is String && obj.count() == 2 && operation in unaryPrimitives){
-            return parseUnaryAction(operation, obj)
-        }
+       // if(operation is String && obj.count() == 2 && operation in unaryPrimitives){
+       //     return parseUnaryAction(operation, obj)
+       // }
 
         val convertedOp = convert(operation)
 
@@ -221,13 +221,13 @@ private fun parseBinaryAction(operation:String, obj: ArrayList<*>): CoreResult<S
     return CoreResult(false, null, UnsupportedBinaryOperation(operation, "$operation is not defined as binary operation"))
 }
 
-private fun parseUnaryAction(operation:String, obj: ArrayList<*>): CoreResult<SugarExpression>{
-    val arg = convert(obj[1])
-    if(!arg.success){
-        return arg
-    }
-if(operation in primitives){
-    return parserSuccess( SugarPrimitive(operation, listOf(arg.value!!)))
-}
-    return CoreResult(false, null, UnsupportedUnaryOperation(operation, "$operation is not not defined as unary operation"))
-}
+//private fun parseUnaryAction(operation:String, obj: ArrayList<*>): CoreResult<SugarExpression>{
+ //   val arg = convert(obj[1])
+  //  if(!arg.success){
+  //      return arg
+  //  }
+//if(operation in primitives){
+ //   return parserSuccess( SugarPrimitive(operation, listOf(arg.value!!)))
+//}
+ //   return CoreResult(false, null, UnsupportedUnaryOperation(operation, "$operation is not not defined as unary operation"))
+//}

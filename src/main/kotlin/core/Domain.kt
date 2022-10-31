@@ -59,3 +59,30 @@ data class Context(val variables: Environment, val parent:Context? = null){
     }
 
 }
+
+
+val primitiveFunctions: HashMap<String, Expression> = hashMapOf(
+    "iadd" to binaryNumeric("iadd"),
+    "imul" to binaryNumeric("imul"),
+    "isub" to binaryNumeric("isub"),
+    "idiv" to binaryNumeric("idiv"),
+    "fadd" to binaryNumeric("fadd"),
+    "fmul" to binaryNumeric("fmul"),
+    "fsub" to binaryNumeric("fsub"),
+    "fdiv" to binaryNumeric("fdiv"),
+    "add" to binaryNumeric("add"),
+    "mul" to binaryNumeric("mul"),
+    "sub" to binaryNumeric("sub"),
+    "div" to binaryNumeric("div"),
+    "and" to binaryBool("and"),
+    "or" to binaryBool("or"),
+    "xor" to binaryBool("xor"),
+    "not" to unary("not"),
+    "is_int" to unary("is_int"),
+    "is_float" to unary("is_float"),
+    "is_bool" to unary("is_bool"),
+    "neg" to unary("neg")
+
+
+)
+val defaultContext = Context(Environment( primitiveFunctions), null)

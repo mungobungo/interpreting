@@ -16,7 +16,7 @@ internal class DomainKtTest {
     }
 
     private val emptyEnv = Environment(hashMapOf())
-    private val emptyContext = Context(emptyEnv)
+    private val emptyContext = defaultContext
 
     private fun expressionToExpression(evaluated:Expression, input:Expression){
         val res = input.eval(emptyContext)
@@ -53,22 +53,22 @@ internal class DomainKtTest {
 
     @Test
     fun testSimpleAddition() {
-        expressionToExpression(EInt(5), ECall(primitives["add"]!!, listOf(EInt(5), EInt(0))))
-        expressionToExpression(EInt(5), ECall( primitives["add"]!!, listOf(EInt(0), EInt(5))))
-        expressionToExpression(EInt(10), ECall(primitives["add"]!!, listOf(EInt(7), EInt(3))))
-        expressionToExpression(EInt(7), ECall(primitives["add"]!!,listOf( EInt(-3), EInt(10))))
-        expressionToExpression(EInt(6), ECall(primitives["add"]!!,listOf( EInt(10), EInt(-4))))
+        expressionToExpression(EInt(5), ECall(ESymbol("add"), listOf(EInt(5), EInt(0))))
+        expressionToExpression(EInt(5), ECall( ESymbol("add"), listOf(EInt(0), EInt(5))))
+        expressionToExpression(EInt(10), ECall(ESymbol("add"), listOf(EInt(7), EInt(3))))
+        expressionToExpression(EInt(7), ECall(ESymbol("add"),listOf( EInt(-3), EInt(10))))
+        expressionToExpression(EInt(6), ECall(ESymbol("add"),listOf( EInt(10), EInt(-4))))
     }
 
     @Test
     fun testComplexAddition() {
-        val add = primitives["add"]!!
+        val add = ESymbol("add")
         expressionToExpression(EInt(6), ECall(add, listOf(EInt(1), ECall(add,  listOf(EInt(2), EInt(3))))))
     }
 
     @Test
     fun testSimpleMultiplication() {
-        val mul = primitives["mul"]!!
+        val mul = ESymbol("mul")
         expressionToExpression(EInt(0), ECall(mul,listOf( EInt(0), EInt(42))))
         expressionToExpression(EInt(0), ECall(mul,listOf(EInt(42), EInt(0))))
         expressionToExpression(EInt(42), ECall(mul, listOf(EInt(1), EInt(42))))
@@ -78,8 +78,8 @@ internal class DomainKtTest {
 
     @Test
     fun testComplicatedMultiplication() {
-        val mul = primitives["mul"]!!
-        val add = primitives["add"]!!
+        val mul = ESymbol("mul")
+        val add = ESymbol("add")
         expressionToExpression(EInt(10), (ECall( mul, listOf((ECall(mul, listOf(EInt(1), EInt(5)))), EInt(2)))))
         expressionToExpression(EInt(12), (ECall( mul, listOf((ECall(add, listOf(EInt(1), EInt(5)))), EInt(2)))))
     }

@@ -47,15 +47,15 @@ internal class ParserKtTest {
 
     @Test
     fun testSimpleAdd() {
-        assertEquals(SugarPrimitive("add", listOf(SugarInt(3), SugarInt(5))), parse("[add, 3, 5]").value!!)
-        assertEquals(SugarPrimitive("iadd", listOf(SugarInt(3), SugarInt(5))), parse("[iadd, 3, 5]").value!!)
+        assertEquals(SugarCall(SugarSymbol("add"), listOf(SugarInt(3), SugarInt(5))), parse("[add, 3, 5]").value!!)
+        assertEquals(SugarCall(SugarSymbol( "iadd"), listOf(SugarInt(3), SugarInt(5))), parse("[iadd, 3, 5]").value!!)
     }
 
     @Test
     fun testComplicatedAdd() {
         assertEquals(
-            SugarPrimitive("add", listOf(
-                (SugarPrimitive("add", listOf(SugarInt(3), SugarInt(5)))),
+            SugarCall(SugarSymbol ("add"), listOf(
+                (SugarCall(SugarSymbol("add"), listOf(SugarInt(3), SugarInt(5)))),
                     SugarInt(42))),
             parse("[add, [add, 3,5], 42]").value!!
         )
@@ -63,7 +63,7 @@ internal class ParserKtTest {
 
     @Test
     fun testSimpleMultiplication() {
-        assertEquals(SugarPrimitive("mul", listOf((SugarInt(11)), SugarInt(33))), parse("[mul, 11, 33]").value!!)
+        assertEquals(SugarCall(SugarSymbol("mul"), listOf((SugarInt(11)), SugarInt(33))), parse("[mul, 11, 33]").value!!)
     }
 
     @Test
@@ -72,7 +72,7 @@ internal class ParserKtTest {
             parse("[mul, [mul, 3,5], 42]")
         data.toString()
         assertEquals(
-            SugarPrimitive("mul", listOf (SugarPrimitive("mul", listOf( SugarInt(3), SugarInt(5))),
+            SugarCall(SugarSymbol("mul"), listOf (SugarCall(SugarSymbol("mul"), listOf( SugarInt(3), SugarInt(5))),
                 SugarInt(42))),
             parse("[mul, [mul, 3,5], 42]").value!!
         )
@@ -81,7 +81,7 @@ internal class ParserKtTest {
     @Test
     fun testMulAndAdd() {
         assertEquals(
-            SugarPrimitive("mul", listOf(SugarPrimitive("add", listOf(SugarInt(22), SugarInt(11))), SugarInt(44))),
+            SugarCall(SugarSymbol("mul"), listOf(SugarCall(SugarSymbol("add"), listOf(SugarInt(22), SugarInt(11))), SugarInt(44))),
             parse("[mul, [add, 22, 11], 44]").value!!
         )
     }

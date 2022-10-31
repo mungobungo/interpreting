@@ -71,10 +71,10 @@ data class SugarNeq(val left:SugarExpression, val right:SugarExpression) : Sugar
 data class SugarOnes(val number:Int): SugarExpression{
     override fun desugar(): Expression {
         var initial = ECall(
-            core.primitives["add"]!!, listOf( EInt(1), EInt(1)))
+            ESymbol("add"), listOf( EInt(1), EInt(1)))
         for (a in 1..number ){
 
-            initial = ECall(primitives["add"]!!, listOf(initial, EInt(1)))
+            initial = ECall(ESymbol("add"), listOf(initial, EInt(1)))
         }
         return initial
     }
@@ -101,7 +101,7 @@ data class SugarDo(val expressions:List<SugarExpression>):SugarExpression{
 
 data class SugarPrimitive(val name:String, val params:List<SugarExpression>) :SugarExpression{
     override fun desugar(): Expression {
-        return  ECall( primitives[name]!!, params.map{it.desugar()})
+        return  ECall( ESymbol(name), params.map{it.desugar()})
     }
 
 }
