@@ -142,13 +142,11 @@ fun convert(obj:Any):CoreResult<SugarExpression>{
                 val broken = expressions.filter { !it.success }.map { it.error!! }.joinToString { "\n" }
                 return parserFailure(ParsingError(obj, "error during parsing $operation $obj\n $broken" ))
             }
-            return parserSuccess(SugarPrimitive(operation, expressions.map { it.value!!.desugar() }))
+            return parserSuccess(SugarPrimitive(operation, expressions.map { it.value!! }))
         }
         if(operation is String &&  obj.count() == 3 && (
-                    operation in binaryFloatBoolPrimitives
-                    || operation in binaryIntBoolPrimitives
-                    || operation in binaryBoolPrimitives
-                    || operation == "setvar")){
+                    operation in hashSetOf("eq", "neq", "lt", "lte", "gt", "gte") ||
+                     operation == "setvar")){
             return parseBinaryAction(operation, obj)
         }
 
@@ -177,19 +175,12 @@ private fun parseBinaryAction(operation:String, obj: ArrayList<*>): CoreResult<S
     val l = left.value!!
     val r = right.value!!
     when(operation){
-        "fadd"  -> return parserSuccess(SugarFAdd(l,r))
-        "fmul" -> return parserSuccess(SugarFMul(l,r))
-        "fdiv"  -> return parserSuccess(SugarFDiv(l,r))
-        "fsub"  -> return parserSuccess(SugarFSub(l,r))
-        "lt" -> return parserSuccess(SugarNumericLt(l,r))
-        "lte" -> return parserSuccess(SugarNumericLte(l,r))
-        "gt" -> return parserSuccess(SugarNumericGt(l,r))
-        "gte" -> return parserSuccess(SugarNumericGte(l,r))
-        "eq" -> return parserSuccess(SugarNumericEq(l,r))
-        "neq" -> return parserSuccess(SugarNumericNeq(l,r))
-        "and" -> return parserSuccess(SugarAnd(l,r))
-        "or" -> return parserSuccess(SugarOr(l,r))
-        "xor" -> return parserSuccess(SugarXor(l,r))
+        "lt" -> return parserSuccess(SugarLt(l,r))
+        "lte" -> return parserSuccess(SugarLte(l,r))
+        "gt" -> return parserSuccess(SugarGt(l,r))
+        "gte" -> return parserSuccess(SugarGte(l,r))
+        "eq" -> return parserSuccess(SugarEq(l,r))
+        "neq" -> return parserSuccess(SugarNeq(l,r))
     }
     if(operation == "setvar"){
     if(l !is SugarSymbol){
@@ -201,17 +192,12 @@ private fun parseBinaryAction(operation:String, obj: ArrayList<*>): CoreResult<S
 }
 
 private fun parseUnaryAction(operation:String, obj: ArrayList<*>): CoreResult<SugarExpression>{
-    val op = convert(obj[1])
-    if(!op.success){
-        return op
+    val arg = convert(obj[1])
+    if(!arg.success){
+        return arg
     }
-
-    val v = op.value!!
-    when(operation){
-        "is_int" -> return parserSuccess(SugarIsInt(v))
-        "is_bool" -> return parserSuccess(SugarIsBool(v))
-        "is_float" -> return parserSuccess(SugarIsFloat(v))
-        "not" -> return parserSuccess(SugarNot(v))
-    }
-    return CoreResult(false, null, UnsupportedUnaryOperation(op, "$operation is not not defined as unary operation"))
+if(operation in primitives){
+    return parserSuccess( SugarPrimitive(operation, listOf(arg.value!!)))
+}
+    return CoreResult(false, null, UnsupportedUnaryOperation(operation, "$operation is not not defined as unary operation"))
 }

@@ -11,6 +11,17 @@ interface IFunction : Expression{
     fun call(params:List<Expression>, context: Context): CoreResult<Expression>
 }
 
+interface IComparable: Expression{
+    fun eq(other:Expression) : CoreResult<EBool>
+    fun neq(other:Expression) : CoreResult<EBool>
+}
+
+interface IOrdered : Expression{
+    fun lt(other: Expression) : CoreResult<EBool>
+    fun lte(other: Expression) : CoreResult<EBool>
+    fun gt(other:Expression) :CoreResult<EBool>
+    fun gte(other:Expression) :CoreResult<EBool>
+}
 
 data class CoreResult<T>(
     val success: Boolean,

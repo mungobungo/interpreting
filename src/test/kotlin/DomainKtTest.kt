@@ -53,40 +53,42 @@ internal class DomainKtTest {
 
     @Test
     fun testSimpleAddition() {
-        expressionToExpression(EInt(5), EBinaryIntegerOp("add", EInt(5), EInt(0)))
-        expressionToExpression(EInt(5), EBinaryIntegerOp( "add",EInt(0), EInt(5)))
-        expressionToExpression(EInt(10), EBinaryIntegerOp("add",EInt(7), EInt(3)))
-        expressionToExpression(EInt(7), EBinaryIntegerOp("add",EInt(-3), EInt(10)))
-        expressionToExpression(EInt(6), EBinaryIntegerOp("add",EInt(10), EInt(-4)))
+        expressionToExpression(EInt(5), ECall(primitives["add"]!!, listOf(EInt(5), EInt(0))))
+        expressionToExpression(EInt(5), ECall( primitives["add"]!!, listOf(EInt(0), EInt(5))))
+        expressionToExpression(EInt(10), ECall(primitives["add"]!!, listOf(EInt(7), EInt(3))))
+        expressionToExpression(EInt(7), ECall(primitives["add"]!!,listOf( EInt(-3), EInt(10))))
+        expressionToExpression(EInt(6), ECall(primitives["add"]!!,listOf( EInt(10), EInt(-4))))
     }
 
     @Test
     fun testComplexAddition() {
-        expressionToExpression(EInt(6), EBinaryIntegerOp("add", EInt(1), EBinaryIntegerOp("add", EInt(2), EInt(3))))
+        val add = primitives["add"]!!
+        expressionToExpression(EInt(6), ECall(add, listOf(EInt(1), ECall(add,  listOf(EInt(2), EInt(3))))))
     }
 
     @Test
     fun testSimpleMultiplication() {
-        expressionToExpression(EInt(0), EBinaryIntegerOp("mul",EInt(0), EInt(42)))
-        expressionToExpression(EInt(0), EBinaryIntegerOp("mul",EInt(42), EInt(0)))
-        expressionToExpression(EInt(42), EBinaryIntegerOp("mul", EInt(1), EInt(42)))
-        expressionToExpression(EInt(42), EBinaryIntegerOp("mul",EInt(42), EInt(1)))
-        expressionToExpression(EInt(4), EBinaryIntegerOp("mul",EInt(2), EInt(2)))
+        val mul = primitives["mul"]!!
+        expressionToExpression(EInt(0), ECall(mul,listOf( EInt(0), EInt(42))))
+        expressionToExpression(EInt(0), ECall(mul,listOf(EInt(42), EInt(0))))
+        expressionToExpression(EInt(42), ECall(mul, listOf(EInt(1), EInt(42))))
+        expressionToExpression(EInt(42), ECall(mul,listOf(EInt(42), EInt(1))))
+        expressionToExpression(EInt(4), ECall(mul,listOf(EInt(2), EInt(2))))
     }
 
     @Test
     fun testComplicatedMultiplication() {
-        expressionToExpression(EInt(10), (EBinaryIntegerOp( "mul", (EBinaryIntegerOp("mul", EInt(1), EInt(5))), EInt(2))))
-        expressionToExpression(EInt(12), (EBinaryIntegerOp("mul", EBinaryIntegerOp("add", EInt(1), EInt(5)), EInt(2))))
+        val mul = primitives["mul"]!!
+        val add = primitives["add"]!!
+        expressionToExpression(EInt(10), (ECall( mul, listOf((ECall(mul, listOf(EInt(1), EInt(5)))), EInt(2)))))
+        expressionToExpression(EInt(12), (ECall( mul, listOf((ECall(add, listOf(EInt(1), EInt(5)))), EInt(2)))))
     }
 
 
     @Test
     fun testComplicatedExpressionWithParsing() {
-        expressionToExpression(EInt(10), (EBinaryIntegerOp("mul", EBinaryIntegerOp("mul",EInt(1), EInt(5)), EInt(2))))
         yamlToExpression(EInt(10), "[mul, [mul, 1, 5], 2]")
         yamlToYaml("10", "[mul, [mul, 1, 5], 2]")
-        expressionToExpression(EInt(12), (EBinaryIntegerOp("mul",EBinaryIntegerOp("add",EInt(1), EInt(5)), EInt(2))))
         yamlToYaml("12", "[mul, [add, 1, 5], 2]")
     }
 

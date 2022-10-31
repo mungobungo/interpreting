@@ -1,7 +1,93 @@
 package core
 
 
-data class EInt(val value:Int):Expression {
+data class EInt(val value:Int):Expression, IComparable, IOrdered {
+    override fun eq(other: Expression): CoreResult<EBool> {
+
+       if(other !is EInt && other !is EFloat){
+           return CoreResult(true, EBool(false), null)
+       }
+       var otherVal = 0
+       if(other is EFloat){
+           otherVal = other.value.toInt()
+       }
+        if(other is EInt){
+            otherVal = other.value
+        }
+        return CoreResult(true, EBool(otherVal == value), null)
+    }
+
+    override fun neq(other: Expression): CoreResult<EBool> {
+
+        if(other !is EInt && other !is EFloat){
+            return CoreResult(true, EBool(false), null)
+        }
+        var otherVal = 0
+        if(other is EFloat){
+            otherVal = other.value.toInt()
+        }
+        if(other is EInt){
+            otherVal = other.value
+        }
+        return CoreResult(true, EBool(otherVal != value), null)
+    }
+
+    override fun lt(other: Expression): CoreResult<EBool> {
+        if(other !is EInt && other !is EFloat){
+            return CoreResult(true, EBool(false), null)
+        }
+        var otherVal = 0
+        if(other is EFloat){
+            otherVal = other.value.toInt()
+        }
+        if(other is EInt){
+            otherVal = other.value
+        }
+        return CoreResult(true, EBool(otherVal < value), null)
+    }
+
+    override fun lte(other: Expression): CoreResult<EBool> {
+        if(other !is EInt && other !is EFloat){
+            return CoreResult(true, EBool(false), null)
+        }
+        var otherVal = 0
+        if(other is EFloat){
+            otherVal = other.value.toInt()
+        }
+        if(other is EInt){
+            otherVal = other.value
+        }
+        return CoreResult(true, EBool(otherVal <= value), null)
+    }
+
+    override fun gt(other: Expression): CoreResult<EBool> {
+        if(other !is EInt && other !is EFloat){
+            return CoreResult(true, EBool(false), null)
+        }
+        var otherVal = 0
+        if(other is EFloat){
+            otherVal = other.value.toInt()
+        }
+        if(other is EInt){
+            otherVal = other.value
+        }
+        return CoreResult(true, EBool(otherVal > value), null)
+    }
+
+    override fun gte(other: Expression): CoreResult<EBool> {
+        if(other !is EInt && other !is EFloat){
+            return CoreResult(true, EBool(false), null)
+        }
+        var otherVal = 0
+        if(other is EFloat){
+            otherVal = other.value.toInt()
+        }
+        if(other is EInt){
+            otherVal = other.value
+        }
+        return CoreResult(true, EBool(otherVal >= value), null)
+    }
+
     override fun eval(context: Context): CoreResult<Expression> {
         return evalSuccess(this)
     }
@@ -11,7 +97,92 @@ data class EInt(val value:Int):Expression {
     }
 }
 
-data class EFloat(val value:Double):Expression {
+data class EFloat(val value:Double):Expression, IOrdered, IComparable {
+    override fun eq(other: Expression): CoreResult<EBool> {
+
+        if(other !is EInt && other !is EFloat){
+            return CoreResult(true, EBool(false), null)
+        }
+        var otherVal = 0.0
+        if(other is EFloat){
+            otherVal = other.value
+        }
+        if(other is EInt){
+            otherVal = other.value.toDouble()
+        }
+        return CoreResult(true, EBool(otherVal == value), null)
+    }
+
+    override fun neq(other: Expression): CoreResult<EBool> {
+
+        if(other !is EInt && other !is EFloat){
+            return CoreResult(true, EBool(false), null)
+        }
+        var otherVal = 0.0
+        if(other is EFloat){
+            otherVal = other.value
+        }
+        if(other is EInt){
+            otherVal = other.value.toDouble()
+        }
+        return CoreResult(true, EBool(otherVal != value), null)
+    }
+
+    override fun lt(other: Expression): CoreResult<EBool> {
+        if(other !is EInt && other !is EFloat){
+            return CoreResult(true, EBool(false), null)
+        }
+        var otherVal = 0.0
+        if(other is EFloat){
+            otherVal = other.value
+        }
+        if(other is EInt){
+            otherVal = other.value.toDouble()
+        }
+        return CoreResult(true, EBool(otherVal < value), null)
+    }
+
+    override fun lte(other: Expression): CoreResult<EBool> {
+        if(other !is EInt && other !is EFloat){
+            return CoreResult(true, EBool(false), null)
+        }
+        var otherVal = 0.0
+        if(other is EFloat){
+            otherVal = other.value
+        }
+        if(other is EInt){
+            otherVal = other.value.toDouble()
+        }
+        return CoreResult(true, EBool(otherVal <= value), null)
+    }
+
+    override fun gt(other: Expression): CoreResult<EBool> {
+        if(other !is EInt && other !is EFloat){
+            return CoreResult(true, EBool(false), null)
+        }
+        var otherVal = 0.0
+        if(other is EFloat){
+            otherVal = other.value
+        }
+        if(other is EInt){
+            otherVal = other.value.toDouble()
+        }
+        return CoreResult(true, EBool(otherVal > value), null)
+    }
+
+    override fun gte(other: Expression): CoreResult<EBool> {
+        if(other !is EInt && other !is EFloat){
+            return CoreResult(true, EBool(false), null)
+        }
+        var otherVal = 0.0
+        if(other is EFloat){
+            otherVal = other.value
+        }
+        if(other is EInt){
+            otherVal = other.value.toDouble()
+        }
+        return CoreResult(true, EBool(otherVal >= value), null)
+    }
     override fun eval(context: Context): CoreResult<Expression> {
         return evalSuccess(this)
     }
@@ -22,7 +193,21 @@ data class EFloat(val value:Double):Expression {
 }
 
 
-data class EBool(val value:Boolean):Expression {
+data class EBool(val value:Boolean):Expression, IComparable {
+    override fun eq(other: Expression): CoreResult<EBool> {
+        if(other !is EBool){
+            return CoreResult(true, EBool(false), null)
+        }
+        return CoreResult(true, EBool(other.value == value), null)
+    }
+
+    override fun neq(other: Expression): CoreResult<EBool> {
+        if(other !is EBool){
+            return CoreResult(true, EBool(false), null)
+        }
+        return CoreResult(true, EBool(other.value != value), null)
+    }
+
     override fun eval(context: Context): CoreResult<Expression> {
         return evalSuccess(this)
     }
@@ -101,12 +286,4 @@ data class ECall(val func:Expression, val params:List<Expression>) : Expression{
     }
 
 }
-fun binaryNumeric(name:String): EPrimitive{
-    return EPrimitive(name){
-            params: List<Expression>, context: Context -> evalBinaryNumeric(name,params, context) }
-}
 
-val primitives : HashMap<String, EPrimitive> = hashMapOf(
-    "iadd" to binaryNumeric("iadd"),
-    "add" to binaryNumeric("add")
-)

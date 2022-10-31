@@ -12,15 +12,6 @@ val binaryFloatPrimitives = hashMapOf(
     "fdiv" to {a:Double, b:Double -> a /b},
     "div" to {a:Double, b:Double -> a/b},
 )
-data class EBinaryFloatOp(val operationName:String, val left:Expression, val right: Expression): Expression {
-    override fun eval(context:Context): CoreResult<Expression> {
-
-        return evalBinaryFloat(operationName, left, right, context)
-    }
-    override fun unparse(): String {
-        return "[$operationName, ${left.unparse()}, ${right.unparse()}]"
-    }
-}
 fun evalBinaryFloat(operationName:String, leftExpression:Expression, rightExpression:Expression,
                       context: Context):CoreResult<Expression>{
 
@@ -60,56 +51,6 @@ fun evalBinaryFloat(operationName:String, leftExpression:Expression, rightExpres
 
     return evalSuccess(EFloat(op((left as EFloat).value, (right as EFloat).value)))
 }
-
-val binaryFloatBoolPrimitives = hashMapOf(
-    "lt" to {a:Double, b:Double -> a <b},
-    "lte" to {a:Double, b: Double-> a<=b},
-    "gt" to {a:Double, b:Double -> a >b},
-    "gte" to {a:Double, b:Double -> a>=b},
-    "eq" to {a:Double, b:Double -> abs(a -b) <0.0000001 },
-    "neq" to {a:Double, b:Double -> abs(a-b) >0.0000001},
-)
-fun evalBinaryFloatBool(operationName:String, leftExpression:Expression, rightExpression:Expression,
-                        context: Context
-):CoreResult<Expression>{
-
-    val leftResult = leftExpression.eval(context)
-    if(!leftResult.success){
-        return leftResult
-    }
-
-    if(leftResult.value !is EFloat && leftResult.value !is EInt){
-        return evalTypeError(leftExpression, "type error while evaluating left argument of '${operationName}'," +
-                " expected a float  or integer value, but got `${leftResult.value!!.unparse()}`")
-    }
-
-    val left = leftResult.value!!
-
-    val rightResult = rightExpression.eval(context)
-    if(!rightResult.success){
-        return rightResult
-    }
-    if(rightResult.value !is EInt && rightResult.value !is EFloat){
-        return evalTypeError(left, "type error while evaluating right argument of '${operationName}'," +
-                " expected a float or integer value, but got `${rightResult.value!!.unparse()}`")
-    }
-    val right = rightResult.value!!
-
-    val op = binaryFloatBoolPrimitives[operationName]!!
-    if(left is EInt && right is EInt){
-        return evalSuccess(EBool(op(left.value.toDouble(), right.value.toDouble())))
-    }
-    if(left is EInt && right is EFloat){
-        return evalSuccess(EBool(op(left.value.toDouble(), right.value)))
-    }
-
-    if(left is EFloat && right is EInt){
-        return evalSuccess(EBool(op(left.value, right.value.toDouble())))
-    }
-
-    return evalSuccess(EBool(op((left as EFloat).value, (right as EFloat).value)))
-}
-
 
 
 val binaryIntPrimitives = hashMapOf(
@@ -165,35 +106,6 @@ val binaryIntBoolPrimitives = hashMapOf(
     "eq" to {a:Int, b:Int -> a ==b},
     "neq" to {a:Int, b:Int -> a != b},
 )
-fun evalBinaryIntegerBool(operationName:String, leftExpression:Expression, rightExpression:Expression,
-context: Context
-                          ):CoreResult<Expression>{
-
-    val leftResult = leftExpression.eval(context)
-    if(!leftResult.success){
-        return leftResult
-    }
-
-    if(leftResult.value !is EInt){
-        return evalTypeError(leftExpression, "type error while evaluating left argument of '${operationName}'," +
-                " expected an integer value, but got `${leftResult.value!!.unparse()}`")
-    }
-
-    val left = leftResult.value!! as EInt
-
-    val rightResult = rightExpression.eval(context)
-    if(!rightResult.success){
-        return rightResult
-    }
-    if(rightResult.value !is EInt){
-        return evalTypeError(left, "type error while evaluating right argument of '${operationName}'," +
-                " expected an integer value, but got `${rightResult.value!!.unparse()}`")
-    }
-    val right = rightResult.value!! as EInt
-
-    val op = binaryIntBoolPrimitives[operationName]!!
-    return evalSuccess(EBool(op(left.value, right.value)))
-}
 fun evalBinaryNumeric(operationName:String, params:List<Expression>,
 context: Context):CoreResult<Expression>{
 
@@ -240,122 +152,16 @@ context: Context):CoreResult<Expression>{
 }
 
 
-data class EBinaryNumericBoolOp(val operationName:String, val left:Expression, val right:Expression): Expression {
-    override fun eval(context: Context): CoreResult<Expression> {
-        return evalBinaryNumericBool(operationName, left, right, context)
-    }
-
-    override fun unparse(): String {
-        return "[$operationName, ${left.unparse()}, ${right.unparse()}]".format()
-    }
-}
-fun evalBinaryNumericBool(operationName:String, leftExpression:Expression, rightExpression:Expression,
-context: Context):CoreResult<Expression>{
-    val leftResult = leftExpression.eval(context)
-    if(!leftResult.success){
-        return leftResult
-    }
-
-    if(leftResult.value !is EFloat && leftResult.value !is EInt) {
-        return evalTypeError(leftExpression, "type error while evaluating left argument of '${operationName}'," +
-                " expected a numeric value, but got `${leftResult.value!!.unparse()}`")
-    }
-
-    val left = leftResult.value!!
-
-    val rightResult = rightExpression.eval(context)
-    if(!rightResult.success){
-        return rightResult
-    }
-    if(rightResult.value !is EInt && rightResult.value !is EFloat){
-        return evalTypeError(left, "type error while evaluating right argument of '${operationName}'," +
-                " expected a numeric value, but got `${rightResult.value!!.unparse()}`")
-    }
-    val right = rightResult.value!!
-
-    if(left is EInt && right is EInt){
-        return evalBinaryIntegerBool(operationName, left, right, context)
-    }
-    if(left is EFloat && right is EInt){
-        return evalBinaryFloatBool(operationName, left, EFloat((right).value.toDouble()), context)
-    }
-    if(left is EInt && right is EFloat){
-        return evalBinaryFloatBool(operationName, EFloat(left.value.toDouble()), right,context)
-    }
-
-    return evalBinaryFloatBool(operationName, left, right, context)
-}
-
-
-data class EIsInt(val v:Expression):Expression{
-    override fun eval(context: Context): CoreResult<Expression> {
-        return  evalSuccess(EBool( v is EInt))
-    }
-
-    override fun unparse(): String {
-        return "[is_int, ${v.unparse()}]"
-    }
-
-}
-
-
-data class EIsFloat(val v:Expression):Expression{
-    override fun eval(context: Context): CoreResult<Expression> {
-        return  evalSuccess(EBool( v is EFloat))
-    }
-
-    override fun unparse(): String {
-        return "[is_float, ${v.unparse()}]"
-    }
-
-}
-data class EIsBool(val v:Expression):Expression{
-    override fun eval(context: Context): CoreResult<Expression> {
-        return  evalSuccess(EBool( v is EBool))
-    }
-
-    override fun unparse(): String {
-        return "[is_bool, ${v.unparse()}]"
-    }
-
-}
-data class ENot(val v:Expression):Expression{
-    override fun eval(context: Context): CoreResult<Expression> {
-        val evaluated = v.eval(context)
-        if(!evaluated.success){
-            return evaluated
-        }
-        val res = evaluated.value!!
-        if(res !is EBool){
-
-            return evalTypeError(v, "type error while evaluating  argument of 'not'," +
-                    " expected a boolean value, but got `${res.unparse()}`")
-        }
-        return  evalSuccess(EBool( !res.value))
-    }
-
-    override fun unparse(): String {
-        return "[not, ${v.unparse()}]"
-    }
-
-}
 val binaryBoolPrimitives = hashMapOf(
     "and" to {a:Boolean, b:Boolean -> a &&b},
     "or" to {a:Boolean, b:Boolean -> a||b},
     "xor" to {a:Boolean, b:Boolean -> a xor b},
 )
-data class EBinaryBoolOp(val operationName: String, val left:Expression, val right:Expression): Expression {
-    override fun eval(context: Context): CoreResult<Expression> {
-        return evalBinaryBool(operationName, left, right, context)
-    }
-
-    override fun unparse(): String {
-        return "[$operationName, ${left.unparse()}, ${right.unparse()}]".format()
-    }
-}
-fun evalBinaryBool(operationName:String, leftExpression:Expression, rightExpression:Expression,
+fun evalBinaryBool(operationName:String, params:List<Expression>,
 context: Context):CoreResult<Expression>{
 
+    val leftExpression =  params[0]!!
+    val rightExpression = params[1]!!
     val leftResult = leftExpression.eval(context)
     if(!leftResult.success){
         return leftResult
@@ -414,3 +220,224 @@ data class EDo(val expressions:List<Expression>): Expression{
     }
 }
 
+data class EEq(val first:Expression, val second:Expression): Expression{
+    override fun eval(context: Context): CoreResult<Expression> {
+        val firstResult = first.eval(context)
+        if(!firstResult.success){
+            return firstResult
+        }
+        if(firstResult.value !is IComparable){
+            return evalTypeError(first, "cannot call 'eq'  on ${first.unparse()} \n ${firstResult.value!!.unparse()}")
+        }
+        val secondResult = second.eval(context)
+        if(!secondResult.success){
+            return secondResult
+        }
+        val comparision = (firstResult.value as IComparable).eq(secondResult.value!!)
+        if(comparision.success){
+            return CoreResult(true, comparision.value!!, null)
+        }
+        return CoreResult(false, null, comparision.error)
+    }
+
+    override fun unparse(): String {
+        return "[eq, ${first.unparse()}, ${second.unparse()}]"
+    }
+
+}
+
+data class ENeq(val first:Expression, val second:Expression): Expression{
+    override fun eval(context: Context): CoreResult<Expression> {
+        val firstResult = first.eval(context)
+        if(!firstResult.success){
+            return firstResult
+        }
+        if(firstResult.value !is IComparable){
+            return evalTypeError(first, "cannot call 'neq'  on ${first.unparse()} \n ${firstResult.value!!.unparse()}")
+        }
+        val secondResult = second.eval(context)
+        if(!secondResult.success){
+            return secondResult
+        }
+        val comparision = (firstResult.value as IComparable).neq(secondResult.value!!)
+        if(comparision.success){
+            return CoreResult(true, comparision.value!!, null)
+        }
+        return CoreResult(false, null, comparision.error)
+    }
+
+    override fun unparse(): String {
+        return "[neq, ${first.unparse()}, ${second.unparse()}]"
+    }
+
+}
+data class ELt(val first:Expression, val second:Expression): Expression{
+    override fun eval(context: Context): CoreResult<Expression> {
+        val firstResult = first.eval(context)
+        if(!firstResult.success){
+            return firstResult
+        }
+        if(firstResult.value !is IOrdered){
+            return evalTypeError(first, "cannot call 'lt'  on ${first.unparse()} \n ${firstResult.value!!.unparse()}")
+        }
+        val secondResult = second.eval(context)
+        if(!secondResult.success){
+            return secondResult
+        }
+        val comparision = (firstResult.value as IOrdered).lt(secondResult.value!!)
+        if(comparision.success){
+            return CoreResult(true, comparision.value!!, null)
+        }
+        return CoreResult(false, null, comparision.error)
+    }
+
+    override fun unparse(): String {
+        return "[lt, ${first.unparse()}, ${second.unparse()}]"
+    }
+
+}
+data class ELte(val first:Expression, val second:Expression): Expression{
+    override fun eval(context: Context): CoreResult<Expression> {
+        val firstResult = first.eval(context)
+        if(!firstResult.success){
+            return firstResult
+        }
+        if(firstResult.value !is IOrdered || firstResult.value !is IComparable){
+            return evalTypeError(first, "cannot call 'lte'  on ${first.unparse()} \n ${firstResult.value!!.unparse()}")
+        }
+        val secondResult = second.eval(context)
+        if(!secondResult.success){
+            return secondResult
+        }
+        val comparision = (firstResult.value as IOrdered).lte(secondResult.value!!)
+        if(comparision.success){
+            return CoreResult(true, comparision.value!!, null)
+        }
+        return CoreResult(false, null, comparision.error)
+    }
+
+    override fun unparse(): String {
+        return "[lte, ${first.unparse()}, ${second.unparse()}]"
+    }
+
+}
+data class EGt(val first:Expression, val second:Expression): Expression{
+    override fun eval(context: Context): CoreResult<Expression> {
+        val firstResult = first.eval(context)
+        if(!firstResult.success){
+            return firstResult
+        }
+        if(firstResult.value !is IOrdered){
+            return evalTypeError(first, "cannot call 'gt'  on ${first.unparse()} \n ${firstResult.value!!.unparse()}")
+        }
+        val secondResult = second.eval(context)
+        if(!secondResult.success){
+            return secondResult
+        }
+        val comparision = (firstResult.value as IOrdered).gt(secondResult.value!!)
+        if(comparision.success){
+            return CoreResult(true, comparision.value!!, null)
+        }
+        return CoreResult(false, null, comparision.error)
+    }
+
+    override fun unparse(): String {
+        return "[gt, ${first.unparse()}, ${second.unparse()}]"
+    }
+
+}
+data class EGte(val first:Expression, val second:Expression): Expression{
+    override fun eval(context: Context): CoreResult<Expression> {
+        val firstResult = first.eval(context)
+        if(!firstResult.success){
+            return firstResult
+        }
+        if(firstResult.value !is IOrdered || firstResult.value !is IComparable){
+            return evalTypeError(first, "cannot call 'gte'  on ${first.unparse()} \n ${firstResult.value!!.unparse()}")
+        }
+        val secondResult = second.eval(context)
+        if(!secondResult.success){
+            return secondResult
+        }
+        val comparision = (firstResult.value as IOrdered).gte(secondResult.value!!)
+        if(comparision.success){
+            return CoreResult(true, comparision.value!!, null)
+        }
+        return CoreResult(false, null, comparision.error)
+    }
+
+    override fun unparse(): String {
+        return "[gte, ${first.unparse()}, ${second.unparse()}]"
+    }
+
+}
+fun binaryNumeric(name:String): EPrimitive{
+    return EPrimitive(name){
+            params: List<Expression>, context: Context -> evalBinaryNumeric(name,params, context) }
+}
+fun binaryBool(name:String): EPrimitive{
+    return EPrimitive(name){
+            params: List<Expression>, context: Context -> evalBinaryBool(name,params, context) }
+}
+
+fun unary(name:String): EPrimitive{
+    return EPrimitive(name){
+            params: List<Expression>, context: Context -> unaryPrimitive(name,params, context) }
+}
+val unaryPrimitives:HashMap<String , (Expression) -> CoreResult<Expression>> = hashMapOf(
+    "is_int" to {a:Expression ->  evalSuccess(EBool(a is EInt))},
+    "is_float" to {a:Expression -> evalSuccess(EBool(a is EFloat))},
+    "is_bool" to {a:Expression -> evalSuccess(EBool(a is EBool))},
+    "not" to {a:Expression ->
+        if(a !is EBool)
+             evalTypeError(a, "'not' applicable only to booleans, got '${a.unparse()}'")
+        else
+             evalSuccess(EBool(!(a as EBool).value))},
+    "neg" to {a: Expression ->
+        if(a !is EInt && a !is EFloat)
+            evalTypeError(a, "'neg' applicable only to numeric values, got '${a.unparse()}'")
+        else
+            if( a is EInt){
+                evalSuccess(EInt( (a as EInt).value*-1))
+            }else{
+                evalSuccess(EFloat( (a as EFloat).value*-1))
+            }
+
+    }
+)
+fun unaryPrimitive(name:String, params: List<Expression>, context: Context) :CoreResult<Expression>{
+    if(params.size != 1){
+        return evalArgumentCountError(params, "'$name' expecting one argument, bot ${params.size}")
+    }
+    val evaluated = params[0]!!.eval(context)
+    if(!evaluated.success){
+        return evaluated
+    }
+    val func = unaryPrimitives[name]!!
+    return  func(evaluated.value!!)
+
+}
+val primitives : HashMap<String, EPrimitive> = hashMapOf(
+    "iadd" to binaryNumeric("iadd"),
+    "imul" to binaryNumeric("imul"),
+    "isub" to binaryNumeric("isub"),
+    "idiv" to binaryNumeric("idiv"),
+    "fadd" to binaryNumeric("fadd"),
+    "fmul" to binaryNumeric("fmul"),
+    "fsub" to binaryNumeric("fsub"),
+    "fdiv" to binaryNumeric("fdiv"),
+    "add" to binaryNumeric("add"),
+    "mul" to binaryNumeric("mul"),
+    "sub" to binaryNumeric("sub"),
+    "div" to binaryNumeric("div"),
+    "and" to binaryBool("and"),
+    "or" to binaryBool("or"),
+    "xor" to binaryBool("xor"),
+    "not" to unary("not"),
+    "is_int" to unary("is_int"),
+    "is_float" to unary("is_float"),
+    "is_bool" to unary("is_bool"),
+    "neg" to unary("neg")
+
+
+)

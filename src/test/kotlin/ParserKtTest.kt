@@ -1,3 +1,4 @@
+import core.EInt
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -46,21 +47,23 @@ internal class ParserKtTest {
 
     @Test
     fun testSimpleAdd() {
-        assertEquals(SugarAdd(SugarInt(3), SugarInt(5)), parse("[add, 3, 5]").value!!)
-        assertEquals(SugarIAdd(SugarInt(3), SugarInt(5)), parse("[iadd, 3, 5]").value!!)
+        assertEquals(SugarPrimitive("add", listOf(SugarInt(3), SugarInt(5))), parse("[add, 3, 5]").value!!)
+        assertEquals(SugarPrimitive("iadd", listOf(SugarInt(3), SugarInt(5))), parse("[iadd, 3, 5]").value!!)
     }
 
     @Test
     fun testComplicatedAdd() {
         assertEquals(
-            SugarAdd(SugarAdd(SugarInt(3), SugarInt(5)), SugarInt(42)),
+            SugarPrimitive("add", listOf(
+                (SugarPrimitive("add", listOf(SugarInt(3), SugarInt(5)))),
+                    SugarInt(42))),
             parse("[add, [add, 3,5], 42]").value!!
         )
     }
 
     @Test
     fun testSimpleMultiplication() {
-        assertEquals(SugarMul(SugarInt(11), SugarInt(33)), parse("[mul, 11, 33]").value!!)
+        assertEquals(SugarPrimitive("mul", listOf((SugarInt(11)), SugarInt(33))), parse("[mul, 11, 33]").value!!)
     }
 
     @Test
@@ -69,7 +72,8 @@ internal class ParserKtTest {
             parse("[mul, [mul, 3,5], 42]")
         data.toString()
         assertEquals(
-            SugarMul(SugarMul(SugarInt(3), SugarInt(5)), SugarInt(42)),
+            SugarPrimitive("mul", listOf (SugarPrimitive("mul", listOf( SugarInt(3), SugarInt(5))),
+                SugarInt(42))),
             parse("[mul, [mul, 3,5], 42]").value!!
         )
     }
@@ -77,7 +81,7 @@ internal class ParserKtTest {
     @Test
     fun testMulAndAdd() {
         assertEquals(
-            SugarMul(SugarAdd(SugarInt(22), SugarInt(11)), SugarInt(44)),
+            SugarPrimitive("mul", listOf(SugarPrimitive("add", listOf(SugarInt(22), SugarInt(11))), SugarInt(44))),
             parse("[mul, [add, 22, 11], 44]").value!!
         )
     }
@@ -91,7 +95,7 @@ internal class ParserKtTest {
     @Test
     fun testSimpleAddUnparse() {
         val yaml = "[add, 3, 5]"
-        assertEquals(yaml, SugarAdd(SugarInt(3), SugarInt(5)).desugar().unparse())
+        assertEquals(yaml, SugarPrimitive("add", listOf((SugarInt(3)), SugarInt(5))).desugar().unparse())
         assertEquals(yaml, parse(yaml).value!!.desugar().unparse())
     }
 
@@ -100,7 +104,7 @@ internal class ParserKtTest {
         val yaml = "[iadd, [add, 3, 5], 42]"
         assertEquals(
             yaml,
-            SugarIAdd(SugarAdd(SugarInt(3), SugarInt(5)), SugarInt(42)).desugar().unparse()
+            SugarPrimitive("iadd", listOf((SugarPrimitive("add", listOf( (SugarInt(3)), SugarInt(5)))), SugarInt(42))).desugar().unparse()
         )
         assertEquals(yaml, parse(yaml).value!!.desugar().unparse())
     }
@@ -109,7 +113,7 @@ internal class ParserKtTest {
     fun testSimpleMultiplicationUnparse() {
         val yaml = "[mul, 11, 33]"
 
-        assertEquals(yaml, SugarMul(SugarInt(11), SugarInt(33)).desugar().unparse())
+        assertEquals(yaml, SugarPrimitive("mul", listOf(SugarInt(11), SugarInt(33))).desugar().unparse())
         assertEquals(yaml, parse(yaml).value!!.desugar().unparse())
     }
 
@@ -118,7 +122,7 @@ internal class ParserKtTest {
         val yaml = "[mul, [mul, 3, 5], 42]"
         assertEquals(
             yaml,
-            SugarMul(SugarMul(SugarInt(3), SugarInt(5)), SugarInt(42)).desugar().unparse()
+            SugarPrimitive("mul", listOf( SugarPrimitive("mul", listOf((SugarInt(3)), SugarInt(5))), SugarInt(42))).desugar().unparse()
         )
         assertEquals(yaml, parse(yaml).value!!.desugar().unparse())
     }
@@ -128,7 +132,7 @@ internal class ParserKtTest {
         val yaml = "[mul, [add, 22, 11], 44]"
         assertEquals(
             yaml,
-            SugarMul(SugarAdd(SugarInt(22), SugarInt(11)), SugarInt(44)).desugar().unparse()
+            SugarPrimitive("mul",listOf(SugarPrimitive("add",listOf(SugarInt(22), SugarInt(11))), SugarInt(44))).desugar().unparse()
         )
         assertEquals(yaml, parse(yaml).value!!.desugar().unparse())
     }
@@ -140,7 +144,8 @@ internal class ParserKtTest {
         val desugared = "[mul, [sub, 22, 11], 44]"
         assertEquals(
             desugared,
-            SugarMul(SugarSub(SugarInt(22), SugarInt(11)), SugarInt(44)).desugar().unparse()
+            SugarPrimitive("mul", listOf(SugarPrimitive("sub", listOf(SugarInt(22), SugarInt(11))),
+                SugarInt(44))).desugar().unparse()
         )
         assertEquals(desugared, parse(yaml).value!!.desugar().unparse())
     }
@@ -149,8 +154,11 @@ internal class ParserKtTest {
     fun testNegUnparse() {
         val yaml = "[neg, [mul, 2, 10]]"
         val g = parse((yaml))
-        val desugared = "[mul, -1, [mul, 2, 10]]"
-        assertEquals(desugared, SugarNeg(SugarMul(SugarInt(2), SugarInt(10))).desugar().unparse())
+        val desugared = "[neg, [mul, 2, 10]]"
+        assertEquals(desugared, SugarPrimitive("neg", listOf(
+            SugarPrimitive("mul", listOf(SugarInt(2), SugarInt(10))))).desugar().unparse())
+        val parsed = parse(yaml)
+
         assertEquals(desugared, parse(yaml).value!!.desugar().unparse())
     }
 
@@ -158,7 +166,8 @@ internal class ParserKtTest {
     fun testIsIntUnparse() {
         val yaml = "[is_int, [imul, 1, 20]]"
         val desugared = "[is_int, [imul, 1, 20]]"
-        assertEquals(desugared, SugarIsInt(SugarIMul(SugarInt(1), SugarInt(20))).desugar().unparse())
+        assertEquals(desugared, SugarPrimitive("is_int", listOf (SugarPrimitive("imul",listOf((SugarInt(1)), SugarInt(20))))).desugar().unparse())
+
 
         assertEquals(desugared, parse(yaml).value!!.desugar().unparse())
     }
@@ -167,7 +176,11 @@ internal class ParserKtTest {
     fun testIsFloatUnparse() {
         val yaml = "[is_float, [imul, 1, 20]]"
         val desugared = "[is_float, [imul, 1, 20]]"
-        assertEquals(desugared, SugarIsFloat(SugarIMul(SugarInt(1), SugarInt(20))).desugar().unparse())
+        assertEquals(desugared, SugarPrimitive("is_float",listOf(
+            SugarPrimitive("imul", listOf(SugarInt(1), SugarInt(20)))
+        ))
+
+            .desugar().unparse())
 
         assertEquals(desugared, parse(yaml).value!!.desugar().unparse())
     }
@@ -176,7 +189,7 @@ internal class ParserKtTest {
     fun testIsBoolUnparse() {
         val yaml = "[is_bool, [is_int, 1]]"
         val desugared = "[is_bool, [is_int, 1]]"
-        assertEquals(desugared, SugarIsBool(SugarIsInt(SugarInt(1))).desugar().unparse())
+        assertEquals(desugared, SugarPrimitive("is_bool",listOf(SugarPrimitive("is_int", listOf(SugarInt(1))))).desugar().unparse())
 
         assertEquals(desugared, parse(yaml).value!!.desugar().unparse())
     }
