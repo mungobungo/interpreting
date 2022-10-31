@@ -43,7 +43,7 @@ data class EInt(val value:Int):Expression, IComparable, IOrdered {
         if(other is EInt){
             otherVal = other.value
         }
-        return CoreResult(true, EBool(otherVal < value), null)
+        return CoreResult(true, EBool( value < otherVal), null)
     }
 
     override fun lte(other: Expression): CoreResult<EBool> {
@@ -57,7 +57,7 @@ data class EInt(val value:Int):Expression, IComparable, IOrdered {
         if(other is EInt){
             otherVal = other.value
         }
-        return CoreResult(true, EBool(otherVal <= value), null)
+        return CoreResult(true, EBool(value <= otherVal), null)
     }
 
     override fun gt(other: Expression): CoreResult<EBool> {
@@ -71,7 +71,7 @@ data class EInt(val value:Int):Expression, IComparable, IOrdered {
         if(other is EInt){
             otherVal = other.value
         }
-        return CoreResult(true, EBool(otherVal > value), null)
+        return CoreResult(true, EBool( value > otherVal), null)
     }
 
     override fun gte(other: Expression): CoreResult<EBool> {
@@ -85,7 +85,7 @@ data class EInt(val value:Int):Expression, IComparable, IOrdered {
         if(other is EInt){
             otherVal = other.value
         }
-        return CoreResult(true, EBool(otherVal >= value), null)
+        return CoreResult(true, EBool( value >=  otherVal), null)
     }
 
     override fun eval(context: Context): CoreResult<Expression> {
@@ -139,7 +139,7 @@ data class EFloat(val value:Double):Expression, IOrdered, IComparable {
         if(other is EInt){
             otherVal = other.value.toDouble()
         }
-        return CoreResult(true, EBool(otherVal < value), null)
+        return CoreResult(true, EBool( value < otherVal), null)
     }
 
     override fun lte(other: Expression): CoreResult<EBool> {
@@ -153,7 +153,7 @@ data class EFloat(val value:Double):Expression, IOrdered, IComparable {
         if(other is EInt){
             otherVal = other.value.toDouble()
         }
-        return CoreResult(true, EBool(otherVal <= value), null)
+        return CoreResult(true, EBool( value <= otherVal), null)
     }
 
     override fun gt(other: Expression): CoreResult<EBool> {
@@ -167,7 +167,7 @@ data class EFloat(val value:Double):Expression, IOrdered, IComparable {
         if(other is EInt){
             otherVal = other.value.toDouble()
         }
-        return CoreResult(true, EBool(otherVal > value), null)
+        return CoreResult(true, EBool( value > otherVal), null)
     }
 
     override fun gte(other: Expression): CoreResult<EBool> {
@@ -181,7 +181,7 @@ data class EFloat(val value:Double):Expression, IOrdered, IComparable {
         if(other is EInt){
             otherVal = other.value.toDouble()
         }
-        return CoreResult(true, EBool(otherVal >= value), null)
+        return CoreResult(true, EBool( value>=otherVal), null)
     }
     override fun eval(context: Context): CoreResult<Expression> {
         return evalSuccess(this)

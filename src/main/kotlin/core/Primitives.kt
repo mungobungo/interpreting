@@ -149,6 +149,10 @@ fun evalBinaryNumeric(
     val right = rightResult.value!!
 
     if (left is EInt && right is EInt) {
+        if(operationName.startsWith("f")){
+
+            return evalBinaryFloat(operationName, EFloat( left.value.toDouble()), EFloat((right).value.toDouble()), context)
+        }
         return evalBinaryInteger(operationName, left, right, context)
     }
    if(operationName.startsWith("i")){
