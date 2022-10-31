@@ -71,17 +71,22 @@ fun convert(obj:Any):CoreResult<SugarExpression>{
         }
         if(operation == "lambda"){
 
-            val paramNames = obj.slice(1 ..obj.size -2)
+            if(obj[1] !is ArrayList<*>){
+                return parserFailure(ParsingError(obj[1], "list of strings for lambda names should be an array, got ${obj[1]}"))
+            }
+            val paramNames = obj[1] as ArrayList<Any>
+            val lambdaBody = obj[2] as ArrayList<Any>
+
             if(paramNames.any{ it !is String }) {
                 val broken = paramNames.filter { it !is String }.joinToString { "\n" }
                 return parserFailure(ParsingError(obj, "error during parsing 'lambda' parameter names $obj\n $broken"))
             }
-                val body = convert(obj.last())
-                if(!body.success){
-                    return body
-                }
-
-            return parserSuccess( SugarLambda(paramNames.map { it.toString() }, body.value!!))
+                val bodyList = lambdaBody.map { convert(it) }
+            if(bodyList.any{!it.success}){
+                return parserFailure(ParsingError(bodyList, bodyList.filter { !it.success }.map { it.error!! }.joinToString("\n")  ))
+            }
+            val bodyRes = bodyList.map { it.value!! }
+            return parserSuccess( SugarLambda(paramNames.map { it.toString() }, bodyRes))
         }
         if(operation == "fun"){
 
@@ -89,17 +94,23 @@ fun convert(obj:Any):CoreResult<SugarExpression>{
             if(functionName !is String){
                 return parserFailure(ParsingError(obj, "function name should be a string, but got $functionName"))
             }
-            val paramNames = obj.slice(2 ..obj.size -2)
+            if(obj[2] !is ArrayList<*>){
+                return parserFailure(ParsingError(obj[2], "list of strings for lambda names should be an array, got ${obj[1]}"))
+            }
+            val paramNames = obj[2] as ArrayList<Any>
+            val lambdaBody = obj[3] as ArrayList<Any>
+
             if(paramNames.any{ it !is String }) {
                 val broken = paramNames.filter { it !is String }.joinToString { "\n" }
                 return parserFailure(ParsingError(obj, "error during parsing 'lambda' parameter names $obj\n $broken"))
             }
-            val body = convert(obj.last())
-            if(!body.success){
-                return body
+            val bodyList = lambdaBody.map { convert(it) }
+            if(bodyList.any{!it.success}){
+                return parserFailure(ParsingError(bodyList, bodyList.filter { !it.success }.map { it.error!! }.joinToString("\n")  ))
             }
-
-            return parserSuccess( SugarFun(functionName, paramNames.map { it.toString() }, body.value!!))
+            val bodyRes = bodyList.map { it.value!! }
+           // return parserSuccess( SugarLambda(paramNames.map { it.toString() }, bodyRes))
+            return parserSuccess( SugarFun(functionName, paramNames.map { it.toString() }, bodyRes))
         }
         if(operation =="list"){
             val elems = obj.takeLast(obj.size -1)

@@ -60,6 +60,7 @@ data class Context(val variables: Environment, val parent:Context? = null){
             if(current.parent == null) {
                 break
             }
+            current = current.parent!!
         }
         return Context(environment, null)
     }

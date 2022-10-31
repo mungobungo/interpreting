@@ -10,9 +10,9 @@ data class ESetVar(val name: String, val variableValue: Expression) : Expression
         }
         // Critical for the evaluation of the closures
         // [setvar, myc, [let, c, 0, [lambda, [do, [setvar, c, [add, c, 1]], c]]]]
-        val expanded = valueResult.context.clone()
-        expanded.variables.bindings[name] = valueResult.value!!
-        return evalSuccess(valueResult.value!!, expanded)
+      //  val expanded = valueResult.context.clone()
+        context.variables.bindings[name] = valueResult.value!!
+        return evalSuccess(valueResult.value!!, context)
     }
 
     override fun unparse(): String {
@@ -26,7 +26,7 @@ data class EDo(val expressions: List<Expression>) : Expression {
 
         var res: Expression?= null
 
-        var latestContext = context.clone()
+        var latestContext = context.expand()
 
         for(e:Expression in expressions){
             val eResult = e.eval(latestContext)
@@ -36,7 +36,7 @@ data class EDo(val expressions: List<Expression>) : Expression {
             latestContext = eResult.context
             res = eResult.value!!
         }
-        return evalSuccess(res!!,latestContext)
+        return evalSuccess(res!!,context)
 
     }
 

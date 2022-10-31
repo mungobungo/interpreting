@@ -301,18 +301,35 @@ data class ECall(val func:Expression, val params:List<Expression>) : Expression{
 
 }
 
-data class ELambda(val paramNames: List<String>, val body:Expression, val closure:Context) : Expression, IFunction{
+data class ELambda(val paramNames: List<String>, val body:List<Expression>, val closure:Context) : Expression, IFunction{
     override fun call(params: List<Expression>, context: Context): CoreResult<Expression> {
         if(params.size != paramNames.size){
             return evalArgumentCountError(params, context,"argument count does not match number of parameters, ${params.size} != ${paramNames.size} in ${this.unparse()}")
         }
-        val expandedContext = context.clone()
+        val expandedContext = closure
         for(v in paramNames.zip(params)){
 
-            expandedContext.variables.addBinding(v.first, v.second)
+            val evaluatedParam = v.second.eval(expandedContext)
+            if(!evaluatedParam.success){
+                return evaluatedParam
+            }
+            expandedContext.variables.addBinding(v.first, evaluatedParam.value!!)
         }
 
-        return  body.eval(expandedContext)
+        var res: Expression?= null
+
+        var latestContext = expandedContext
+
+        for(e:Expression in body){
+            val eResult = e.eval(latestContext)
+            if(!eResult.success){
+                return eResult
+            }
+            latestContext = eResult.context
+            res = eResult.value!!
+        }
+        return evalSuccess(res!!,context)
+
     }
 
     override fun eval(context: Context): CoreResult<Expression> {
@@ -321,7 +338,14 @@ data class ELambda(val paramNames: List<String>, val body:Expression, val closur
     }
 
     override fun unparse(): String {
-        return "[lambda, ${paramNames.joinToString(",") { it }}, ${body.unparse()}]"
+        if(paramNames.isEmpty()){
+            return "[lambda, ${body.joinToString(",") { it.unparse() }}]"
+        }
+        return "[lambda, ${paramNames.joinToString(",") { it }}, ${body.joinToString(",") {it.unparse()  }}]"
+    }
+
+    override fun toString(): String {
+        return unparse()
     }
 
 }

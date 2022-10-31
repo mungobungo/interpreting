@@ -126,14 +126,14 @@ data class SugarLetStar(val bindings:List<Pair<String, SugarExpression>>, val bo
 
 }
 
-data class SugarLambda(val paramNames:List<String>, val body:SugarExpression):SugarExpression{
+data class SugarLambda(val paramNames:List<String>, val body:List<SugarExpression>):SugarExpression{
     override fun desugar(): Expression {
-        return ELambda(paramNames, body.desugar(), defaultContext.clone())
+        return ELambda(paramNames, body.map{it.desugar()}, defaultContext.expand())
     }
 
 }
 
-data class SugarFun(val name:String, val paramNames:List<String>, val body:SugarExpression):SugarExpression{
+data class SugarFun(val name:String, val paramNames:List<String>, val body:List<SugarExpression>):SugarExpression{
     override fun desugar(): Expression {
        return SugarSetVar(name, SugarLambda(paramNames, body)).desugar()
     }
