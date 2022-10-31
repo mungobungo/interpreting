@@ -22,7 +22,7 @@ fun evalBinaryFloat(
 
     if (leftResult.value !is EFloat && leftResult.value !is EInt) {
         return evalTypeError(
-            leftExpression, "type error while evaluating left argument of '${operationName}'," +
+            leftExpression, context,"type error while evaluating left argument of '${operationName}'," +
                     " expected a float  or integer value, but got `${leftResult.value!!.unparse()}`"
         )
     }
@@ -35,7 +35,7 @@ fun evalBinaryFloat(
     }
     if (rightResult.value !is EInt && rightResult.value !is EFloat) {
         return evalTypeError(
-            left, "type error while evaluating right argument of '${operationName}'," +
+            left, context,"type error while evaluating right argument of '${operationName}'," +
                     " expected a float or integer value, but got `${rightResult.value!!.unparse()}`"
         )
     }
@@ -43,17 +43,17 @@ fun evalBinaryFloat(
 
     val op = binaryFloatPrimitives[operationName]!!
     if (left is EInt && right is EInt) {
-        return evalSuccess(EFloat(op(left.value.toDouble(), right.value.toDouble())))
+        return evalSuccess(EFloat(op(left.value.toDouble(), right.value.toDouble())), context)
     }
     if (left is EInt && right is EFloat) {
-        return evalSuccess(EFloat(op(left.value.toDouble(), right.value)))
+        return evalSuccess(EFloat(op(left.value.toDouble(), right.value)), context)
     }
 
     if (left is EFloat && right is EInt) {
-        return evalSuccess(EFloat(op(left.value, right.value.toDouble())))
+        return evalSuccess(EFloat(op(left.value, right.value.toDouble())),context)
     }
 
-    return evalSuccess(EFloat(op((left as EFloat).value, (right as EFloat).value)))
+    return evalSuccess(EFloat(op((left as EFloat).value, (right as EFloat).value)),context)
 }
 
 
@@ -80,7 +80,7 @@ fun evalBinaryInteger(
 
     if (leftResult.value !is EInt) {
         return evalTypeError(
-            leftExpression, "type error while evaluating left argument of '${operationName}'," +
+            leftExpression, context, "type error while evaluating left argument of '${operationName}'," +
                     " expected an integer value, but got `${leftResult.value!!.unparse()}`"
         )
     }
@@ -93,7 +93,7 @@ fun evalBinaryInteger(
     }
     if (rightResult.value !is EInt) {
         return evalTypeError(
-            left, "type error while evaluating right argument of '${operationName}'," +
+            left, context, "type error while evaluating right argument of '${operationName}'," +
                     " expected an integer value, but got `${rightResult.value!!.unparse()}`"
         )
     }
@@ -102,11 +102,11 @@ fun evalBinaryInteger(
     val op = binaryIntPrimitives[operationName]!!
     if ((operationName == "div" || operationName == "idiv") && right.value == 0) {
         return CoreResult(
-            false, null,
+            false, context, null,
             DivisionByZeroError(leftExpression, "division by zero")
         )
     }
-    return evalSuccess(EInt(op(left.value, right.value)))
+    return evalSuccess(EInt(op(left.value, right.value)), context)
 }
 
 fun evalBinaryNumeric(
@@ -115,7 +115,7 @@ fun evalBinaryNumeric(
 ): CoreResult<Expression> {
 
     if (params.size != 2) {
-        return evalArgumentCountError(params,
+        return evalArgumentCountError(params,context,
             "parameter count mismatch for $operationName, expected 2, got ${params.size} \n" +
                     params.joinToString(", ") { it.unparse() })
     }
@@ -128,7 +128,7 @@ fun evalBinaryNumeric(
 
     if (leftResult.value !is EFloat && leftResult.value !is EInt) {
         return evalTypeError(
-            leftExpression, "type error while evaluating left argument of '${operationName}'," +
+            leftExpression, context, "type error while evaluating left argument of '${operationName}'," +
                     " expected a numeric value, but got `${leftResult.value!!.unparse()}`"
         )
     }
@@ -141,7 +141,7 @@ fun evalBinaryNumeric(
     }
     if (rightResult.value !is EInt && rightResult.value !is EFloat) {
         return evalTypeError(
-            left, "type error while evaluating right argument of '${operationName}'," +
+            left, context, "type error while evaluating right argument of '${operationName}'," +
                     " expected a numeric value, but got `${rightResult.value!!.unparse()}`"
         )
     }
@@ -155,7 +155,7 @@ fun evalBinaryNumeric(
         return evalBinaryInteger(operationName, left, right, context)
     }
     if(operationName.startsWith("i")){
-        return evalTypeError(leftExpression, "'$operationName' is working only with integers, but got ${leftExpression.unparse()} and ${rightExpression.unparse()}")
+        return evalTypeError(leftExpression, context,"'$operationName' is working only with integers, but got ${leftExpression.unparse()} and ${rightExpression.unparse()}")
     }
     if (left is EFloat && right is EInt) {
         return evalBinaryFloat(operationName, left, EFloat((right).value.toDouble()), context)

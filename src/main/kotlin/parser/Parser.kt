@@ -30,11 +30,11 @@ data class UnsupportedUnaryOperation(
 
 data class ParsingError(override val input: Any, override val message: String) :ICoreError
 fun parserSuccess(expression: SugarExpression) : CoreResult<SugarExpression> {
-    return CoreResult(true, expression, null)
+    return CoreResult(true, defaultContext, expression, null)
 }
 
 fun parserFailure(error: ICoreError): CoreResult<SugarExpression>{
-    return CoreResult(false, null, error)
+    return CoreResult(false, defaultContext,null, error)
 }
 fun parse(input:String):CoreResult<SugarExpression>{
     val yaml = Yaml()
@@ -232,11 +232,11 @@ private fun parseBinaryAction(operation:String, obj: ArrayList<*>): CoreResult<S
     }
     if(operation == "setvar"){
     if(l !is SugarSymbol){
-     return CoreResult(false, null, ParsingError(l, "setvar expects a string as variable name, but got \n $l"))
+     return CoreResult(false, defaultContext,null, ParsingError(l, "setvar expects a string as variable name, but got \n $l"))
     }
     return parserSuccess(SugarSetVar((l as SugarSymbol).name, r))
     }
-    return CoreResult(false, null, UnsupportedBinaryOperation(operation, "$operation is not defined as binary operation"))
+    return CoreResult(false, defaultContext, null, UnsupportedBinaryOperation(operation, "$operation is not defined as binary operation"))
 }
 
 //private fun parseUnaryAction(operation:String, obj: ArrayList<*>): CoreResult<SugarExpression>{

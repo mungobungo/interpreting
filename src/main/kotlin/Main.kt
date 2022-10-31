@@ -3,7 +3,7 @@ import parser.parse
 
 fun main(args: Array<String>) {
     println("REPL v0.1")
-    val context = defaultContext
+    var context = defaultContext
 
     while (true){
         print(">> ")
@@ -27,6 +27,7 @@ fun main(args: Array<String>) {
             println("Eval error: " + evaluated.error!!.message + "\n ${evaluated.error!!.input}")
         }else{
             println(evaluated.value!!.unparse())
+            context = evaluated.context
         }
         println("parser: ${parserTime/1e6f}ms, eval: ${evalTime/1e6f}ms")
     }

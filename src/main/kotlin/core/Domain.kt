@@ -12,19 +12,20 @@ interface IFunction : Expression{
 }
 
 interface IComparable: Expression{
-    fun eq(other:Expression) : CoreResult<EBool>
-    fun neq(other:Expression) : CoreResult<EBool>
+    fun eq(other:Expression, context: Context) : CoreResult<EBool>
+    fun neq(other:Expression, context: Context) : CoreResult<EBool>
 }
 
 interface IOrdered : Expression{
-    fun lt(other: Expression) : CoreResult<EBool>
-    fun lte(other: Expression) : CoreResult<EBool>
-    fun gt(other:Expression) :CoreResult<EBool>
-    fun gte(other:Expression) :CoreResult<EBool>
+    fun lt(other: Expression, context: Context) : CoreResult<EBool>
+    fun lte(other: Expression, context: Context) : CoreResult<EBool>
+    fun gt(other:Expression, context: Context) :CoreResult<EBool>
+    fun gte(other:Expression,context: Context) :CoreResult<EBool>
 }
 
 data class CoreResult<T>(
     val success: Boolean,
+    val context:Context,
     val value: T?,
     val error: ICoreError?
 
@@ -45,17 +46,22 @@ data class Environment(val bindings:HashMap<String, Expression>){
     fun isDefined(name:String): Boolean{
         return bindings.containsKey(name)
     }
-    fun get(name:String): CoreResult<Expression>{
-        if(bindings.containsKey(name)){
-            return CoreResult(true, bindings[name]!!, null)
-        }
-        return CoreResult(false, null, VariableNotFoundError(name, "'$name' is not found in env: \n $this"))
-    }
 }
 
 data class Context(val variables: Environment, val parent:Context? = null){
     fun expand():Context{
         return Context(Environment(hashMapOf()), this)
+    }
+    fun clone():Context{
+        val environment = Environment(hashMapOf())
+        var current = this
+        while((current) !=null){
+            environment.bindings.putAll(current.variables.bindings)
+            if(current.parent == null) {
+                break
+            }
+        }
+        return Context(environment, null)
     }
 
 }

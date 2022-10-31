@@ -1,8 +1,8 @@
 package core
 
 
-fun evalSuccess(expression: Expression): CoreResult<Expression> {
-    return CoreResult(true, expression, null)
+fun evalSuccess(expression: Expression, context: Context): CoreResult<Expression> {
+    return CoreResult(true, context, expression, null)
 }
 
 data class OperationTypeMismatchError(
@@ -10,8 +10,8 @@ data class OperationTypeMismatchError(
     override val message: String,
 ) : ICoreError
 
-fun evalTypeError(expression: Expression, error:String): CoreResult<Expression> {
-    return CoreResult(false, null, OperationTypeMismatchError(expression, error))
+fun evalTypeError(expression: Expression, context: Context, error:String): CoreResult<Expression> {
+    return CoreResult(false, context, null, OperationTypeMismatchError(expression, error))
 }
 
 
@@ -20,8 +20,8 @@ data class ArgumentCountError(
     override val message: String,
 ) : ICoreError
 
-fun evalArgumentCountError(arguments: List<Expression>, error:String): CoreResult<Expression> {
-    return CoreResult(false, null, ArgumentCountError(arguments, error))
+fun evalArgumentCountError(arguments: List<Expression>, context:Context, error:String): CoreResult<Expression> {
+    return CoreResult(false, context, null, ArgumentCountError(arguments, error))
 }
 data class DivisionByZeroError(
     override val input: Any,

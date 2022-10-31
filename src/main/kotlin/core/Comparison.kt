@@ -7,17 +7,17 @@ data class EEq(val first: Expression, val second: Expression) : Expression {
             return firstResult
         }
         if (firstResult.value !is IComparable) {
-            return evalTypeError(first, "cannot call 'eq'  on ${first.unparse()} \n ${firstResult.value!!.unparse()}")
+            return evalTypeError(first, context, "cannot call 'eq'  on ${first.unparse()} \n ${firstResult.value!!.unparse()}")
         }
         val secondResult = second.eval(context)
         if (!secondResult.success) {
             return secondResult
         }
-        val comparision = (firstResult.value as IComparable).eq(secondResult.value!!)
+        val comparision = (firstResult.value as IComparable).eq(secondResult.value!!, context)
         if (comparision.success) {
-            return CoreResult(true, comparision.value!!, null)
+            return CoreResult(true, context, comparision.value!!, null)
         }
-        return CoreResult(false, null, comparision.error)
+        return CoreResult(false, context, null, comparision.error)
     }
 
     override fun unparse(): String {
@@ -33,17 +33,17 @@ data class ENeq(val first: Expression, val second: Expression) : Expression {
             return firstResult
         }
         if (firstResult.value !is IComparable) {
-            return evalTypeError(first, "cannot call 'neq'  on ${first.unparse()} \n ${firstResult.value!!.unparse()}")
+            return evalTypeError(first, context, "cannot call 'neq'  on ${first.unparse()} \n ${firstResult.value!!.unparse()}")
         }
         val secondResult = second.eval(context)
         if (!secondResult.success) {
             return secondResult
         }
-        val comparision = (firstResult.value as IComparable).neq(secondResult.value!!)
+        val comparision = (firstResult.value as IComparable).neq(secondResult.value!!, context)
         if (comparision.success) {
-            return CoreResult(true, comparision.value!!, null)
+            return CoreResult(true, context, comparision.value!!, null)
         }
-        return CoreResult(false, null, comparision.error)
+        return CoreResult(false, context,null, comparision.error)
     }
 
     override fun unparse(): String {
@@ -59,17 +59,17 @@ data class ELt(val first: Expression, val second: Expression) : Expression {
             return firstResult
         }
         if (firstResult.value !is IOrdered) {
-            return evalTypeError(first, "cannot call 'lt'  on ${first.unparse()} \n ${firstResult.value!!.unparse()}")
+            return evalTypeError(first, context,"cannot call 'lt'  on ${first.unparse()} \n ${firstResult.value!!.unparse()}")
         }
         val secondResult = second.eval(context)
         if (!secondResult.success) {
             return secondResult
         }
-        val comparision = (firstResult.value as IOrdered).lt(secondResult.value!!)
+        val comparision = (firstResult.value as IOrdered).lt(secondResult.value!!, context)
         if (comparision.success) {
-            return CoreResult(true, comparision.value!!, null)
+            return CoreResult(true, context,comparision.value!!, null)
         }
-        return CoreResult(false, null, comparision.error)
+        return CoreResult(false, context,null, comparision.error)
     }
 
     override fun unparse(): String {
@@ -85,17 +85,17 @@ data class ELte(val first: Expression, val second: Expression) : Expression {
             return firstResult
         }
         if (firstResult.value !is IOrdered || firstResult.value !is IComparable) {
-            return evalTypeError(first, "cannot call 'lte'  on ${first.unparse()} \n ${firstResult.value!!.unparse()}")
+            return evalTypeError(first, context,"cannot call 'lte'  on ${first.unparse()} \n ${firstResult.value!!.unparse()}")
         }
         val secondResult = second.eval(context)
         if (!secondResult.success) {
             return secondResult
         }
-        val comparision = (firstResult.value as IOrdered).lte(secondResult.value!!)
+        val comparision = (firstResult.value as IOrdered).lte(secondResult.value!!,context)
         if (comparision.success) {
-            return CoreResult(true, comparision.value!!, null)
+            return CoreResult(true,context, comparision.value!!, null)
         }
-        return CoreResult(false, null, comparision.error)
+        return CoreResult(false, context,null, comparision.error)
     }
 
     override fun unparse(): String {
@@ -111,17 +111,17 @@ data class EGt(val first: Expression, val second: Expression) : Expression {
             return firstResult
         }
         if (firstResult.value !is IOrdered) {
-            return evalTypeError(first, "cannot call 'gt'  on ${first.unparse()} \n ${firstResult.value!!.unparse()}")
+            return evalTypeError(first, context,"cannot call 'gt'  on ${first.unparse()} \n ${firstResult.value!!.unparse()}")
         }
         val secondResult = second.eval(context)
         if (!secondResult.success) {
             return secondResult
         }
-        val comparision = (firstResult.value as IOrdered).gt(secondResult.value!!)
+        val comparision = (firstResult.value as IOrdered).gt(secondResult.value!!, context)
         if (comparision.success) {
-            return CoreResult(true, comparision.value!!, null)
+            return CoreResult(true,context,  comparision.value!!, null)
         }
-        return CoreResult(false, null, comparision.error)
+        return CoreResult(false, context,null, comparision.error)
     }
 
     override fun unparse(): String {
@@ -137,17 +137,17 @@ data class EGte(val first: Expression, val second: Expression) : Expression {
             return firstResult
         }
         if (firstResult.value !is IOrdered || firstResult.value !is IComparable) {
-            return evalTypeError(first, "cannot call 'gte'  on ${first.unparse()} \n ${firstResult.value!!.unparse()}")
+            return evalTypeError(first, context,"cannot call 'gte'  on ${first.unparse()} \n ${firstResult.value!!.unparse()}")
         }
         val secondResult = second.eval(context)
         if (!secondResult.success) {
             return secondResult
         }
-        val comparision = (firstResult.value as IOrdered).gte(secondResult.value!!)
+        val comparision = (firstResult.value as IOrdered).gte(secondResult.value!!,context)
         if (comparision.success) {
-            return CoreResult(true, comparision.value!!, null)
+            return CoreResult(true, context,comparision.value!!, null)
         }
-        return CoreResult(false, null, comparision.error)
+        return CoreResult(false, context,null, comparision.error)
     }
 
     override fun unparse(): String {

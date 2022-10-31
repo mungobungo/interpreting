@@ -19,7 +19,7 @@ fun evalBinaryBool(
 
     if (leftResult.value !is EBool) {
         return evalTypeError(
-            leftExpression, "type error while evaluating left argument of '${operationName}'," +
+            leftExpression, context,"type error while evaluating left argument of '${operationName}'," +
                     " expected a boolean value, but got `${leftResult.value!!.unparse()}`"
         )
     }
@@ -32,12 +32,12 @@ fun evalBinaryBool(
     }
     if (rightResult.value !is EBool) {
         return evalTypeError(
-            left, "type error while evaluating right argument of '${operationName}'," +
+            left, context, "type error while evaluating right argument of '${operationName}'," +
                     " expected a boolean value, but got `${rightResult.value!!.unparse()}`"
         )
     }
     val right = rightResult.value!! as EBool
 
     val op = binaryBoolPrimitives[operationName]!!
-    return evalSuccess(EBool(op(left.value, right.value)))
+    return evalSuccess(EBool(op(left.value, right.value)), context)
 }
