@@ -476,3 +476,8 @@ data class ECall(val func:Expression, val arg:Expression):Expression{
 //[setvar, inc1, [lambda, m , [add, m, 1]]]
 // [call, inc1, 12]
 // [let, x, 10, [let, f, [lambda, z, [sub, x, z]], [call, f, 15]]]
+// >> [let, x, 200, [let, f, [lambda, z, [sub, z, x]], [let, x, 100, [let, g, [lambda, z, [sub, z, x]], [sub, [call, f, 1], [call, g, 1]]]]]]
+//-100
+//parser: 3.377893ms, eval: 0.194912ms
+
+// [setvar, mk_counter, [lambda, initial, [lambda, _, [do, [setvar, initial, [add, initial,1]], initial]]]]
