@@ -91,11 +91,8 @@ fun convert(obj:Any):CoreResult<SugarExpression>{
             if(!f.success){
                 return parserFailure(ParsingError(obj, "cannot parse the function definition inside of call , ${obj[1]}"))
             }
-            val arguments = obj[2]
+            val arguments = obj.slice(2 until obj.size)
 
-            if(arguments !is List<*>){
-                return parserFailure(ParsingError(obj, "error parsing arguments of 'call' function, expected list , but gon $arguments"))
-            }
             val argValues = mutableListOf<SugarExpression>()
             for(argVal in arguments){
                 val arg = convert(argVal!!)

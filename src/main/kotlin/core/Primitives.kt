@@ -432,7 +432,7 @@ data class ELambdaRef(val argumentNames:List<String>, val body: List<Expression>
     }
 
     override fun unparse(): String {
-        return "[lambda_ref, ${argumentNames.joinToString(",")}, ${body.joinToString(",") { it.unparse() }}]"
+        return "[lambda_ref, ${argumentNames.joinToString(",")}, ...}]"
     }
 
 }
@@ -512,7 +512,7 @@ data class EIf(val condition:Expression, val mainBranch: Expression, val alterna
     }
 
     override fun unparse(): String {
-        return "[if, $mainBranch, $alternativeBranch]"
+        return "[if, ${mainBranch.unparse()}, ${alternativeBranch.unparse()}]"
     }
 
 }
@@ -582,3 +582,6 @@ data class EFunRecDefinition(val name:String,
 
 // working factorial
 // [funrec, fac, [x], [if, [eq, x, 1], 1, [mul, x, [call, fac, [[sub, x, 1]]]]]]
+
+//[funrec, odd, [x], [if, [eq, 1, x], true, [call, even, [sub, x, 1]]]]
+//[funrec, even, [x], [if, [eq, 0, x], true, [call, odd, [sub, x, 1]]]]

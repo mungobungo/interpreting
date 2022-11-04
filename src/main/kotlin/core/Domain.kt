@@ -48,8 +48,9 @@ data class Context(val variables: Environment, val parent:Context? = null){
         return Context(Environment(res), parent)
     }
 
-    //override fun toString(): String {
-    //    return ""//variables.bindings.values.joinToString(",")
-   // }
+    override fun toString(): String {
+
+        return variables.bindings.keys.joinToString(",")
+    }
 
 }
