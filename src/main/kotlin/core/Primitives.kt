@@ -497,9 +497,17 @@ data class EIf(val condition:Expression, val mainBranch: Expression, val alterna
             return evalTypeError(this, "'if' condition should be boolean, but got ${cond.value}")
         }
         if(cond.value.value){
-            return  evalSuccess(mainBranch)
+            val evaluatedMain = mainBranch.eval(context)
+            if(!evaluatedMain.success){
+                return evaluatedMain
+            }
+            return  evalSuccess(evaluatedMain.value!!)
         }else{
-            return evalSuccess(alternativeBranch)
+            val evaluatedAlternative = alternativeBranch.eval(context)
+            if(!evaluatedAlternative.success){
+                return evaluatedAlternative
+            }
+            return evalSuccess(evaluatedAlternative.value!!)
         }
     }
 
@@ -552,3 +560,6 @@ data class EIf(val condition:Expression, val mainBranch: Expression, val alterna
 // [call, [lambda, [x], [add, x, 10]], [222]]
 // [call, [lambda, [x, y], [add, x, y]], [2, 3]]
 // [call, [lambda, [x,y,z], [add, x, y]], [2,3,100]]
+
+// broken factorial
+// [fun, fac, [x], [if, [eq, x, 1], 1, [mul, x, [call, fac, [sub, x, 1]]]]]
