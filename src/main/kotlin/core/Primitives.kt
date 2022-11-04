@@ -426,27 +426,27 @@ data class EDo(val expressions:List<Expression>): Expression{
 
 
 
-data class ELambdaRef(val variableName:String, val body: List<Expression>, val closure:Context): Expression{
+data class ELambdaRef(val argumentNames:List<String>, val body: List<Expression>, val closure:Context): Expression{
     override fun eval(context: Context): CoreResult<Expression> {
         return evalSuccess(this)
     }
 
     override fun unparse(): String {
-        return "[lambda_ref, $variableName, ${body.joinToString(",") { it.unparse() }}]"
+        return "[lambda_ref, ${argumentNames.joinToString(",")}, ${body.joinToString(",") { it.unparse() }}]"
     }
 
 }
-data class ELambdaDefinition(val variableName: String, val body:List<Expression>):Expression{
+data class ELambdaDefinition(val argumentNames: List<String>, val body:List<Expression>):Expression{
     override fun eval(context: Context): CoreResult<Expression> {
-       return evalSuccess( ELambdaRef(variableName, body, context.clone()))
+       return evalSuccess( ELambdaRef(argumentNames, body, context.clone()))
     }
 
     override fun unparse(): String {
-        return "[lambda , ${variableName}, ${body.joinToString(","){it.unparse()}}]"
+        return "[lambda , [${argumentNames.joinToString(",") }], ${body.joinToString(","){it.unparse()}}]"
     }
 }
 
-data class ECall(val func:Expression, val arg:Expression):Expression{
+data class ECall(val func:Expression, val args:List<Expression>):Expression{
     override fun eval(context: Context): CoreResult<Expression> {
         val ff = func.eval(context)
         if(!ff.success){
@@ -456,12 +456,17 @@ data class ECall(val func:Expression, val arg:Expression):Expression{
             return evalTypeError(this, "call error: function argument should be lambda ref ,but got ${ff.value!!.unparse()}")
         }
         val f = ff.value
-        val newContext = f.closure
-        val argValue =  arg.eval(context) //context.variables.get(f.variableName)
-        if(! argValue.success){
-            return evalTypeError(this, "argument ${f.variableName} cannot be evaluated during the call of ")
+        if(f.argumentNames.size != args.size){
+            return evalTypeError(this, "call error: mismatch number of parameters, expected ${f.argumentNames.size}, but gon ${args.size} in \n${func.unparse()}")
         }
-        newContext.variables.bindings[f.variableName] = argValue.value!!
+        val newContext = f.closure
+        for( arg in f.argumentNames.zip(args)){
+            val argValue =  arg.second.eval(context) //context.variables.get(f.variableName)
+            if(! argValue.success){
+                return evalTypeError(this, "argument ${arg.first} cannot be evaluated during the call of ")
+            }
+            newContext.variables.bindings[arg.first] = argValue.value!!
+        }
 
 
         val res = mutableListOf<Expression>()
@@ -477,7 +482,7 @@ data class ECall(val func:Expression, val arg:Expression):Expression{
     }
 
     override fun unparse(): String {
-        return "[call, ${func.unparse()}, ${arg.unparse()}]"
+        return "[call, ${func.unparse()}, [${args.joinToString(","){it.unparse()}}]]"
     }
 
 }
@@ -509,6 +514,7 @@ data class ECall(val func:Expression, val arg:Expression):Expression{
 //>> [call, c1, 11]
 //11
 
+// intro into capturing variables
 // [setvar, x, 10]
 // [setvar, f1, [lambda, a, [add, a, x]]]
 // [call, f1, 10]
@@ -517,3 +523,10 @@ data class ECall(val func:Expression, val arg:Expression):Expression{
 // [call, f1, 15]
 // [setvar, f2, [lambda, a, [add, a, x]]]
 // [call, f2, 0]
+
+// calls with multiple params
+// [call, [lambda, [], 1], []]
+// [call, [lambda, [x], x], [100]]
+// [call, [lambda, [x], [add, x, 10]], [222]]
+// [call, [lambda, [x, y], [add, x, y]], [2, 3]]
+// [call, [lambda, [x,y,z], [add, x, y]], [2,3,100]]

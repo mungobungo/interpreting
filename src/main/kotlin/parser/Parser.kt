@@ -73,21 +73,39 @@ fun convert(obj:Any):CoreResult<SugarExpression>{
             if(!f.success){
                 return parserFailure(ParsingError(obj, "cannot parse the function definition inside of call , ${obj[1]}"))
             }
-            val arg = convert(obj[2])
-            if(!arg.success){
-                return parserFailure(ParsingError(obj, "cannot parse argument to the function call, ${obj[2]}"))
+            val arguments = obj[2]
+
+            if(arguments !is List<*>){
+                return parserFailure(ParsingError(obj, "error parsing arguments of 'call' function, expected list , but gon $arguments"))
             }
-            return parserSuccess(SugarCall(f.value!!, arg.value!!))
+            val argValues = mutableListOf<SugarExpression>()
+            for(argVal in arguments){
+                val arg = convert(argVal!!)
+                if(!arg.success){
+                    return parserFailure(ParsingError(obj, "cannot parse argument to the function call, ${argVal!!}"))
+                }
+                argValues.add(arg.value!!)
+            }
+            return parserSuccess(SugarCall(f.value!!, argValues))
         }
         if(operation == "lambda"){
-            val arg = convert(obj[1])
-            if(!arg.success){
-                return parserFailure(ParsingError(obj, "error parsing argument for the lambda fucntion, $arg, in $obj"))
+            val args = obj[1]
+            if(args !is List<*>){
+                return parserFailure(ParsingError(obj, "error parsing arguments of lambda function, expectes list , but gon $args"))
             }
-            if(arg.value !is SugarSymbol){
-                return parserFailure(ParsingError(obj, "lambda argument name should be a string, but got ${arg.value} in $obj"))
+            val argNames = mutableListOf<String>()
+            for(argObject in args as List<Any>){
+
+                val arg = convert(argObject)
+                if(!arg.success){
+                    return parserFailure(ParsingError(obj, "error parsing argument for the lambda fucntion, $arg, in $obj"))
+                }
+                if(arg.value !is SugarSymbol){
+                    return parserFailure(ParsingError(obj, "lambda argument name should be a string, but got ${arg.value} in $obj"))
+                }
+                val argName  = arg.value!!.name
+                argNames.add(argName)
             }
-            val argName  = arg.value!!.name
 
             val body = mutableListOf<SugarExpression>()
             for(line in obj.slice(2 until obj.size)) {
@@ -97,7 +115,7 @@ fun convert(obj:Any):CoreResult<SugarExpression>{
                 }
                 body.add(lineVal.value!!)
             }
-            return parserSuccess(SugarFunc(argName, body))
+            return parserSuccess(SugarFunc(argNames, body))
         }
         if(operation =="list"){
             val elems = obj.takeLast(obj.size -1)
