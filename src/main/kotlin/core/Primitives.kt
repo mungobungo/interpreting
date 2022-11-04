@@ -426,23 +426,23 @@ data class EDo(val expressions:List<Expression>): Expression{
 
 
 
-data class ELambdaRef(val variableName:String, val body: Expression, val closure:Context): Expression{
+data class ELambdaRef(val variableName:String, val body: List<Expression>, val closure:Context): Expression{
     override fun eval(context: Context): CoreResult<Expression> {
         return evalSuccess(this)
     }
 
     override fun unparse(): String {
-        return "[lambda_ref, $variableName, ${body.unparse()}]"
+        return "[lambda_ref, $variableName, ${body.joinToString(",") { it.unparse() }}]"
     }
 
 }
-data class ELambdaDefinition(val variableName: String, val body:Expression):Expression{
+data class ELambdaDefinition(val variableName: String, val body:List<Expression>):Expression{
     override fun eval(context: Context): CoreResult<Expression> {
        return evalSuccess( ELambdaRef(variableName, body, context))
     }
 
     override fun unparse(): String {
-        return "[lambda , ${variableName}, ${body.unparse()}]"
+        return "[lambda , ${variableName}, ${body.joinToString(","){it.unparse()}}]"
     }
 }
 
@@ -456,13 +456,23 @@ data class ECall(val func:Expression, val arg:Expression):Expression{
             return evalTypeError(this, "call error: function argument should be lambda ref ,but got ${ff.value!!.unparse()}")
         }
         val f = ff.value
-        val newContext = f.closure.expand()
+        val newContext = f.closure
         val argValue =  arg.eval(context) //context.variables.get(f.variableName)
         if(! argValue.success){
             return evalTypeError(this, "argument ${f.variableName} cannot be evaluated during the call of ")
         }
         newContext.variables.bindings[f.variableName] = argValue.value!!
-        return f.body.eval(newContext)
+
+
+        val res = mutableListOf<Expression>()
+        for(e:Expression in  f.body){
+            val eResult = e.eval(newContext)
+            if(!eResult.success){
+                return eResult
+            }
+            res.add(eResult.value!!)
+        }
+        return evalSuccess(res.last())
 
     }
 
@@ -481,3 +491,20 @@ data class ECall(val func:Expression, val arg:Expression):Expression{
 //parser: 3.377893ms, eval: 0.194912ms
 
 // [setvar, mk_counter, [lambda, initial, [lambda, _, [do, [setvar, initial, [add, initial,1]], initial]]]]
+
+
+
+//[setvar, mk_counter, [lambda, cnt, [lambda, _, [setvar, cnt, [add, cnt, 1]], cnt]]]
+// [setvar, c1, [call, mk_counter, 15]]
+// [call, c1, 10]
+// [call, c1, 0]
+
+// what if we create new counter?
+//>> [setvar, c3, [call, mk_counter, 9]]
+//[lambda_ref, _, [setvar, cnt, [add, cnt, 1]],cnt]
+//parser: 2.908809ms, eval: 0.03952ms
+//>> [call, c3, 0]
+//10
+//parser: 0.694687ms, eval: 0.033879ms
+//>> [call, c1, 11]
+//11

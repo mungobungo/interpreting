@@ -89,11 +89,15 @@ fun convert(obj:Any):CoreResult<SugarExpression>{
             }
             val argName  = arg.value!!.name
 
-            val body = convert(obj[2])
-            if(!body.success){
-                return parserFailure(ParsingError(obj, "error while testing lambda body, $body in $obj"))
+            val body = mutableListOf<SugarExpression>()
+            for(line in obj.slice(2 until obj.size)) {
+                val lineVal = convert(line)
+                if (!lineVal.success) {
+                    return parserFailure(ParsingError(obj, "error while testing lambda body,$line, \n $body in $obj"))
+                }
+                body.add(lineVal.value!!)
             }
-            return parserSuccess(SugarFunc(argName, body.value!!))
+            return parserSuccess(SugarFunc(argName, body))
         }
         if(operation =="list"){
             val elems = obj.takeLast(obj.size -1)
