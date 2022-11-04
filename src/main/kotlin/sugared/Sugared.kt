@@ -255,7 +255,13 @@ data class SugarIf(val condition:SugarExpression, val mainBranch:SugarExpression
     override fun desugar(): Expression {
         return EIf(condition.desugar(), mainBranch.desugar(), alternativeBranch.desugar())
     }
-
 }
+
+data class SugarFunRec(val name:String, val argumentNames: List<String>, val body: List<SugarExpression>):SugarExpression{
+    override fun desugar(): Expression {
+        return EFunRecDefinition(name, argumentNames, body.map { it.desugar() })
+    }
+}
+
 
 

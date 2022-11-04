@@ -516,6 +516,22 @@ data class EIf(val condition:Expression, val mainBranch: Expression, val alterna
     }
 
 }
+
+
+data class EFunRecDefinition(val name:String,
+                             val argumentNames: List<String>, val body:List<Expression>):Expression{
+    override fun eval(context: Context): CoreResult<Expression> {
+        val c = context.clone()
+        val lambdaRef = ELambdaRef(argumentNames, body, c)
+        c.variables.bindings[name] = lambdaRef
+
+        return ESetVar(name, lambdaRef).eval(context)
+    }
+
+    override fun unparse(): String {
+        return "[lambda , [${argumentNames.joinToString(",") }], ${body.joinToString(","){it.unparse()}}]"
+    }
+}
 //[lambda, m, [add, m , 1]]
 // [call, [lambda, m, [add, m, 1]], 100]
 //[setvar, inc1, [lambda, m , [add, m, 1]]]
@@ -562,4 +578,7 @@ data class EIf(val condition:Expression, val mainBranch: Expression, val alterna
 // [call, [lambda, [x,y,z], [add, x, y]], [2,3,100]]
 
 // broken factorial
-// [fun, fac, [x], [if, [eq, x, 1], 1, [mul, x, [call, fac, [sub, x, 1]]]]]
+// [fun, fac, [x], [if, [eq, x, 1], 1, [mul, x, [call, fac, [[sub, x, 1]]]]]]
+
+// working factorial
+// [funrec, fac, [x], [if, [eq, x, 1], 1, [mul, x, [call, fac, [[sub, x, 1]]]]]]

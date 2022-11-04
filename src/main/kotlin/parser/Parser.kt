@@ -106,6 +106,39 @@ fun convert(obj:Any):CoreResult<SugarExpression>{
             }
             return parserSuccess(SugarCall(f.value!!, argValues))
         }
+        if(operation == "funrec"){
+            val name = obj[1]
+            if(name !is String){
+                return parserFailure(ParsingError(obj, "error during parsing 'funrec' declaration, name expected to be a string, but got $name"))
+            }
+            val args = obj[2]
+            if(args !is List<*>){
+                return parserFailure(ParsingError(obj, "error parsing arguments of 'funrec', expected list , but got $args"))
+            }
+            val argNames = mutableListOf<String>()
+            for(argObject in args as List<Any>){
+
+                val arg = convert(argObject)
+                if(!arg.success){
+                    return parserFailure(ParsingError(obj, "error parsing argument for the 'funrec', $arg, in $obj"))
+                }
+                if(arg.value !is SugarSymbol){
+                    return parserFailure(ParsingError(obj, "'funrec' argument name should be a string, but got ${arg.value} in $obj"))
+                }
+                val argName  = arg.value!!.name
+                argNames.add(argName)
+            }
+
+            val body = mutableListOf<SugarExpression>()
+            for(line in obj.slice(3 until obj.size)) {
+                val lineVal = convert(line)
+                if (!lineVal.success) {
+                    return parserFailure(ParsingError(obj, "error while testing 'funrec' body,$line, \n $body in $obj"))
+                }
+                body.add(lineVal.value!!)
+            }
+            return parserSuccess(SugarFunRec(name, argNames, body))
+        }
         if(operation == "fun"){
             val name = obj[1]
             if(name !is String){
