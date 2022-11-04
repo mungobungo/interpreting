@@ -233,7 +233,7 @@ data class SugarLetStar(val bindings:List<Pair<String, SugarExpression>>, val bo
 
 }
 
-data class SugarFunc(val argumentNames:List<String>, val body: List<SugarExpression>): SugarExpression{
+data class SugarLambda(val argumentNames:List<String>, val body: List<SugarExpression>): SugarExpression{
     override fun desugar(): Expression {
        return ELambdaDefinition(argumentNames, body.map { it.desugar() })
     }
@@ -244,3 +244,12 @@ data class SugarCall(val func:SugarExpression, val arguments:List<SugarExpressio
         return ECall(func.desugar(), arguments.map{it.desugar()})
     }
 }
+
+data class SugarFunc(val name:String, val argumentNames: List<String>, val body: List<SugarExpression>):SugarExpression{
+    override fun desugar(): Expression {
+        return  ESetVar(name, ELambdaDefinition(argumentNames, body.map { it.desugar() }))
+    }
+
+}
+
+

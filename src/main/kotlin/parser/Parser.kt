@@ -88,6 +88,39 @@ fun convert(obj:Any):CoreResult<SugarExpression>{
             }
             return parserSuccess(SugarCall(f.value!!, argValues))
         }
+        if(operation == "fun"){
+            val name = obj[1]
+            if(name !is String){
+                return parserFailure(ParsingError(obj, "error during parsing 'fun' declaration, name expected to be a string, but got $name"))
+            }
+            val args = obj[2]
+            if(args !is List<*>){
+                return parserFailure(ParsingError(obj, "error parsing arguments of function, expected list , but got $args"))
+            }
+            val argNames = mutableListOf<String>()
+            for(argObject in args as List<Any>){
+
+                val arg = convert(argObject)
+                if(!arg.success){
+                    return parserFailure(ParsingError(obj, "error parsing argument for the 'fun', $arg, in $obj"))
+                }
+                if(arg.value !is SugarSymbol){
+                    return parserFailure(ParsingError(obj, "'fun' argument name should be a string, but got ${arg.value} in $obj"))
+                }
+                val argName  = arg.value!!.name
+                argNames.add(argName)
+            }
+
+            val body = mutableListOf<SugarExpression>()
+            for(line in obj.slice(3 until obj.size)) {
+                val lineVal = convert(line)
+                if (!lineVal.success) {
+                    return parserFailure(ParsingError(obj, "error while testing 'fun' body,$line, \n $body in $obj"))
+                }
+                body.add(lineVal.value!!)
+            }
+            return parserSuccess(SugarFunc(name, argNames, body))
+        }
         if(operation == "lambda"){
             val args = obj[1]
             if(args !is List<*>){
@@ -115,7 +148,7 @@ fun convert(obj:Any):CoreResult<SugarExpression>{
                 }
                 body.add(lineVal.value!!)
             }
-            return parserSuccess(SugarFunc(argNames, body))
+            return parserSuccess(SugarLambda(argNames, body))
         }
         if(operation =="list"){
             val elems = obj.takeLast(obj.size -1)
