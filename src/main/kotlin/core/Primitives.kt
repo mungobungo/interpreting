@@ -438,7 +438,7 @@ data class ELambdaRef(val variableName:String, val body: List<Expression>, val c
 }
 data class ELambdaDefinition(val variableName: String, val body:List<Expression>):Expression{
     override fun eval(context: Context): CoreResult<Expression> {
-       return evalSuccess( ELambdaRef(variableName, body, context))
+       return evalSuccess( ELambdaRef(variableName, body, context.clone()))
     }
 
     override fun unparse(): String {
@@ -508,3 +508,12 @@ data class ECall(val func:Expression, val arg:Expression):Expression{
 //parser: 0.694687ms, eval: 0.033879ms
 //>> [call, c1, 11]
 //11
+
+// [setvar, x, 10]
+// [setvar, f1, [lambda, a, [add, a, x]]]
+// [call, f1, 10]
+// [call, f1, 15]
+// [setvar, x, 111111]
+// [call, f1, 15]
+// [setvar, f2, [lambda, a, [add, a, x]]]
+// [call, f2, 0]

@@ -42,6 +42,11 @@ data class Context(val variables: Environment, val parent:Context? = null){
     fun expand():Context{
         return Context(Environment(hashMapOf()), this)
     }
+    fun clone():Context{
+        val res = hashMapOf<String, Expression>()
+        res.putAll(variables.bindings)
+        return Context(Environment(res), parent)
+    }
 
     //override fun toString(): String {
     //    return ""//variables.bindings.values.joinToString(",")
