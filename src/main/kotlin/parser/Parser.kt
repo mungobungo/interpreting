@@ -68,6 +68,24 @@ fun convert(obj:Any):CoreResult<SugarExpression>{
         if(operation == "ones"){
             return parserSuccess(SugarOnes(obj[1] as Int))
         }
+        if(operation == "if"){
+            val cond = convert(obj[1])
+            if(!cond.success){
+                return parserFailure(ParsingError(obj, "cannot parse condition for 'if' expression, ${cond.value}\n internal error : ${cond.error}"))
+            }
+            val mainBranch = convert(obj[2])
+
+            if(!mainBranch.success){
+                return parserFailure(ParsingError(obj, "cannot parse main branch for 'if' expression, ${mainBranch.value}\n internal error : ${mainBranch.error}"))
+            }
+            val alternativeBranch = convert(obj[3])
+            if(!alternativeBranch.success){
+
+                return parserFailure(ParsingError(obj, "cannot parse alternative branch for 'if' expression, ${alternativeBranch.value}\n internal error : ${alternativeBranch.error}"))
+            }
+            return parserSuccess(SugarIf(cond.value!!, mainBranch.value!!, alternativeBranch.value!!))
+
+        }
         if(operation == "call"){
             val f = convert(obj[1])
             if(!f.success){

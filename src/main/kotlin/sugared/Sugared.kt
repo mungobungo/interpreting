@@ -249,6 +249,12 @@ data class SugarFunc(val name:String, val argumentNames: List<String>, val body:
     override fun desugar(): Expression {
         return  ESetVar(name, ELambdaDefinition(argumentNames, body.map { it.desugar() }))
     }
+}
+
+data class SugarIf(val condition:SugarExpression, val mainBranch:SugarExpression, val alternativeBranch:SugarExpression):SugarExpression{
+    override fun desugar(): Expression {
+        return EIf(condition.desugar(), mainBranch.desugar(), alternativeBranch.desugar())
+    }
 
 }
 

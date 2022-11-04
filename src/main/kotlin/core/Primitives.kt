@@ -486,6 +486,28 @@ data class ECall(val func:Expression, val args:List<Expression>):Expression{
     }
 
 }
+
+data class EIf(val condition:Expression, val mainBranch: Expression, val alternativeBranch:Expression):Expression{
+    override fun eval(context: Context): CoreResult<Expression> {
+        val cond = condition.eval(context)
+        if(!cond.success){
+            return evalTypeError(this, "'if' cannot evaluate condition, ${condition.unparse()}")
+        }
+        if(cond.value !is EBool){
+            return evalTypeError(this, "'if' condition should be boolean, but got ${cond.value}")
+        }
+        if(cond.value.value){
+            return  evalSuccess(mainBranch)
+        }else{
+            return evalSuccess(alternativeBranch)
+        }
+    }
+
+    override fun unparse(): String {
+        return "[if, $mainBranch, $alternativeBranch]"
+    }
+
+}
 //[lambda, m, [add, m , 1]]
 // [call, [lambda, m, [add, m, 1]], 100]
 //[setvar, inc1, [lambda, m , [add, m, 1]]]
