@@ -424,3 +424,55 @@ data class EDo(val expressions:List<Expression>): Expression{
     }
 }
 
+
+
+data class ELambdaRef(val variableName:String, val body: Expression, val closure:Context): Expression{
+    override fun eval(context: Context): CoreResult<Expression> {
+        return evalSuccess(this)
+    }
+
+    override fun unparse(): String {
+        return "[lambda_ref, $variableName, ${body.unparse()}]"
+    }
+
+}
+data class ELambdaDefinition(val variableName: String, val body:Expression):Expression{
+    override fun eval(context: Context): CoreResult<Expression> {
+       return evalSuccess( ELambdaRef(variableName, body, context))
+    }
+
+    override fun unparse(): String {
+        return "[lambda , ${variableName}, ${body.unparse()}]"
+    }
+}
+
+data class ECall(val func:Expression, val arg:Expression):Expression{
+    override fun eval(context: Context): CoreResult<Expression> {
+        val ff = func.eval(context)
+        if(!ff.success){
+            return ff
+        }
+        if(ff.value !is ELambdaRef){
+            return evalTypeError(this, "call error: function argument should be lambda ref ,but got ${ff.value!!.unparse()}")
+        }
+        val f = ff.value
+        val newContext = f.closure.expand()
+        val argValue =  arg.eval(context) //context.variables.get(f.variableName)
+        if(! argValue.success){
+            return evalTypeError(this, "argument ${f.variableName} cannot be evaluated during the call of ")
+        }
+        newContext.variables.bindings[f.variableName] = argValue.value!!
+        return f.body.eval(newContext)
+
+    }
+
+    override fun unparse(): String {
+        return "[call, ${func.unparse()}, ${arg.unparse()}]"
+    }
+
+}
+//[lambda, m, [add, m , 1]]
+// [call, [lambda, m, [add, m, 1]], 100]
+//[setvar, inc1, [lambda, m , [add, m, 1]]]
+// [call, inc1, 12]
+// [let, x, 10, [let, f, [lambda, z, [sub, x, z]], [call, f, 15]]]

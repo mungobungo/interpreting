@@ -43,4 +43,8 @@ data class Context(val variables: Environment, val parent:Context? = null){
         return Context(Environment(hashMapOf()), this)
     }
 
+    //override fun toString(): String {
+    //    return ""//variables.bindings.values.joinToString(",")
+   // }
+
 }

@@ -68,6 +68,33 @@ fun convert(obj:Any):CoreResult<SugarExpression>{
         if(operation == "ones"){
             return parserSuccess(SugarOnes(obj[1] as Int))
         }
+        if(operation == "call"){
+            val f = convert(obj[1])
+            if(!f.success){
+                return parserFailure(ParsingError(obj, "cannot parse the function definition inside of call , ${obj[1]}"))
+            }
+            val arg = convert(obj[2])
+            if(!arg.success){
+                return parserFailure(ParsingError(obj, "cannot parse argument to the function call, ${obj[2]}"))
+            }
+            return parserSuccess(SugarCall(f.value!!, arg.value!!))
+        }
+        if(operation == "lambda"){
+            val arg = convert(obj[1])
+            if(!arg.success){
+                return parserFailure(ParsingError(obj, "error parsing argument for the lambda fucntion, $arg, in $obj"))
+            }
+            if(arg.value !is SugarSymbol){
+                return parserFailure(ParsingError(obj, "lambda argument name should be a string, but got ${arg.value} in $obj"))
+            }
+            val argName  = arg.value!!.name
+
+            val body = convert(obj[2])
+            if(!body.success){
+                return parserFailure(ParsingError(obj, "error while testing lambda body, $body in $obj"))
+            }
+            return parserSuccess(SugarFunc(argName, body.value!!))
+        }
         if(operation =="list"){
             val elems = obj.takeLast(obj.size -1)
             val expressions = elems.map { convert(it) }
