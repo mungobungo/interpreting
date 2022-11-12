@@ -1,5 +1,6 @@
 package core
 
+import java.util.Objects
 import kotlin.math.abs
 
 val binaryFloatPrimitives = hashMapOf(
@@ -532,6 +533,45 @@ data class EFunRecDefinition(val name:String,
         return "[lambda , [${argumentNames.joinToString(",") }], ${body.joinToString(","){it.unparse()}}]"
     }
 }
+
+data class EDict(val values:HashMap<Expression, Expression>): Expression{
+    override fun eval(context: Context): CoreResult<Expression> {
+       return evalSuccess(this)
+    }
+
+    override fun unparse(): String{
+        val items = values.entries.joinToString(", ") {  it.key.unparse() +":" + it.value.unparse()  }
+        return "{$items}"
+    }
+
+}
+
+data class EGet(val key: Expression, val obj: Expression) :Expression{
+    override fun eval(context: Context): CoreResult<Expression> {
+
+
+       val objv = obj.eval(context)
+       if(!objv.success){
+           return objv
+       }
+        if(objv.value !is EDict){
+            return evalTypeError(this, "'get' accepts dictionary as second arugment, but got ${obj.unparse()}")
+        }
+        val dic = objv.value.values
+        if(!dic.containsKey(key)){
+            return evalTypeError(this, "'get' key ${key.unparse()}  is not found in ${objv.value.unparse()}")
+        }
+        val obj = dic[key]!!
+        val evaluated = obj.eval(context)
+        return evaluated
+    }
+
+    override fun unparse(): String {
+        return "[get, $obj,  $key]"
+    }
+
+}
+
 //[lambda, m, [add, m , 1]]
 // [call, [lambda, m, [add, m, 1]], 100]
 //[setvar, inc1, [lambda, m , [add, m, 1]]]

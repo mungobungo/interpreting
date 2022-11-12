@@ -263,5 +263,22 @@ data class SugarFunRec(val name:String, val argumentNames: List<String>, val bod
     }
 }
 
+data class SugarDict(val values:HashMap<SugarExpression, SugarExpression>): SugarExpression{
+    override fun desugar(): Expression {
+        val converted = values.entries.map { Pair(it.key.desugar(), it.value.desugar()) }
+        converted.toMap()
+        return EDict(HashMap(converted.toMap()))
+        }
+    }
+
+data class SugarGet(val key:SugarExpression, val obj:SugarExpression): SugarExpression{
+    override fun desugar(): Expression {
+        return EGet(key.desugar(), obj.desugar())
+    }
+
+}
+
+
+
 
 

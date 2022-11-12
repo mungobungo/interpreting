@@ -63,10 +63,25 @@ fun convert(obj:Any):CoreResult<SugarExpression>{
         return parserSuccess(SugarSymbol(obj))
     }
 
+    if(obj is LinkedHashMap<*, *>){
+        val converted = obj.entries.map { Pair(convert(it.key).value!!, convert(it.value).value!!) }.toMap()
+        return parserSuccess( SugarDict(HashMap(converted)))
+    }
     if(obj is ArrayList<*>){
         val operation= obj[0]
         if(operation == "ones"){
             return parserSuccess(SugarOnes(obj[1] as Int))
+        }
+        if(operation == "get"){
+            val key = convert(obj[2])
+            if(!key.success){
+                return key
+            }
+            val dic = convert(obj[1])
+            if(!dic.success){
+                return dic
+            }
+            return parserSuccess(SugarGet(key.value!!, dic.value!!))
         }
         if(operation == "if"){
             val cond = convert(obj[1])
