@@ -1,8 +1,7 @@
 package core
 
-import javax.swing.Icon
-
 interface Expression{
+
     fun eval(context: Context):CoreResult<Expression>
     fun unparse():String
 }
