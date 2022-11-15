@@ -30,7 +30,7 @@ fun main(args: Array<String>) {
         if(!evaluated.success){
             println("Eval error: " + evaluated.error!!.message + "\n ${evaluated.error!!.input}")
         }else{
-            println(evaluated.value!!.unparse())
+            println( evaluated.value!!.unparse() + " :: " + evaluated.value.type().unparse())
         }
         println("parser: ${parserTime/1e6f}ms, eval: ${evalTime/1e6f}ms")
     }

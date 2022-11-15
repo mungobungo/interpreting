@@ -21,6 +21,10 @@ data class EBinaryFloatOp(val operationName:String, val left:Expression, val rig
     override fun unparse(): String {
         return "[$operationName, ${left.unparse()}, ${right.unparse()}]"
     }
+
+    override fun type(): StrongType{
+         return TFunc(listOf(TFloat()), TFloat())
+    }
 }
 fun evalBinaryFloat(operationName:String, leftExpression:Expression, rightExpression:Expression,
                       context: Context):CoreResult<Expression>{
@@ -123,13 +127,19 @@ val binaryIntPrimitives = hashMapOf(
     "idiv" to {a:Int, b:Int -> a /b},
     "div" to {a:Int, b:Int -> a/b},
     )
-data class EBinaryIntegerOp(val operationName: String, val left:Expression, val right:Expression): Expression {
+data class EBinaryIntegerOp(val operationName: String, val left:Expression, val right:Expression,
+): Expression {
     override fun eval(context: Context): CoreResult<Expression> {
         return evalBinaryInteger(operationName, left, right,context)
     }
 
     override fun unparse(): String {
         return "[$operationName, ${left.unparse()}, ${right.unparse()}]".format()
+    }
+
+    override fun type(): StrongType {
+
+        return TFunc(listOf(TInt()), TInt())
     }
 }
 fun evalBinaryInteger(operationName:String, leftExpression:Expression, rightExpression:Expression,
@@ -212,6 +222,15 @@ data class EBinaryNumericOp(val operationName:String, val left:Expression, val r
     override fun unparse(): String {
         return "[$operationName, ${left.unparse()}, ${right.unparse()}]".format()
     }
+
+    override fun type(): StrongType
+        {
+            return if(left.type() is TInt && right.type() is TInt){
+                TFunc(listOf(TInt()), TInt())
+            }else{
+                TFunc(listOf(TFloat()), TFloat())
+            }
+        }
 }
 fun evalBinaryNumeric(operationName:String, leftExpression:Expression, rightExpression:Expression,
 context: Context):CoreResult<Expression>{
@@ -258,6 +277,13 @@ data class EBinaryNumericBoolOp(val operationName:String, val left:Expression, v
 
     override fun unparse(): String {
         return "[$operationName, ${left.unparse()}, ${right.unparse()}]".format()
+    }
+
+    override fun type(): StrongType{
+        if(left.type() is TInt && right.type() is TInt){
+            return TFunc(listOf(TInt()), TInt())
+        }
+        return TFunc(listOf(TFloat()), TFloat())
     }
 }
 fun evalBinaryNumericBool(operationName:String, leftExpression:Expression, rightExpression:Expression,
@@ -307,6 +333,10 @@ data class EIsInt(val v:Expression):Expression{
         return "[is_int, ${v.unparse()}]"
     }
 
+    override fun type(): StrongType {
+       return TFunc(listOf(TAny()), TBool())
+    }
+
 }
 
 
@@ -319,6 +349,11 @@ data class EIsFloat(val v:Expression):Expression{
         return "[is_float, ${v.unparse()}]"
     }
 
+    override fun type(): StrongType {
+
+        return TFunc(listOf(TAny()), TBool())
+    }
+
 }
 data class EIsBool(val v:Expression):Expression{
     override fun eval(context: Context): CoreResult<Expression> {
@@ -327,6 +362,11 @@ data class EIsBool(val v:Expression):Expression{
 
     override fun unparse(): String {
         return "[is_bool, ${v.unparse()}]"
+    }
+
+    override fun type(): StrongType {
+
+        return TFunc(listOf(TAny()), TBool())
     }
 
 }
@@ -349,6 +389,10 @@ data class ENot(val v:Expression):Expression{
         return "[not, ${v.unparse()}]"
     }
 
+    override fun type(): StrongType {
+        return TFunc(listOf(TBool()), TBool())
+    }
+
 }
 val binaryBoolPrimitives = hashMapOf(
     "and" to {a:Boolean, b:Boolean -> a &&b},
@@ -362,6 +406,9 @@ data class EBinaryBoolOp(val operationName: String, val left:Expression, val rig
 
     override fun unparse(): String {
         return "[$operationName, ${left.unparse()}, ${right.unparse()}]".format()
+    }
+    override fun type(): StrongType {
+        return TFunc(listOf(TBool(), TBool()), TBool())
     }
 }
 fun evalBinaryBool(operationName:String, leftExpression:Expression, rightExpression:Expression,
@@ -407,6 +454,10 @@ data class ESetVar(val name:String, val variableValue:Expression):Expression{
         return "[setvar, $name, ${variableValue.unparse()}]"
     }
 
+    override fun type(): StrongType {
+        return TFunc(listOf(), TAny())
+    }
+
 }
 data class EDo(val expressions:List<Expression>): Expression{
     override fun eval(context: Context): CoreResult<Expression> {
@@ -423,6 +474,10 @@ data class EDo(val expressions:List<Expression>): Expression{
 
         return "[do, ${expressions.joinToString(", ") { it.unparse() }}]"
     }
+
+    override fun type(): StrongType {
+       return expressions.last().type()
+    }
 }
 
 
@@ -436,6 +491,10 @@ data class ELambdaRef(val argumentNames:List<String>, val body: List<Expression>
         return "[lambda_ref, ${argumentNames.joinToString(",")}, ...}]"
     }
 
+    override fun type(): StrongType {
+        return TInvalidType("LambdaRef type not supported")
+    }
+
 }
 data class ELambdaDefinition(val argumentNames: List<String>, val body:List<Expression>):Expression{
     override fun eval(context: Context): CoreResult<Expression> {
@@ -444,6 +503,10 @@ data class ELambdaDefinition(val argumentNames: List<String>, val body:List<Expr
 
     override fun unparse(): String {
         return "[lambda , [${argumentNames.joinToString(",") }], ${body.joinToString(","){it.unparse()}}]"
+    }
+
+    override fun type(): StrongType {
+       return TInvalidType("lambda definition type is not implemented")
     }
 }
 
@@ -486,6 +549,13 @@ data class ECall(val func:Expression, val args:List<Expression>):Expression{
         return "[call, ${func.unparse()}, [${args.joinToString(","){it.unparse()}}]]"
     }
 
+    override fun type(): StrongType {
+        if(func.type() is TFunc){
+            return (func.type() as TFunc).result
+        }
+       return TInvalidType("not functional type in the call ${this.unparse()}")
+    }
+
 }
 
 data class EIf(val condition:Expression, val mainBranch: Expression, val alternativeBranch:Expression):Expression{
@@ -516,6 +586,10 @@ data class EIf(val condition:Expression, val mainBranch: Expression, val alterna
         return "[if, ${mainBranch.unparse()}, ${alternativeBranch.unparse()}]"
     }
 
+    override fun type(): StrongType {
+       return mainBranch.type()
+    }
+
 }
 
 
@@ -532,6 +606,10 @@ data class EFunRecDefinition(val name:String,
     override fun unparse(): String {
         return "[lambda , [${argumentNames.joinToString(",") }], ${body.joinToString(","){it.unparse()}}]"
     }
+
+    override fun type(): StrongType {
+       return TInvalidType("recursive function definition is not defined")
+    }
 }
 
 data class EDict(val values:HashMap<Expression, Expression>): Expression{
@@ -541,7 +619,10 @@ data class EDict(val values:HashMap<Expression, Expression>): Expression{
 
     override fun unparse(): String{
         val items = values.entries.joinToString(", ") {  it.key.unparse() +":" + it.value.unparse()  }
-        return "{$items}"
+        return "{$items}"}
+
+    override fun type(): StrongType {
+       return TInvalidType("Dictionary is not supported")
     }
 
 }
@@ -568,6 +649,10 @@ data class EGet(val key: Expression, val obj: Expression) :Expression{
 
     override fun unparse(): String {
         return "[get, $obj,  $key]"
+    }
+
+    override fun type(): StrongType {
+       return TInvalidType("Get operation is not typeable")
     }
 
 }

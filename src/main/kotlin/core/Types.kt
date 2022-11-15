@@ -9,6 +9,10 @@ data class EInt(val value:Int):Expression {
     override fun unparse(): String {
         return value.toString()
     }
+
+    override fun type(): StrongType {
+       return TInt()
+    }
 }
 
 data class EFloat(val value:Double):Expression {
@@ -18,6 +22,10 @@ data class EFloat(val value:Double):Expression {
 
     override fun unparse(): String {
         return value.toString()
+    }
+
+    override fun type(): StrongType {
+       return TFloat()
     }
 }
 
@@ -29,6 +37,10 @@ data class EBool(val value:Boolean):Expression {
 
     override fun unparse(): String {
         return value.toString()
+    }
+
+    override fun type(): StrongType {
+       return TBool()
     }
 }
 data class ESymbol(val name:String):Expression{
@@ -49,6 +61,10 @@ data class ESymbol(val name:String):Expression{
     override fun unparse(): String {
         return name
     }
+
+    override fun type(): StrongType {
+       return TInvalidType("esymbol is not supported in typing")
+    }
 }
 
 data class EList(val elems: List<Expression>):Expression{
@@ -67,6 +83,10 @@ data class EList(val elems: List<Expression>):Expression{
 
     override fun unparse(): String {
         return "[list, ${elems.joinToString(", ") { it.unparse() }}]"
+    }
+
+    override fun type(): StrongType {
+       return TInvalidType("list is not supported")
     }
 
 }

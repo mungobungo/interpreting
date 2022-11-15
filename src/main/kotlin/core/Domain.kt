@@ -4,6 +4,8 @@ interface Expression{
 
     fun eval(context: Context):CoreResult<Expression>
     fun unparse():String
+
+    fun type() : StrongType
 }
 
 

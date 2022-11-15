@@ -36,6 +36,16 @@ class TFloat : StrongType{
     }
 }
 
+class TAny: StrongType{
+    override fun unparse(): String {
+       return "any"
+    }
+
+    override fun nestedUnparse(): String {
+        return unparse()
+    }
+
+}
 data class TFunc(val arguments:List<StrongType>, val result:StrongType) :StrongType{
     override fun unparse(): String {
 
@@ -47,9 +57,9 @@ data class TFunc(val arguments:List<StrongType>, val result:StrongType) :StrongT
     }
 }
 
-class TInvalidType: StrongType{
+data class TInvalidType(val error:String): StrongType{
     override fun unparse(): String {
-       return "invalid_type"
+       return "invalid_type: $error"
     }
 
     override fun nestedUnparse(): String {
