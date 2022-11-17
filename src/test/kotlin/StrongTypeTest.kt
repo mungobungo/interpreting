@@ -31,11 +31,20 @@ internal class StrongTypeTest {
     }
 
     @Test
-    fun testIntegerAddition(){
+    fun testIntegerBinaryOperation(){
 
         assertEquals(TInt(), typeOf(toEx("[iadd, 4, 5]")))
         assertEquals(TInt(), typeOf(toEx("[iadd, 4, [iadd, 9, 100]]")))
 
         assertEquals(TInt(), typeOf(toEx("[iadd, 4, [imul, 9, [idiv, 10, 0]]]")))
+    }
+    @Test
+    fun testFloatBinaryOperation(){
+
+        assertEquals(TFloat(), typeOf(toEx("[fadd, 4.0, 5.0]")))
+        assertTrue(typeOf(toEx("[fadd, 4, 5.0]")) is TypeError)
+        assertEquals(TFloat(), typeOf(toEx("[fadd, 4.1, [fadd, 9.0, 100.0]]")))
+
+        assertEquals(TFloat(), typeOf(toEx("[fadd, 4.0, [fmul, 9.0, [fdiv, 10.0, 0.0]]]")))
     }
 }

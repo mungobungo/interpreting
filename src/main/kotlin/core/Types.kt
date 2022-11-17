@@ -18,6 +18,7 @@ fun typeOf(e: Expression) : StrongType{
         is EFloat -> return TFloat()
         is EBool -> return TBool()
         is EBinaryIntegerOp -> return binaryIntegerOpType(e)
+        is EBinaryFloatOp -> return binaryFloatOpType(e)
     }
     return TypeError("type_error", e, "unsupported expression ${e.unparse()}")
 }
@@ -29,4 +30,12 @@ fun binaryIntegerOpType(e: EBinaryIntegerOp): StrongType {
         return TInt()
     }
     return TypeError("binary_integer_type_error", e, "left and right arguments of `${e.operationName}` are expected to be integers, but got $left and $right in ${e.unparse()}")
+}
+fun binaryFloatOpType(e: EBinaryFloatOp): StrongType {
+    val left = typeOf(e.left)
+    val right = typeOf(e.right)
+    if(left is TFloat && right is TFloat){
+        return TFloat()
+    }
+    return TypeError("binary_float_type_error", e, "left and right arguments of `${e.operationName}` are expected to be floats, but got $left and $right in ${e.unparse()}")
 }
