@@ -4,6 +4,36 @@ interface StrongType{
     val type:String
 }
 
+data class TypeEnv(val env:HashMap<String, StrongType>, val parent:TypeEnv?=null){
+    fun expand(): TypeEnv{
+        return TypeEnv(hashMapOf(), this)
+    }
+    fun isLocallyDefined(symbol:String):Pair<Boolean, StrongType>{
+        val res = env[symbol]
+
+        return if(res !=null){
+            Pair(true, res)
+        }else{
+            Pair(false,TypeError("binding_not_found",ESymbol(symbol), "symbol `$symbol` not found in typeEnv $this"))
+        }
+    }
+    fun isGloballyDefined(symbol: String):Pair<Boolean, StrongType>{
+        var current: TypeEnv? = this
+        var res = current!!.isLocallyDefined(symbol)
+        if(res.first){
+            return res
+        }
+        while(current!=null){
+            current = current.parent
+            res = current!!.isLocallyDefined(symbol)
+            if(res.first) {
+                return res
+            }
+        }
+        return Pair(false,TypeError("binding_not_found",ESymbol(symbol), "symbol `$symbol` not found in typeEnv $this"))
+    }
+}
+
 data class TInt(override val type:String = "int"): StrongType
 
 data class  TFloat(override val type:String="float"): StrongType
@@ -11,6 +41,7 @@ data class  TFloat(override val type:String="float"): StrongType
 data class  TBool(override val type:String="bool"): StrongType
 
 data class TypeError(override val type:String ="type_error", val input: Expression,  val error:String):StrongType
+
 
 fun typeOf(e: Expression) : StrongType{
     when(e){
