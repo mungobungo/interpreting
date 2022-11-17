@@ -35,5 +35,7 @@ internal class StrongTypeTest {
 
         assertEquals(TInt(), typeOf(toEx("[iadd, 4, 5]")))
         assertEquals(TInt(), typeOf(toEx("[iadd, 4, [iadd, 9, 100]]")))
+
+        assertEquals(TInt(), typeOf(toEx("[iadd, 4, [imul, 9, [idiv, 10, 0]]]")))
     }
 }
