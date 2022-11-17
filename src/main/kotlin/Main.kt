@@ -2,7 +2,7 @@ import core.*
 import parser.parse
 
 fun main(args: Array<String>) {
-    println("REPL v0.1")
+    println("REPL v0.2")
     val variables = hashMapOf<String, Expression>(
         "x" to EInt(3),
         "y" to EInt(10),
@@ -23,16 +23,26 @@ fun main(args: Array<String>) {
             println("Parsing error: " + parsed.error!!.message  + "\n ${parsed.error!!.input}")
             continue
         }
-        val evalStart = System.nanoTime()
 
-        val evaluated = parsed.value!!.desugar().eval(context)
+        val parsedValue = parsed.value!!.desugar()
+        val typeStart = System.nanoTime()
+
+        val typed = typeOf(parsedValue)
+        val typeTime = System.nanoTime() - typeStart
+        if(typed is TypeError){
+            println("Type error: " + typed.error)
+        }
+
+        val evalStart = System.nanoTime()
+        val evaluated = parsedValue.eval(context)
         val evalTime = System.nanoTime() - evalStart
         if(!evaluated.success){
             println("Eval error: " + evaluated.error!!.message + "\n ${evaluated.error!!.input}")
-        }else{
-            println(evaluated.value!!.unparse())
         }
-        println("parser: ${parserTime/1e6f}ms, eval: ${evalTime/1e6f}ms")
+        else{
+            println(evaluated.value!!.unparse() + " :: ${typed.type}" )
+        }
+        println("parser: ${parserTime/1e6f}ms, type: ${typeTime/1e6f}ms,  eval: ${evalTime/1e6f}ms")
     }
 
 }

@@ -55,7 +55,13 @@ internal class StrongTypeTest {
         assertEquals(TFloat(), typeOf(toEx("[add, 4, 5.0]")))
         assertEquals(TInt(), typeOf(toEx("[add, 4, 5]")))
         assertEquals(TFloat(), typeOf(toEx("[add, 4.1, [add, 9, 100.0]]")))
-
         assertEquals(TFloat(), typeOf(toEx("[mul, 4.0, [add, 9.0, [idiv, 10, 0]]]")))
+    }
+    @Test
+    fun testBinaryBoolOperation(){
+
+        assertEquals(TBool(), typeOf(toEx("[and, True, False]")))
+        assertEquals(TBool(), typeOf(toEx("[and, True, [or, False, True]]")))
+        assertEquals(TBool(), typeOf(toEx("[or, True, [and, True, False]]")))
     }
 }

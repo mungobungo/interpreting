@@ -20,8 +20,18 @@ fun typeOf(e: Expression) : StrongType{
         is EBinaryIntegerOp -> return binaryIntegerOpType(e)
         is EBinaryFloatOp -> return binaryFloatOpType(e)
         is EBinaryNumericOp -> return binaryNumericOpType(e)
+        is EBinaryBoolOp -> return binaryBoolOpType(e)
     }
     return TypeError("type_error", e, "unsupported expression ${e.unparse()}")
+}
+
+fun binaryBoolOpType(e: EBinaryBoolOp): StrongType {
+   val left = typeOf(e.left)
+   val right = typeOf(e.right)
+   if(left is TBool && right is TBool){
+       return TBool()
+   }
+    return TypeError("binary_bool_type_error", e, "left and right arguments of `${e.operationName}` are expected to be booleans, but got $left and $right in ${e.unparse()}")
 }
 
 fun binaryNumericOpType(e: EBinaryNumericOp): StrongType {
