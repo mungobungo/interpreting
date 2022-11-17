@@ -18,17 +18,22 @@ internal class StrongTypeTest {
     fun tearDown() {
     }
 
-    private val emptyEnv = Environment(hashMapOf())
-    private val emptyContext = Context(emptyEnv)
 
     private fun toEx(yaml: String): Expression {
-        return parse(yaml).value!!.desugar().eval(emptyContext).value!!
+        return parse(yaml).value!!.desugar()
     }
 
     @Test
     fun testSimpleInt() {
-        assertTrue(typeOf(toEx("10")) is TInt)
-        assertTrue(typeOf(toEx("1.02")) is TFloat)
-        assertTrue(typeOf(toEx("true")) is TBool)
+        assertEquals(TInt(),  typeOf(toEx("10")))
+        assertEquals(TFloat(), typeOf(toEx("1.02")))
+        assertEquals(TBool(), typeOf(toEx("true")))
+    }
+
+    @Test
+    fun testIntegerAddition(){
+
+        assertEquals(TInt(), typeOf(toEx("[iadd, 4, 5]")))
+        assertEquals(TInt(), typeOf(toEx("[iadd, 4, [iadd, 9, 100]]")))
     }
 }
