@@ -25,7 +25,7 @@ internal class DomainKtTest {
         assertNotNull(res.value)
         assertEquals(evaluated, res.value!!)
     }
-    private fun yamlToExpression(expression: Expression, yaml: String) {
+    fun yamlToExpression(expression: Expression, yaml: String) {
         assertEquals(expression, parse(yaml).value!!.desugar().eval(emptyContext).value!!)
     }
 
