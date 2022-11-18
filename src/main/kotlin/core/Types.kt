@@ -54,8 +54,20 @@ fun typeOf(e: Expression, te: TypeEnv) : TypeCheckResult{
         is EBinaryBoolOp -> return binaryBoolOpType(e, te)
         is ESymbol -> return symbolType(e, te)
         is ESetVar -> return setVarType(e, te)
+        is EDo -> return doType(e, te)
     }
     return TypeCheckResult(false,  TypeError("type_error", e, "unsupported expression ${e.unparse()}"),te)
+}
+
+fun doType(e: EDo, te: TypeEnv): TypeCheckResult {
+   val localTypeEnv = te.expand()
+    for(exp in e.expressions){
+        val type = typeOf(exp, localTypeEnv)
+        if(!type.success){
+            return type
+        }
+    }
+    return TypeCheckResult(true, typeOf(e.expressions.last(), localTypeEnv).result, te)
 }
 
 fun setVarType(e: ESetVar, te: TypeEnv): TypeCheckResult {
