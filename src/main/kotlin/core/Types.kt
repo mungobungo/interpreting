@@ -55,7 +55,13 @@ fun typeOf(e: Expression, te: TypeEnv) : TypeCheckResult{
         is ESymbol -> return symbolType(e, te)
         is ESetVar -> return setVarType(e, te)
         is EDo -> return doType(e, te)
+        is ELambdaDefinition -> return lambdaType(e, te)
     }
+    return TypeCheckResult(false,  TypeError("type_error", e, "unsupported expression ${e.unparse()}"),te)
+}
+
+fun lambdaType(e: ELambdaDefinition, te: TypeEnv): TypeCheckResult {
+
     return TypeCheckResult(false,  TypeError("type_error", e, "unsupported expression ${e.unparse()}"),te)
 }
 
