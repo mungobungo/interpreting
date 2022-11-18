@@ -8,6 +8,11 @@ fun main(args: Array<String>) {
         "y" to EInt(10),
     )
     val context = Context(Environment(variables))
+    val typeEnv = TypeEnv(hashMapOf())
+    for( elem in variables){
+        typeEnv.env[elem.key]  = typeOf(elem.value, typeEnv).result
+    }
+
 
     while (true){
         print(">> ")
@@ -27,10 +32,10 @@ fun main(args: Array<String>) {
         val parsedValue = parsed.value!!.desugar()
         val typeStart = System.nanoTime()
 
-        val typed = typeOf(parsedValue)
+        val typed = typeOf(parsedValue, typeEnv)
         val typeTime = System.nanoTime() - typeStart
-        if(typed is TypeError){
-            println("Type error: " + typed.error)
+        if(typed.result is TypeError){
+            println("Type error: " + typed.result.error)
         }
 
         val evalStart = System.nanoTime()
@@ -40,7 +45,7 @@ fun main(args: Array<String>) {
             println("Eval error: " + evaluated.error!!.message + "\n ${evaluated.error!!.input}")
         }
         else{
-            println(evaluated.value!!.unparse() + " :: ${typed.type}" )
+            println(evaluated.value!!.unparse() + " :: ${typed.result.type}" )
         }
         println("parser: ${parserTime/1e6f}ms, type: ${typeTime/1e6f}ms,  eval: ${evalTime/1e6f}ms")
     }

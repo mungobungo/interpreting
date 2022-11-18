@@ -4,6 +4,8 @@ interface StrongType{
     val type:String
 }
 
+data class TypeCheckResult(val success:Boolean, val result:StrongType, val te: TypeEnv)
+
 data class TypeEnv(val env:HashMap<String, StrongType>, val parent:TypeEnv?=null){
     fun expand(): TypeEnv{
         return TypeEnv(hashMapOf(), this)
@@ -19,18 +21,15 @@ data class TypeEnv(val env:HashMap<String, StrongType>, val parent:TypeEnv?=null
     }
     fun isGloballyDefined(symbol: String):Pair<Boolean, StrongType>{
         var current: TypeEnv? = this
-        var res = current!!.isLocallyDefined(symbol)
-        if(res.first){
-            return res
-        }
+        val res = Pair(false,TypeError("binding_not_found",ESymbol(symbol), "symbol `$symbol` not found in typeEnv $this"))
         while(current!=null){
-            current = current.parent
-            res = current!!.isLocallyDefined(symbol)
-            if(res.first) {
-                return res
+            val value = current!!.isLocallyDefined(symbol)
+            if(value.first) {
+                return value
             }
+            current = current.parent
         }
-        return Pair(false,TypeError("binding_not_found",ESymbol(symbol), "symbol `$symbol` not found in typeEnv $this"))
+        return res
     }
 }
 
@@ -42,61 +41,106 @@ data class  TBool(override val type:String="bool"): StrongType
 
 data class TypeError(override val type:String ="type_error", val input: Expression,  val error:String):StrongType
 
+data class TFunc(override val type:String ="fun",  val params:List<StrongType>, val result:List<StrongType>):StrongType
 
-fun typeOf(e: Expression) : StrongType{
+fun typeOf(e: Expression, te: TypeEnv) : TypeCheckResult{
     when(e){
-        is EInt -> return TInt()
-        is EFloat -> return TFloat()
-        is EBool -> return TBool()
-        is EBinaryIntegerOp -> return binaryIntegerOpType(e)
-        is EBinaryFloatOp -> return binaryFloatOpType(e)
-        is EBinaryNumericOp -> return binaryNumericOpType(e)
-        is EBinaryBoolOp -> return binaryBoolOpType(e)
+        is EInt -> return  TypeCheckResult(true, TInt(), te)
+        is EFloat -> return TypeCheckResult(true, TFloat(), te)
+        is EBool -> return  TypeCheckResult(true, TBool(), te)
+        is EBinaryIntegerOp -> return binaryIntegerOpType(e, te)
+        is EBinaryFloatOp -> return binaryFloatOpType(e, te)
+        is EBinaryNumericOp -> return binaryNumericOpType(e, te)
+        is EBinaryBoolOp -> return binaryBoolOpType(e, te)
+        is ESymbol -> return symbolType(e, te)
+        is ESetVar -> return setVarType(e, te)
     }
-    return TypeError("type_error", e, "unsupported expression ${e.unparse()}")
+    return TypeCheckResult(false,  TypeError("type_error", e, "unsupported expression ${e.unparse()}"),te)
 }
 
-fun binaryBoolOpType(e: EBinaryBoolOp): StrongType {
-   val left = typeOf(e.left)
-   val right = typeOf(e.right)
-   if(left is TBool && right is TBool){
-       return TBool()
+fun setVarType(e: ESetVar, te: TypeEnv): TypeCheckResult {
+   val t = typeOf(e.variableValue, te)
+    if(!t.success){
+        return t
+    }
+    te.env[e.name] = t.result
+    return TypeCheckResult(true, t.result, te)
+}
+
+
+fun symbolType(e: ESymbol, te:TypeEnv): TypeCheckResult {
+    val res = te.isGloballyDefined(e.name)
+    if(res.first){
+        return TypeCheckResult(true, res.second, te)
+    }
+    return TypeCheckResult(false, res.second, te)
+}
+
+fun binaryBoolOpType(e: EBinaryBoolOp, te:TypeEnv): TypeCheckResult {
+   val left = typeOf(e.left, te)
+    if(!left.success){
+        return left
+    }
+   val right = typeOf(e.right,te)
+    if(!right.success){
+        return right
+    }
+   if(left.result is TBool && right.result is TBool){
+       return TypeCheckResult(true, TBool(), te)
    }
-    return TypeError("binary_bool_type_error", e, "left and right arguments of `${e.operationName}` are expected to be booleans, but got $left and $right in ${e.unparse()}")
+    return TypeCheckResult(false, TypeError("binary_bool_type_error", e, "left and right arguments of `${e.operationName}` are expected to be booleans, but got $left and $right in ${e.unparse()}"),te)
 }
 
-fun binaryNumericOpType(e: EBinaryNumericOp): StrongType {
-    val left = typeOf(e.left)
-    val right = typeOf(e.right)
-    if(left is TInt && right is TInt){
-        return TInt()
+fun binaryNumericOpType(e: EBinaryNumericOp, te:TypeEnv): TypeCheckResult {
+    val left = typeOf(e.left, te)
+    if(!left.success){
+        return left
     }
-    if(left is TFloat && right is TInt){
-        return TFloat()
+    val right = typeOf(e.right,te)
+    if(!right.success){
+        return right
     }
-    if(left is TInt && right is TFloat){
-        return TFloat()
+    if(left.result is TInt && right.result is TInt){
+        return TypeCheckResult(true, TInt(), te)
     }
-    if(left is TFloat && right is TFloat){
-        return TFloat()
+    if(left.result is TFloat && right.result is TInt){
+        return TypeCheckResult(true, TFloat(), te)
+    }
+    if(left.result is TInt && right.result is TFloat){
+        return TypeCheckResult(true, TFloat(), te)
+    }
+    if(left.result is TFloat && right.result is TFloat){
+        return TypeCheckResult(true, TFloat(), te)
     }
 
-    return TypeError("binary_numeric_type_error", e, "left and right arguments of `${e.operationName}` are expected to be numerics, but got $left and $right in ${e.unparse()}")
+    return TypeCheckResult(false,  TypeError("binary_numeric_type_error", e, "left and right arguments of `${e.operationName}` are expected to be numerics, but got $left and $right in ${e.unparse()}"), te)
 }
 
-fun binaryIntegerOpType(e: EBinaryIntegerOp): StrongType {
-    val left = typeOf(e.left)
-    val right = typeOf(e.right)
-    if(left is TInt && right is TInt){
-        return TInt()
+fun binaryIntegerOpType(e: EBinaryIntegerOp, te:TypeEnv): TypeCheckResult {
+    val left = typeOf(e.left, te)
+    if(!left.success){
+        return left
     }
-    return TypeError("binary_integer_type_error", e, "left and right arguments of `${e.operationName}` are expected to be integers, but got $left and $right in ${e.unparse()}")
+    val right = typeOf(e.right,te)
+    if(!right.success){
+        return right
+    }
+    if(left.result is TInt && right.result is TInt){
+        return TypeCheckResult(true, TInt(), te)
+    }
+    return TypeCheckResult(false, TypeError("binary_integer_type_error", e, "left and right arguments of `${e.operationName}` are expected to be integers, but got $left and $right in ${e.unparse()}"), te)
 }
-fun binaryFloatOpType(e: EBinaryFloatOp): StrongType {
-    val left = typeOf(e.left)
-    val right = typeOf(e.right)
-    if(left is TFloat && right is TFloat){
-        return TFloat()
+fun binaryFloatOpType(e: EBinaryFloatOp, te:TypeEnv): TypeCheckResult {
+    val left = typeOf(e.left, te)
+    if(!left.success){
+        return left
     }
-    return TypeError("binary_float_type_error", e, "left and right arguments of `${e.operationName}` are expected to be floats, but got $left and $right in ${e.unparse()}")
+    val right = typeOf(e.right,te)
+    if(!right.success){
+        return right
+    }
+    if(left.result is TFloat && right.result is TFloat){
+        return TypeCheckResult(true, TFloat(), te)
+    }
+    return TypeCheckResult(false,  TypeError("binary_float_type_error", e, "left and right arguments of `${e.operationName}` are expected to be floats, but got $left and $right in ${e.unparse()}"), te)
 }
