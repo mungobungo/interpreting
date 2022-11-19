@@ -77,9 +77,20 @@ fun typeOf(e: Expression, te: TypeEnv) : TypeCheckResult{
 fun lambdaType(e: ELambdaDefinition, te: TypeEnv): TypeCheckResult {
 
    val localContext = te.expand()
-    //typeOf(e.body, localContext)
 
-    return TypeCheckResult(false,  TypeError("type_error", e, "unsupported expression ${e.unparse()}"),te)
+    val argNames = e.argumentNames
+    for(argName in argNames){
+        localContext.env[argName] = ????
+    }
+
+    for(exp in e.body){
+        val type = typeOf(exp, localContext)
+        if(!type.success){
+            return type
+        }
+    }
+    return TypeCheckResult(true, typeOf(e.body.last(), localContext).result, te)
+
 }
 
 fun doType(e: EDo, te: TypeEnv): TypeCheckResult {
