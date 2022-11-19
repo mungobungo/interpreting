@@ -1,27 +1,30 @@
 package core
 
+import java.util.Scanner
+
 interface StrongType{
     val type:String
+    fun toScheme():TScheme
 }
 
-data class TypeCheckResult(val success:Boolean, val result:StrongType, val te: TypeEnv)
+data class TypeCheckResult(val success:Boolean, val result:TScheme, val te: TypeEnv)
 
-data class TypeEnv(val env:HashMap<String, StrongType>, val parent:TypeEnv?=null){
+data class TypeEnv(val env:HashMap<String, TScheme>, val parent:TypeEnv?=null){
     fun expand(): TypeEnv{
         return TypeEnv(hashMapOf(), this)
     }
-    fun isLocallyDefined(symbol:String):Pair<Boolean, StrongType>{
+    fun isLocallyDefined(symbol:String):Pair<Boolean, TScheme>{
         val res = env[symbol]
 
         return if(res !=null){
             Pair(true, res)
         }else{
-            Pair(false,TypeError("binding_not_found",ESymbol(symbol), "symbol `$symbol` not found in typeEnv $this"))
+            Pair(false,TypeError("binding_not_found",ESymbol(symbol), "symbol `$symbol` not found in typeEnv $this").toScheme())
         }
     }
-    fun isGloballyDefined(symbol: String):Pair<Boolean, StrongType>{
+    fun isGloballyDefined(symbol: String):Pair<Boolean, TScheme>{
         var current: TypeEnv? = this
-        val res = Pair(false,TypeError("binding_not_found",ESymbol(symbol), "symbol `$symbol` not found in typeEnv $this"))
+        val res = Pair(false,TypeError("binding_not_found",ESymbol(symbol), "symbol `$symbol` not found in typeEnv $this").toScheme())
         while(current!=null){
             val value = current!!.isLocallyDefined(symbol)
             if(value.first) {
@@ -33,19 +36,44 @@ data class TypeEnv(val env:HashMap<String, StrongType>, val parent:TypeEnv?=null
     }
 }
 
-data class TInt(override val type:String = "int"): StrongType
+data class TInt(override val type:String = "int"): StrongType {
+    override fun toScheme(): TScheme {
+       return TScheme(listOf(), this)
+    }
+}
 
-data class  TFloat(override val type:String="float"): StrongType
+data class  TFloat(override val type:String="float"): StrongType {
+    override fun toScheme(): TScheme {
+       return TScheme(listOf(), this)
+    }
+}
 
-data class  TBool(override val type:String="bool"): StrongType
+data class  TBool(override val type:String="bool"): StrongType {
+    override fun toScheme(): TScheme {
+       return TScheme(listOf(), this)
+    }
+}
 
-data class TypeError(override val type:String ="type_error", val input: Expression,  val error:String):StrongType
-data class TypeVariable(override val type:String= "tvar", val name:String) :StrongType
+data class TypeError(override val type:String ="type_error", val input: Expression,  val error:String):StrongType {
+    override fun toScheme(): TScheme {
+       return TScheme(listOf(), this)
+    }
+}
+
+data class TypeVariable(override val type:String= "tvar", val name:String) :StrongType {
+    override fun toScheme(): TScheme {
+       return TScheme(listOf(name), this)
+    }
+}
 // is_int :: a -> Bool
 
 data class TScheme(val typeVars:List<String>, val type:StrongType) // for all, a, b :  a -> b -> a
 // Scheme without typeVars is considered to be just a type // forall () : Int == Int
-data class TFunc(override val type:String ="fun",  val params:List<StrongType>, val result:StrongType):StrongType
+data class TFunc(override val type:String ="fun",  val params:List<StrongType>, val result:StrongType):StrongType {
+    override fun toScheme(): TScheme {
+       return TScheme(listOf(), this)
+    }
+}
 
 // lambda x, y : x  :: TScheme([a, b], TFunc(params:[a, b], result:a)
 
@@ -59,9 +87,9 @@ data class TFunc(override val type:String ="fun",  val params:List<StrongType>, 
 // [let, id, [lambda, [x], x]] :: TScheme([a], TFunc(params:[a], result : a)) // forall a. :: a->a
 fun typeOf(e: Expression, te: TypeEnv) : TypeCheckResult{
     when(e){
-        is EInt -> return  TypeCheckResult(true, TInt(), te)
-        is EFloat -> return TypeCheckResult(true, TFloat(), te)
-        is EBool -> return  TypeCheckResult(true, TBool(), te)
+        is EInt -> return  TypeCheckResult(true, TInt().toScheme(), te)
+        is EFloat -> return TypeCheckResult(true, TFloat().toScheme(), te)
+        is EBool -> return  TypeCheckResult(true, TBool().toScheme(), te)
         is EBinaryIntegerOp -> return binaryIntegerOpType(e, te)
         is EBinaryFloatOp -> return binaryFloatOpType(e, te)
         is EBinaryNumericOp -> return binaryNumericOpType(e, te)
@@ -71,25 +99,25 @@ fun typeOf(e: Expression, te: TypeEnv) : TypeCheckResult{
         is EDo -> return doType(e, te)
         is ELambdaDefinition -> return lambdaType(e, te)
     }
-    return TypeCheckResult(false,  TypeError("type_error", e, "unsupported expression ${e.unparse()}"),te)
+    return TypeCheckResult(false,  TypeError("type_error", e, "unsupported expression ${e.unparse()}").toScheme(),te)
 }
 
 fun lambdaType(e: ELambdaDefinition, te: TypeEnv): TypeCheckResult {
 
-   val localContext = te.expand()
+   val localTypeEnv = te.expand()
 
     val argNames = e.argumentNames
     for(argName in argNames){
-        localContext.env[argName] = ????
+       // localContext.env[argName] = ????
     }
 
     for(exp in e.body){
-        val type = typeOf(exp, localContext)
+        val type = typeOf(exp, localTypeEnv)
         if(!type.success){
             return type
         }
     }
-    return TypeCheckResult(true, typeOf(e.body.last(), localContext).result, te)
+    return TypeCheckResult(true, typeOf(e.body.last(), localTypeEnv).result, te)
 
 }
 
@@ -131,10 +159,10 @@ fun binaryBoolOpType(e: EBinaryBoolOp, te:TypeEnv): TypeCheckResult {
     if(!right.success){
         return right
     }
-   if(left.result is TBool && right.result is TBool){
-       return TypeCheckResult(true, TBool(), te)
+   if(left.result.type is TBool && right.result.type is TBool){
+       return TypeCheckResult(true, TBool().toScheme(), te)
    }
-    return TypeCheckResult(false, TypeError("binary_bool_type_error", e, "left and right arguments of `${e.operationName}` are expected to be booleans, but got $left and $right in ${e.unparse()}"),te)
+    return TypeCheckResult(false, TypeError("binary_bool_type_error", e, "left and right arguments of `${e.operationName}` are expected to be booleans, but got $left and $right in ${e.unparse()}").toScheme(),te)
 }
 
 fun binaryNumericOpType(e: EBinaryNumericOp, te:TypeEnv): TypeCheckResult {
@@ -146,20 +174,20 @@ fun binaryNumericOpType(e: EBinaryNumericOp, te:TypeEnv): TypeCheckResult {
     if(!right.success){
         return right
     }
-    if(left.result is TInt && right.result is TInt){
-        return TypeCheckResult(true, TInt(), te)
+    if(left.result.type is TInt && right.result.type is TInt){
+        return TypeCheckResult(true, left.result, te)
     }
-    if(left.result is TFloat && right.result is TInt){
-        return TypeCheckResult(true, TFloat(), te)
+    if(left.result.type is TFloat && right.result.type is TInt){
+        return TypeCheckResult(true, left.result, te)
     }
-    if(left.result is TInt && right.result is TFloat){
-        return TypeCheckResult(true, TFloat(), te)
+    if(left.result.type is TInt && right.result.type is TFloat){
+        return TypeCheckResult(true, right.result, te)
     }
-    if(left.result is TFloat && right.result is TFloat){
-        return TypeCheckResult(true, TFloat(), te)
+    if(left.result.type is TFloat && right.result.type is TFloat){
+        return TypeCheckResult(true, left.result, te)
     }
 
-    return TypeCheckResult(false,  TypeError("binary_numeric_type_error", e, "left and right arguments of `${e.operationName}` are expected to be numerics, but got $left and $right in ${e.unparse()}"), te)
+    return TypeCheckResult(false,  TypeError("binary_numeric_type_error", e, "left and right arguments of `${e.operationName}` are expected to be numerics, but got $left and $right in ${e.unparse()}").toScheme(), te)
 }
 
 fun binaryIntegerOpType(e: EBinaryIntegerOp, te:TypeEnv): TypeCheckResult {
@@ -171,10 +199,10 @@ fun binaryIntegerOpType(e: EBinaryIntegerOp, te:TypeEnv): TypeCheckResult {
     if(!right.success){
         return right
     }
-    if(left.result is TInt && right.result is TInt){
-        return TypeCheckResult(true, TInt(), te)
+    if(left.result.type is TInt && right.result.type is TInt){
+        return TypeCheckResult(true, left.result, te)
     }
-    return TypeCheckResult(false, TypeError("binary_integer_type_error", e, "left and right arguments of `${e.operationName}` are expected to be integers, but got $left and $right in ${e.unparse()}"), te)
+    return TypeCheckResult(false, TypeError("binary_integer_type_error", e, "left and right arguments of `${e.operationName}` are expected to be integers, but got $left and $right in ${e.unparse()}").toScheme(), te)
 }
 fun binaryFloatOpType(e: EBinaryFloatOp, te:TypeEnv): TypeCheckResult {
     val left = typeOf(e.left, te)
@@ -185,8 +213,8 @@ fun binaryFloatOpType(e: EBinaryFloatOp, te:TypeEnv): TypeCheckResult {
     if(!right.success){
         return right
     }
-    if(left.result is TFloat && right.result is TFloat){
-        return TypeCheckResult(true, TFloat(), te)
+    if(left.result.type is TFloat && right.result.type is TFloat){
+        return TypeCheckResult(true, left.result, te)
     }
-    return TypeCheckResult(false,  TypeError("binary_float_type_error", e, "left and right arguments of `${e.operationName}` are expected to be floats, but got $left and $right in ${e.unparse()}"), te)
+    return TypeCheckResult(false,  TypeError("binary_float_type_error", e, "left and right arguments of `${e.operationName}` are expected to be floats, but got $left and $right in ${e.unparse()}").toScheme(), te)
 }

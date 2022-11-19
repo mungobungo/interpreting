@@ -34,8 +34,8 @@ fun main(args: Array<String>) {
 
         val typed = typeOf(parsedValue, typeEnv)
         val typeTime = System.nanoTime() - typeStart
-        if(typed.result is TypeError){
-            println("Type error: " + typed.result.error)
+        if(typed.result.type is TypeError){
+            println("Type error: " + typed.result.type.error)
         }
 
         val evalStart = System.nanoTime()
