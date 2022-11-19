@@ -41,11 +41,22 @@ data class  TBool(override val type:String="bool"): StrongType
 
 data class TypeError(override val type:String ="type_error", val input: Expression,  val error:String):StrongType
 data class TypeVariable(override val type:String= "tvar", val name:String) :StrongType
+// is_int :: a -> Bool
 
 data class TScheme(val typeVars:List<String>, val type:StrongType) // for all, a, b :  a -> b -> a
 // Scheme without typeVars is considered to be just a type // forall () : Int == Int
-data class TFunc(override val type:String ="fun",  val params:List<StrongType>, val result:List<StrongType>):StrongType
+data class TFunc(override val type:String ="fun",  val params:List<StrongType>, val result:StrongType):StrongType
 
+// lambda x, y : x  :: TScheme([a, b], TFunc(params:[a, b], result:a)
+
+
+// lambda x : [call, x, 1]  ::  TScheme([b], TFunc(params:Func(Int->b), result : b)
+// we don't know type of x. But we know it is a function. and this function accepts int. and it returns yet unknown type b.
+
+
+// [let, x, 5, x] :: int
+// [let, id, [lambda, [x], x], [call, id, true]] :: Bool
+// [let, id, [lambda, [x], x]] :: TScheme([a], TFunc(params:[a], result : a)) // forall a. :: a->a
 fun typeOf(e: Expression, te: TypeEnv) : TypeCheckResult{
     when(e){
         is EInt -> return  TypeCheckResult(true, TInt(), te)
