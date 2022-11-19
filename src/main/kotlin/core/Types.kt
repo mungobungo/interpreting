@@ -40,7 +40,10 @@ data class  TFloat(override val type:String="float"): StrongType
 data class  TBool(override val type:String="bool"): StrongType
 
 data class TypeError(override val type:String ="type_error", val input: Expression,  val error:String):StrongType
+data class TypeVariable(override val type:String= "tvar", val name:String) :StrongType
 
+data class TScheme(val typeVars:List<String>, val type:StrongType) // for all, a, b :  a -> b -> a
+// Scheme without typeVars is considered to be just a type // forall () : Int == Int
 data class TFunc(override val type:String ="fun",  val params:List<StrongType>, val result:List<StrongType>):StrongType
 
 fun typeOf(e: Expression, te: TypeEnv) : TypeCheckResult{
@@ -61,6 +64,9 @@ fun typeOf(e: Expression, te: TypeEnv) : TypeCheckResult{
 }
 
 fun lambdaType(e: ELambdaDefinition, te: TypeEnv): TypeCheckResult {
+
+   val localContext = te.expand()
+    //typeOf(e.body, localContext)
 
     return TypeCheckResult(false,  TypeError("type_error", e, "unsupported expression ${e.unparse()}"),te)
 }
