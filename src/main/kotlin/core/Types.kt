@@ -122,7 +122,11 @@ fun lambdaType(e: ELambdaDefinition, te: TypeEnv): TypeCheckResult {
         localTypeEnv.env[argName] = argType.toScheme()
         argTypes.add(argType)
     }
+// [lambda, [a,b], 3]] :: forall a,b   Func([a,b] , int)
 
+    // what about
+    // [lambda, [a,b], [iadd, a, 4]] ??
+    // a can only be integer, we need to capture this info somehow
     for(exp in e.body){
         val type = typeOf(exp, localTypeEnv)
         if(!type.success){
