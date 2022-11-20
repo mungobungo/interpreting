@@ -141,6 +141,25 @@ fun applyEnvSubstitution(sub:Substitution, te:TypeEnv) : TypeEnv{
     return TypeEnv(res)
 }
 
+fun composeSub(sub1: Substitution, sub2: Substitution) : Substitution{
+    val s3  = hashMapOf<String, StrongType>()
+
+    // apply sub1 to all types in sub2 and  save them to the s3
+    for(s in sub2.subs){
+        //if(sub1.subs.containsKey(s.key)){
+            s3[s.key] = applySubstitution(sub1, s.value)
+       // } else{
+          //  s3[s.key] = s.value
+        //}
+    }
+    // take all the vals from sub1 that were not substituted, and add them to s3
+    for(s in sub1.subs){
+        if(!s3.containsKey(s.key)){
+            s3[s.key] = s.value
+        }
+    }
+    return Substitution(s3)
+}
 fun lambdaType(e: ELambdaDefinition, te: TypeEnv): TypeCheckResult {
 
    val localTypeEnv = te.expand()

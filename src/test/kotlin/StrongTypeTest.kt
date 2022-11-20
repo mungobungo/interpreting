@@ -135,4 +135,18 @@ internal class StrongTypeTest {
 
     }
 
+    @Test
+    fun composeSubstitutionTest(){
+
+        val sub1= Substitution(hashMapOf("a" to TInt())) // a:: int
+        val sub2 = Substitution(hashMapOf("b" to TFloat(), // b:; float
+            "x" to TFunc("fun", listOf(TVar("a")), TInt()))) // x:: a -> int
+        val sub3 = composeSub(sub1, sub2)
+        // f:: a -> x -> b -> z -> int
+        val f = TFunc("fun", listOf(TVar("a"), TVar("x"), TVar("b"), TVar("z")), TInt())
+        val subRes = applySubstitution(sub3, f)
+        // after substitution  f:: int -> (int-> int) -> float -> z -> int
+        val res = TFunc("fun", listOf(TInt(), TFunc("fun", listOf(TInt()), TInt()), TFloat(), TVar("z")), TInt())
+        assertEquals(res,  subRes)
+    }
 }
