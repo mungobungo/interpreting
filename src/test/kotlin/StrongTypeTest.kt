@@ -152,4 +152,10 @@ internal class StrongTypeTest {
         val res = TFunc("fun", listOf(TInt(), TFunc("fun", listOf(TInt()), TInt()), TFloat(), TVar("z")), TInt())
         assertEquals(res,  subRes)
     }
+    @Test
+    fun simpleUnifyTest(){
+       assertEquals(emptySub, unify(TInt(), TInt()))
+        assertEquals(emptySub, unify(TFloat(), TFloat()))
+        assertEquals(emptySub, unify(TBool(), TBool()))
+    }
 }

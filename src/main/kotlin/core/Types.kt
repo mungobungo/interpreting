@@ -160,6 +160,35 @@ fun composeSub(sub1: Substitution, sub2: Substitution) : Substitution{
     }
     return Substitution(s3)
 }
+
+// would be nice to get substitutions from somewhere
+// unify to the rescue.
+val emptySub = Substitution(hashMapOf())
+//unify - return the substitution that makes two types equal
+fun unify(t1: StrongType, t2:StrongType) : Substitution{
+    if(t1 is TInt && t2 is TInt){
+        return emptySub
+    }
+    if(t1 is TFloat && t2 is TFloat){
+        return emptySub
+    }
+    if(t1 is TBool && t2 is TBool){
+        return emptySub
+    }
+    if(t1 is TVar){
+        if(t2 is TVar && t1.type == t2.type){
+            return emptySub
+        }
+        return Substitution(hashMapOf(t1.type to t2))
+    }
+    if(t2 is TVar){
+        if(t1 is TVar && t1.type == t2.type){
+            return emptySub
+        }
+        return Substitution(hashMapOf(t2.type to t1))
+    }
+    return emptySub
+}
 fun lambdaType(e: ELambdaDefinition, te: TypeEnv): TypeCheckResult {
 
    val localTypeEnv = te.expand()
