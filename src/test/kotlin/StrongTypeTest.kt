@@ -199,4 +199,18 @@ internal class StrongTypeTest {
         assertTrue(res2.success)
         assertEquals(Substitution(hashMapOf("x" to TInt())), res2.sub)
     }
+    @Test
+    fun functionUnification2Test(){
+
+        val f1 = TFunc("fun", listOf(TVar("x"), TFloat()), TInt())      // f1:: x-> float -> int
+        val f2 = TFunc("fun", listOf(TInt(), TVar("z")), TVar("y"))// f2:: int -> z ->   y
+        val res = unify(f1, f2)
+        assertTrue(res.success)
+        assertEquals(Substitution(hashMapOf("x" to TInt(), "z" to TFloat(), "y" to TInt())), res.sub)
+
+        val res2 = unify(f2, f1)
+
+        assertTrue(res2.success)
+        assertEquals(Substitution(hashMapOf("x" to TInt(), "z" to TFloat(), "y" to TInt())), res2.sub)
+    }
 }
