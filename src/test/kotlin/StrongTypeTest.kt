@@ -157,5 +157,12 @@ internal class StrongTypeTest {
        assertEquals(emptySub, unify(TInt(), TInt()))
         assertEquals(emptySub, unify(TFloat(), TFloat()))
         assertEquals(emptySub, unify(TBool(), TBool()))
+        assertEquals(emptySub, unify(TVar("x"), TVar("x")))
+
+        assertEquals(Substitution(hashMapOf("x" to TBool())), unify(TVar("x"), TBool()))
+        assertEquals(Substitution(hashMapOf("x" to TBool())), unify(TBool(), TVar("x")))
+
+        assertEquals(Substitution(hashMapOf("x" to TVar("y"))), unify(TVar("x"), TVar("y")))
+        assertEquals(Substitution(hashMapOf("y" to TVar("x"))), unify(TVar("y"), TVar("x")))
     }
 }
