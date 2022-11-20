@@ -8,7 +8,16 @@ interface StrongType{
 }
 
 data class TypeCheckResult(val success:Boolean, val result:TScheme, val te: TypeEnv)
+class Helper{
+    companion object {
+        var typeCount = 0
 
+    fun newTypeVar(): TypeVariable{
+        typeCount += 1
+        return TypeVariable(type = "t$typeCount", "t$typeCount")
+    }
+    }
+}
 data class TypeEnv(val env:HashMap<String, TScheme>, val parent:TypeEnv?=null){
     fun expand(): TypeEnv{
         return TypeEnv(hashMapOf(), this)
@@ -107,8 +116,11 @@ fun lambdaType(e: ELambdaDefinition, te: TypeEnv): TypeCheckResult {
    val localTypeEnv = te.expand()
 
     val argNames = e.argumentNames
+    val argTypes = mutableListOf<TypeVariable>()
     for(argName in argNames){
-       // localContext.env[argName] = ????
+        val argType= Helper.newTypeVar()
+        localTypeEnv.env[argName] = argType.toScheme()
+        argTypes.add(argType)
     }
 
     for(exp in e.body){
@@ -117,7 +129,8 @@ fun lambdaType(e: ELambdaDefinition, te: TypeEnv): TypeCheckResult {
             return type
         }
     }
-    return TypeCheckResult(true, typeOf(e.body.last(), localTypeEnv).result, te)
+    val resType = typeOf(e.body.last(), localTypeEnv).result
+    return TypeCheckResult(true, TScheme(argTypes.map { it.name }, TFunc(params = argTypes, result = resType.type)), te)
 
 }
 
