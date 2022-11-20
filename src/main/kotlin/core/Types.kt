@@ -200,6 +200,19 @@ fun unify(t1: StrongType, t2:StrongType) : UnificationResult{
         if(t1.params.size != t2.params.size){
             return UnificationResult(false, emptySub, Pair(t1, t2), "Func argument count mismatch,\n${t1.params.size} arguments for $t1\n${t2.params.size} arguments for $t2\n")
         }
+        var funArgumatnsSub = Substitution(hashMapOf())
+        for(param in t1.params.zip(t2.params)){
+            val argSub = unify(param.first, param.second)
+            if(!argSub.success){
+                return argSub
+            }
+            funArgumatnsSub = composeSub(argSub.sub, funArgumatnsSub)
+        }
+        val funReturnUni = unify(t1.result, t2.result)
+        if(!funReturnUni.success){
+            return funReturnUni
+        }
+       return UnificationResult(true, composeSub(funReturnUni.sub, funArgumatnsSub))
     }
     return UnificationResult(false, emptySub, Pair(t1, t2))
 }

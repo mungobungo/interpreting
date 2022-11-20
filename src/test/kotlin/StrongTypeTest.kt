@@ -2,6 +2,7 @@ import core.*
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
 import parser.parse
 import kotlin.test.assertEquals
 import kotlin.test.assertFails
@@ -182,5 +183,20 @@ internal class StrongTypeTest {
                 "2 arguments for TFunc(type=fun, params=[TInt(type=int), TInt(type=int)], result=TInt(type=int))\n" +
                 "1 arguments for TFunc(type=fun, params=[TInt(type=int)], result=TInt(type=int))\n" +
                 " Cannot unify TFunc(type=fun, params=[TInt(type=int), TInt(type=int)], result=TInt(type=int)) and TFunc(type=fun, params=[TInt(type=int)], result=TInt(type=int))", unify(f1, f2).toString())
+    }
+
+    @Test
+    fun functionUnificationTest(){
+
+        val f1 = TFunc("fun", listOf(TVar("x")), TInt())
+        val f2 = TFunc("fun", listOf(TInt()), TInt())
+        val res = unify(f1, f2)
+        assertTrue(res.success)
+        assertEquals(Substitution(hashMapOf("x" to TInt())), res.sub)
+
+        val res2 = unify(f2, f1)
+
+        assertTrue(res2.success)
+        assertEquals(Substitution(hashMapOf("x" to TInt())), res2.sub)
     }
 }
