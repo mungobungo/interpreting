@@ -1,7 +1,5 @@
 package core
 
-import java.util.Scanner
-
 interface StrongType{
     val type:String
     fun toScheme():TScheme
@@ -12,9 +10,9 @@ class Helper{
     companion object {
         var typeCount = 0
 
-    fun newTypeVar(): TypeVariable{
+    fun newTypeVar(): TVar{
         typeCount += 1
-        return TypeVariable(type = "t$typeCount", "t$typeCount")
+        return TVar(type = "t$typeCount")
     }
     }
 }
@@ -69,9 +67,9 @@ data class TypeError(override val type:String ="type_error", val input: Expressi
     }
 }
 
-data class TypeVariable(override val type:String= "tvar", val name:String) :StrongType {
+data class TVar(override val type:String= "tvar") :StrongType {
     override fun toScheme(): TScheme {
-       return TScheme(listOf(name), this)
+       return TScheme(listOf(type), this)
     }
 }
 // is_int :: a -> Bool
@@ -111,14 +109,35 @@ fun typeOf(e: Expression, te: TypeEnv) : TypeCheckResult{
     return TypeCheckResult(false,  TypeError("type_error", e, "unsupported expression ${e.unparse()}").toScheme(),te)
 }
 
-data class Substitution(val subs:HashMap<TypeVariable, StrongType>)
+data class Substitution(val subs:HashMap<String, StrongType>)
 
+fun applySubstitution (sub:Substitution,  t:StrongType) : StrongType{
+    if(t is TFunc){
+        return TFunc("fun", t.params.map { applySubstitution(sub, it) }, applySubstitution(sub, t.result) )
+    }
+    if( t is TVar){
+        if(sub.subs.containsKey(t.type)){
+            return sub.subs[t.type]!!
+        }
+    }
+    return t
+}
+fun applySchemeSubstitution (sub:Substitution,  s:TScheme) : TScheme{
+    val schemeVars = s.typeVars.toSet()
+    val freeSubs = hashMapOf<String,StrongType>()
+    for(subVal in sub.subs ){
+        if(!schemeVars.contains(subVal.key)){
+            freeSubs[subVal.key] = subVal.value
+        }
+    }
+    return TScheme(s.typeVars, applySubstitution(Substitution(freeSubs), s.type))
+}
 fun lambdaType(e: ELambdaDefinition, te: TypeEnv): TypeCheckResult {
 
    val localTypeEnv = te.expand()
 
     val argNames = e.argumentNames
-    val argTypes = mutableListOf<TypeVariable>()
+    val argTypes = mutableListOf<TVar>()
     for(argName in argNames){
         val argType= Helper.newTypeVar()
         localTypeEnv.env[argName] = argType.toScheme()
@@ -142,7 +161,7 @@ fun lambdaType(e: ELambdaDefinition, te: TypeEnv): TypeCheckResult {
         }
     }
     val resType = typeOf(e.body.last(), localTypeEnv).result
-    return TypeCheckResult(true, TScheme(argTypes.map { it.name }, TFunc(params = argTypes, result = resType.type)), te)
+    return TypeCheckResult(true, TScheme(argTypes.map { it.type }, TFunc(params = argTypes, result = resType.type)), te)
 
 }
 

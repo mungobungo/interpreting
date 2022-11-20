@@ -4,8 +4,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import parser.parse
 import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
-import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 internal class StrongTypeTest {
@@ -71,4 +69,56 @@ internal class StrongTypeTest {
         assertEquals(TBool().toScheme(), typeOf(toEx("[setvar, x , True]"), emptyTypeEnv).result)
         assertEquals(TInt().toScheme(), typeOf(toEx("[setvar, x, 12]"),emptyTypeEnv).result)
     }
+    @Test
+    fun substitution0Test(){
+
+        val sub= Substitution(hashMapOf("a" to TInt(), "b" to TFloat()))
+        // after substitution  f:: int -> int -> int
+        assertEquals(TInt(), applySubstitution(sub, TInt()))
+        assertEquals(TBool(), applySubstitution(sub, TBool()))
+        assertEquals(TFloat(), applySubstitution(sub, TFloat()))
+        assertEquals(TInt(), applySubstitution(sub, TVar("a")))
+        assertEquals(TFloat(), applySubstitution(sub, TVar("b")))
+        assertEquals(TVar("x"), applySubstitution(sub, TVar("x")))
+    }
+    @Test
+    fun substitution1Test(){
+        // f = [lambda, [a, b], [iadd, a, b]]
+        val sub= Substitution(hashMapOf("a" to TInt(), "b" to TInt()))
+        // f:: a -> b -> int
+        val f = TFunc("fun", listOf(TVar("a"), TVar("b")), TInt())
+        val subRes = applySubstitution(sub, f)
+        // after substitution  f:: int -> int -> int
+        assertEquals(TFunc("fun", listOf(TInt(), TInt()), TInt()), subRes)
+    }
+    @Test
+    fun substitution2Test(){
+        // f = [lambda, [a, b], [iadd, a, 8]]
+        val sub= Substitution(hashMapOf("a" to TInt()))
+       // f:: a -> b -> int
+        val f = TFunc("fun", listOf(TVar("a"), TVar("b")), TInt())
+        val subRes = applySubstitution(sub, f)
+        // after substitution  f:: int -> b -> int
+        assertEquals(TFunc("fun", listOf(TInt(), TVar("b")), TInt()), subRes)
+    }
+    @Test
+    fun substitutionSchemeTest(){
+        val sub= Substitution(hashMapOf("a" to TInt()))
+        val t = TScheme(listOf("a"), TVar("a"))// forall a : a
+        // bound variables should not be substituted
+        val subScheme = applySchemeSubstitution(sub, t)
+        assertEquals( TScheme(listOf("a"), TVar("a")), subScheme)// forall a : a
+    }
+
+    @Test
+    fun substitution2SchemeTest(){
+        val f = TFunc("fun", listOf(TVar("a")), TVar("b"))
+        val t = TScheme(listOf("a"), f)// forall a  : a -> b
+        // bound variables should not be substituted
+        val sub= Substitution(hashMapOf("a" to TInt(), "b" to TInt()))
+        val subScheme = applySchemeSubstitution(sub, t)
+        val subF = TFunc("fun", listOf(TVar("a")),TInt()) //  a-> int
+        assertEquals( TScheme(listOf("a"), subF), subScheme)// forall a : a : a -> int
+    }
+
 }
