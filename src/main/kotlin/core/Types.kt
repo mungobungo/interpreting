@@ -111,6 +111,8 @@ fun typeOf(e: Expression, te: TypeEnv) : TypeCheckResult{
     return TypeCheckResult(false,  TypeError("type_error", e, "unsupported expression ${e.unparse()}").toScheme(),te)
 }
 
+data class Substitution(val subs:HashMap<TypeVariable, StrongType>)
+
 fun lambdaType(e: ELambdaDefinition, te: TypeEnv): TypeCheckResult {
 
    val localTypeEnv = te.expand()
@@ -127,6 +129,12 @@ fun lambdaType(e: ELambdaDefinition, te: TypeEnv): TypeCheckResult {
     // what about
     // [lambda, [a,b], [iadd, a, 4]] ??
     // a can only be integer, we need to capture this info somehow
+    // To deal with it , we need to have a way of capturing this information
+    // during the type inference
+    // original type :: a -> b -> int
+    // updated type :: int -> b -> int
+    // the only way to satisfy [iadd, a, 4] is for a to have type int.
+
     for(exp in e.body){
         val type = typeOf(exp, localTypeEnv)
         if(!type.success){
