@@ -172,6 +172,15 @@ internal class StrongTypeTest {
     fun brokenUnificationTest(){
         val u1 = unify(TInt(), TBool())
         assertFalse(u1.success)
-        assertEquals("Cannot unify TInt(type=int) and TBool(type=bool)", u1.toString())
+        assertEquals("Unification error: Cannot unify TInt(type=int) and TBool(type=bool)", u1.toString())
+    }
+    @Test
+    fun brokenUnificationFunctionArgumentMismatchTest(){
+        val f1 = TFunc("fun", listOf(TInt(), TInt()), TInt())
+        val f2 = TFunc("fun", listOf(TInt()), TInt())
+        assertEquals("Func argument count mismatch,\n" +
+                "2 arguments for TFunc(type=fun, params=[TInt(type=int), TInt(type=int)], result=TInt(type=int))\n" +
+                "1 arguments for TFunc(type=fun, params=[TInt(type=int)], result=TInt(type=int))\n" +
+                " Cannot unify TFunc(type=fun, params=[TInt(type=int), TInt(type=int)], result=TInt(type=int)) and TFunc(type=fun, params=[TInt(type=int)], result=TInt(type=int))", unify(f1, f2).toString())
     }
 }

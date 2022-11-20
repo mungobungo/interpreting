@@ -165,12 +165,12 @@ fun composeSub(sub1: Substitution, sub2: Substitution) : Substitution{
 // unify to the rescue.
 val emptySub = Substitution(hashMapOf())
 //unify - return the substitution that makes two types equal
-data class UnificationResult(val success:Boolean, val sub:Substitution = emptySub, val error:Pair<StrongType, StrongType>? = null){
+data class UnificationResult(val success:Boolean, val sub:Substitution = emptySub, val error:Pair<StrongType, StrongType>? = null, val errorMessage:String = "Unification error:"){
     override fun toString(): String {
        if(success){
            return sub.toString()
        }
-        return "Cannot unify ${error!!.first} and ${error.second}"
+        return "$errorMessage Cannot unify ${error!!.first} and ${error.second}"
     }
 }
 fun unify(t1: StrongType, t2:StrongType) : UnificationResult{
@@ -194,6 +194,12 @@ fun unify(t1: StrongType, t2:StrongType) : UnificationResult{
             return UnificationResult(true)
         }
         return UnificationResult(true, Substitution(hashMapOf(t2.type to t1)))
+    }
+
+    if(t1 is TFunc && t2 is TFunc){
+        if(t1.params.size != t2.params.size){
+            return UnificationResult(false, emptySub, Pair(t1, t2), "Func argument count mismatch,\n${t1.params.size} arguments for $t1\n${t2.params.size} arguments for $t2\n")
+        }
     }
     return UnificationResult(false, emptySub, Pair(t1, t2))
 }
