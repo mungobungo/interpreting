@@ -213,4 +213,13 @@ internal class StrongTypeTest {
         assertTrue(res2.success)
         assertEquals(Substitution(hashMapOf("x" to TInt(), "z" to TFloat(), "y" to TInt())), res2.sub)
     }
+    @Test
+    fun functionOccursCheckTest(){
+
+        val f1 = TVar("a")
+        val f2 = TFunc("fun", listOf(TVar("a")),TVar("a"))
+        val res = unify(f1, f2)
+        val g  = applySubstitution(res.sub, f2)
+        g.toString()
+    }
 }
