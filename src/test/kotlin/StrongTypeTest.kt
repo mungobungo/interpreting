@@ -219,7 +219,21 @@ internal class StrongTypeTest {
         val f1 = TVar("a")
         val f2 = TFunc("fun", listOf(TVar("a")),TVar("a"))
         val res = unify(f1, f2)
-        val g  = applySubstitution(res.sub, f2)
-        g.toString()
+        assertEquals("Occurs check for `a`:" +
+                "\n Cannot unify TVar(type=a) and TFunc(type=fun, params=[TVar(type=a)], result=TVar(type=a))", res.toString())
+        val res2 = unify(f2, f1)
+        assertEquals("Occurs check for `a`:" +
+                "\n Cannot unify TFunc(type=fun, params=[TVar(type=a)], result=TVar(type=a)) and TVar(type=a)", res2.toString())
+    }
+
+    @Test
+    fun freeVarsTypeTest(){
+
+        val f1 = TVar("a")
+        assertEquals(setOf("a"), freeVars(f1))
+        val f2 = TFunc("fun", listOf(TVar("a")),TVar("a"))
+        assertEquals(setOf("a"), freeVars(f2))
+        val f3 = TFunc("fun", listOf(TVar("a"), TInt()),TVar("b"))
+        assertEquals(setOf("a", "b"), freeVars(f3))
     }
 }

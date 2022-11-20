@@ -173,6 +173,21 @@ data class UnificationResult(val success:Boolean, val sub:Substitution = emptySu
         return "$errorMessage Cannot unify ${error!!.first} and ${error.second}"
     }
 }
+
+fun freeVars(t:StrongType): HashSet<String>{
+    if(t is TVar){
+        return hashSetOf(t.type)
+    }
+    if(t is TFunc){
+        val result = hashSetOf<String>()
+        for(arg in t.params){
+            result.addAll(freeVars(arg))
+        }
+        result.addAll(freeVars(t.result))
+        return result
+    }
+    return hashSetOf()
+}
 fun unify(t1: StrongType, t2:StrongType) : UnificationResult{
     if(t1 is TInt && t2 is TInt){
         return UnificationResult(true)
@@ -187,11 +202,17 @@ fun unify(t1: StrongType, t2:StrongType) : UnificationResult{
         if(t2 is TVar && t1.type == t2.type){
             return UnificationResult(true)
         }
+        if(freeVars(t2).contains(t1.type)){
+            return UnificationResult(false, emptySub, Pair(t1,t2), "Occurs check for `${t1.type}`:\n")
+        }
         return UnificationResult(true, Substitution(hashMapOf(t1.type to t2)))
     }
     if(t2 is TVar){
         if(t1 is TVar && t1.type == t2.type){
             return UnificationResult(true)
+        }
+        if(freeVars(t1).contains(t2.type)){
+            return UnificationResult(false, emptySub, Pair(t1,t2), "Occurs check for `${t2.type}`:\n")
         }
         return UnificationResult(true, Substitution(hashMapOf(t2.type to t1)))
     }
