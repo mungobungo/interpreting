@@ -165,29 +165,37 @@ fun composeSub(sub1: Substitution, sub2: Substitution) : Substitution{
 // unify to the rescue.
 val emptySub = Substitution(hashMapOf())
 //unify - return the substitution that makes two types equal
-fun unify(t1: StrongType, t2:StrongType) : Substitution{
+data class UnificationResult(val success:Boolean, val sub:Substitution = emptySub, val error:Pair<StrongType, StrongType>? = null){
+    override fun toString(): String {
+       if(success){
+           return sub.toString()
+       }
+        return "Cannot unify ${error!!.first} and ${error.second}"
+    }
+}
+fun unify(t1: StrongType, t2:StrongType) : UnificationResult{
     if(t1 is TInt && t2 is TInt){
-        return emptySub
+        return UnificationResult(true)
     }
     if(t1 is TFloat && t2 is TFloat){
-        return emptySub
+        return UnificationResult(true)
     }
     if(t1 is TBool && t2 is TBool){
-        return emptySub
+        return UnificationResult(true)
     }
     if(t1 is TVar){
         if(t2 is TVar && t1.type == t2.type){
-            return emptySub
+            return UnificationResult(true)
         }
-        return Substitution(hashMapOf(t1.type to t2))
+        return UnificationResult(true, Substitution(hashMapOf(t1.type to t2)))
     }
     if(t2 is TVar){
         if(t1 is TVar && t1.type == t2.type){
-            return emptySub
+            return UnificationResult(true)
         }
-        return Substitution(hashMapOf(t2.type to t1))
+        return UnificationResult(true, Substitution(hashMapOf(t2.type to t1)))
     }
-    return emptySub
+    return UnificationResult(false, emptySub, Pair(t1, t2))
 }
 fun lambdaType(e: ELambdaDefinition, te: TypeEnv): TypeCheckResult {
 

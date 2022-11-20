@@ -4,6 +4,8 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import parser.parse
 import kotlin.test.assertEquals
+import kotlin.test.assertFails
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 internal class StrongTypeTest {
@@ -154,15 +156,22 @@ internal class StrongTypeTest {
     }
     @Test
     fun simpleUnifyTest(){
-       assertEquals(emptySub, unify(TInt(), TInt()))
-        assertEquals(emptySub, unify(TFloat(), TFloat()))
-        assertEquals(emptySub, unify(TBool(), TBool()))
-        assertEquals(emptySub, unify(TVar("x"), TVar("x")))
+       assertEquals(emptySub, unify(TInt(), TInt()).sub)
+        assertEquals(emptySub, unify(TFloat(), TFloat()).sub)
+        assertEquals(emptySub, unify(TBool(), TBool()).sub)
+        assertEquals(emptySub, unify(TVar("x"), TVar("x")).sub)
 
-        assertEquals(Substitution(hashMapOf("x" to TBool())), unify(TVar("x"), TBool()))
-        assertEquals(Substitution(hashMapOf("x" to TBool())), unify(TBool(), TVar("x")))
+        assertEquals(Substitution(hashMapOf("x" to TBool())), unify(TVar("x"), TBool()).sub)
+        assertEquals(Substitution(hashMapOf("x" to TBool())), unify(TBool(), TVar("x")).sub)
 
-        assertEquals(Substitution(hashMapOf("x" to TVar("y"))), unify(TVar("x"), TVar("y")))
-        assertEquals(Substitution(hashMapOf("y" to TVar("x"))), unify(TVar("y"), TVar("x")))
+        assertEquals(Substitution(hashMapOf("x" to TVar("y"))), unify(TVar("x"), TVar("y")).sub)
+        assertEquals(Substitution(hashMapOf("y" to TVar("x"))), unify(TVar("y"), TVar("x")).sub)
+    }
+
+    @Test
+    fun brokenUnificationTest(){
+        val u1 = unify(TInt(), TBool())
+        assertFalse(u1.success)
+        assertEquals("Cannot unify TInt(type=int) and TBool(type=bool)", u1.toString())
     }
 }
