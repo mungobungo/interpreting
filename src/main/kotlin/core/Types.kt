@@ -132,6 +132,15 @@ fun applySchemeSubstitution (sub:Substitution,  s:TScheme) : TScheme{
     }
     return TScheme(s.typeVars, applySubstitution(Substitution(freeSubs), s.type))
 }
+
+fun applyEnvSubstitution(sub:Substitution, te:TypeEnv) : TypeEnv{
+    val res = hashMapOf<String, TScheme>()
+    for(entry in te.env){
+        res[entry.key] = applySchemeSubstitution(sub, entry.value)
+    }
+    return TypeEnv(res)
+}
+
 fun lambdaType(e: ELambdaDefinition, te: TypeEnv): TypeCheckResult {
 
    val localTypeEnv = te.expand()

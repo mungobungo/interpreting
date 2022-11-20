@@ -120,5 +120,19 @@ internal class StrongTypeTest {
         val subF = TFunc("fun", listOf(TVar("a")),TInt()) //  a-> int
         assertEquals( TScheme(listOf("a"), subF), subScheme)// forall a : a : a -> int
     }
+    @Test
+    fun substitutionTypeEnvTest(){
+        val tEnv = TypeEnv(hashMapOf())
+
+        val f = TFunc("fun", listOf(TVar("a")), TVar("b"))
+        val t = TScheme(listOf("a"), f)// forall a  : a -> b
+        tEnv.env["x"] = t
+
+        val sub= Substitution(hashMapOf("a" to TInt(), "b" to TInt()))
+        val subEnv = applyEnvSubstitution(sub, tEnv)
+        val subF = TFunc("fun", listOf(TVar("a")),TInt()) //  a-> int
+       assertEquals( TScheme(listOf("a"), subF), subEnv.env["x"])
+
+    }
 
 }
