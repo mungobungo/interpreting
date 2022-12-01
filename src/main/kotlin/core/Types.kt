@@ -1,11 +1,13 @@
 package core
 
+import java.lang.Error
+
 interface StrongType{
     val type:String
     fun toScheme():TScheme
 }
 
-data class TypeCheckResult(val success:Boolean, val result:TScheme, val te: TypeEnv)
+data class TypeCheckResult(val success:Boolean, val result:TScheme, val te: TypeEnv, val sub: Substitution = emptySub)
 class Helper{
     companion object {
         var typeCount = 0
@@ -105,9 +107,11 @@ fun typeOf(e: Expression, te: TypeEnv) : TypeCheckResult{
         is ESetVar -> return setVarType(e, te)
         is EDo -> return doType(e, te)
         is ELambdaDefinition -> return lambdaType(e, te)
+        is ECall -> return callType(e, te)
     }
     return TypeCheckResult(false,  TypeError("type_error", e, "unsupported expression ${e.unparse()}").toScheme(),te)
 }
+
 
 data class Substitution(val subs:HashMap<String, StrongType>)
 
@@ -270,6 +274,16 @@ fun lambdaType(e: ELambdaDefinition, te: TypeEnv): TypeCheckResult {
 
 }
 
+fun callType(e: ECall, te: TypeEnv): TypeCheckResult {
+    val localTypeEnv = te.expand()
+    val tyres = Helper.newTypeVar()
+    val funType = typeOf(e.func, localTypeEnv)
+    for(arg in e.args){
+    }
+    return TypeCheckResult(false, TypeError("error",e, "error").toScheme(), te)
+
+
+}
 fun doType(e: EDo, te: TypeEnv): TypeCheckResult {
    val localTypeEnv = te.expand()
     for(exp in e.expressions){
