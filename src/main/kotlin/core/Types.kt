@@ -1,7 +1,5 @@
 package core
 
-import java.lang.Error
-
 interface StrongType{
     val type:String
     fun toScheme():TScheme
@@ -49,17 +47,29 @@ data class TInt(override val type:String = "int"): StrongType {
     override fun toScheme(): TScheme {
        return TScheme(listOf(), this)
     }
+
+    override fun toString(): String {
+       return "int"
+    }
 }
 
 data class  TFloat(override val type:String="float"): StrongType {
     override fun toScheme(): TScheme {
        return TScheme(listOf(), this)
     }
+
+    override fun toString(): String {
+       return "float"
+    }
 }
 
 data class  TBool(override val type:String="bool"): StrongType {
     override fun toScheme(): TScheme {
        return TScheme(listOf(), this)
+    }
+
+    override fun toString(): String {
+       return "bool"
     }
 }
 
@@ -73,14 +83,32 @@ data class TVar(override val type:String= "tvar") :StrongType {
     override fun toScheme(): TScheme {
        return TScheme(listOf(type), this)
     }
+
+    override fun toString(): String {
+       return type
+    }
 }
 // is_int :: a -> Bool
 
-data class TScheme(val typeVars:List<String>, val type:StrongType) // for all, a, b :  a -> b -> a
+data class TScheme(val typeVars:List<String>, val type:StrongType){
+    override fun toString(): String {
+        if(typeVars.isEmpty()){
+            return type.toString()
+        }
+       return "forall "+ typeVars.joinToString(","){it}  + "::" + type.toString()
+    }
+} // for all, a, b :  a -> b -> a
 // Scheme without typeVars is considered to be just a type // forall () : Int == Int
 data class TFunc(override val type:String ="fun",  val params:List<StrongType>, val result:StrongType):StrongType {
     override fun toScheme(): TScheme {
        return TScheme(listOf(), this)
+    }
+
+    override fun toString(): String {
+       if(params.isEmpty()){
+           return "() -> $result"
+       }
+        return "(${params.joinToString(" -> ")} -> $result)"
     }
 }
 
@@ -237,7 +265,7 @@ fun unify(t1: StrongType, t2:StrongType) : UnificationResult{
         if(!funReturnUni.success){
             return funReturnUni
         }
-       return UnificationResult(true, composeSub(funReturnUni.sub, funArgumatnsSub))
+       return UnificationResult(true, composeSub( funArgumatnsSub, funReturnUni.sub))
     }
     return UnificationResult(false, emptySub, Pair(t1, t2))
 }
@@ -278,10 +306,29 @@ fun callType(e: ECall, te: TypeEnv): TypeCheckResult {
     val localTypeEnv = te.expand()
     val tyres = Helper.newTypeVar()
     val funType = typeOf(e.func, localTypeEnv)
-    for(arg in e.args){
+    if(!funType.success){
+        return funType
     }
-    return TypeCheckResult(false, TypeError("error",e, "error").toScheme(), te)
-
+    var resSub = funType.sub
+    val args = mutableListOf<StrongType>()
+    for(arg in e.args){
+        val updatedTypeEnv = applyEnvSubstitution(resSub, localTypeEnv)
+        val argType = typeOf(arg, updatedTypeEnv)
+        if(!argType.success){
+            return argType
+        }
+        resSub = composeSub(resSub, argType.sub)
+        args.add(argType.result.type)
+    }
+    val inferredFun = applySubstitution(resSub, funType.result.type)
+    val resultingFun = TFunc("fun", args, tyres)
+    val uSub = unify( resultingFun, inferredFun)
+    if(!uSub.success){
+        return TypeCheckResult(false, TypeError("error", e, uSub.errorMessage).toScheme(), te)
+    }
+    val inferredRes = applySubstitution(uSub.sub, tyres)
+    resSub = composeSub(resSub, uSub.sub)
+    return TypeCheckResult(true, inferredRes.toScheme(), te, resSub)
 
 }
 fun doType(e: EDo, te: TypeEnv): TypeCheckResult {
