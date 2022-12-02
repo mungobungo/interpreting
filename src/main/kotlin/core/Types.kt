@@ -440,8 +440,18 @@ fun binaryFloatOpType(e: EBinaryFloatOp, te:TypeEnv): TypeCheckResult {
     if(!right.success){
         return right
     }
-    if(left.result.type is TFloat && right.result.type is TFloat){
-        return TypeCheckResult(true, left.result, te)
+    val leftSub = unify(left.result.type, TFloat())
+    val rightSub = unify(right.result.type, TFloat())
+    if(!leftSub.success) {
+        return TypeCheckResult(false,  TypeError("binary_float_type_error", e, leftSub.errorMessage).toScheme(),
+            te
+        )
     }
-    return TypeCheckResult(false,  TypeError("binary_float_type_error", e, "left and right arguments of `${e.operationName}` are expected to be floats, but got $left and $right in ${e.unparse()}").toScheme(), te)
+    if(!rightSub.success) {
+        return TypeCheckResult(false,  TypeError("binary_float_type_error", e, rightSub.errorMessage).toScheme(),
+            te
+        )
+    }
+    val composedSub = composeSub(leftSub.sub, rightSub.sub)
+   return TypeCheckResult(true, TFloat().toScheme(), te, composedSub)
 }
