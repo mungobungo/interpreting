@@ -136,10 +136,35 @@ fun typeOf(e: Expression, te: TypeEnv) : TypeCheckResult{
         is EDo -> return doType(e, te)
         is ELambdaDefinition -> return lambdaType(e, te)
         is ECall -> return callType(e, te)
+        is EIf -> return ifType(e,te)
     }
     return TypeCheckResult(false,  TypeError("type_error", e, "unsupported expression ${e.unparse()}").toScheme(),te)
 }
 
+fun ifType(e: EIf, te: TypeEnv): TypeCheckResult {
+    val typeCond = typeOf(e.condition, te)
+    if(!typeCond.success){
+        return typeCond
+    }
+    val condSub = unify(typeCond.result.type, TBool())
+    if(!condSub.success){
+        return TypeCheckResult(false, TypeError("if_condition_type_error", e, condSub.errorMessage).toScheme(),te)
+    }
+    val branch1 = typeOf(e.mainBranch, te)
+    val branch2 = typeOf(e.alternativeBranch, te)
+    if(!branch1.success){
+        return branch1
+    }
+    if(!branch2.success){
+        return branch2
+    }
+    val resSub = unify(branch1.result.type, branch2.result.type)
+   if(!resSub.success){
+       return TypeCheckResult(false, TypeError("if_branch_mismatch_error", e, resSub.errorMessage).toScheme(),te)
+   }
+    return TypeCheckResult(true, applySubstitution(resSub.sub, branch1.result.type).toScheme(), te)
+
+}
 
 data class Substitution(val subs:HashMap<String, StrongType>)
 
