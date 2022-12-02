@@ -14,12 +14,19 @@ fun main(args: Array<String>) {
     }
 
 
+
     while (true){
         print(">> ")
-        val input = readln()
+        var input = readln()
         if(input == "quit")
         {
             return
+
+        }
+        var typeFlag = false
+        if(input.startsWith(":t ")){
+            typeFlag = true
+            input = input.split(":t ")[1]
         }
         val parseStart = System.nanoTime()
         val parsed = parse(input)
@@ -28,6 +35,7 @@ fun main(args: Array<String>) {
             println("Parsing error: " + parsed.error!!.message  + "\n ${parsed.error!!.input}")
             continue
         }
+
 
         val parsedValue = parsed.value!!.desugar()
         val typeStart = System.nanoTime()
@@ -38,16 +46,21 @@ fun main(args: Array<String>) {
             println("Type error: " + typed.result.type.error)
         }
 
-        val evalStart = System.nanoTime()
-        val evaluated = parsedValue.eval(context)
-        val evalTime = System.nanoTime() - evalStart
-        if(!evaluated.success){
-            println("Eval error: " + evaluated.error!!.message + "\n ${evaluated.error!!.input}")
+        if(typeFlag){
+
+            println(parsed.value.desugar().unparse() +  " :: ${typed.result}")
+            println("parser: ${parserTime / 1e6f}ms, type: ${typeTime / 1e6f}ms")
+        }else {
+            val evalStart = System.nanoTime()
+            val evaluated = parsedValue.eval(context)
+            val evalTime = System.nanoTime() - evalStart
+            if (!evaluated.success) {
+                println("Eval error: " + evaluated.error!!.message + "\n ${evaluated.error!!.input}")
+            } else {
+                println(evaluated.value!!.unparse() + " :: ${typed.result}")
+            }
+            println("parser: ${parserTime / 1e6f}ms, type: ${typeTime / 1e6f}ms,  eval: ${evalTime / 1e6f}ms")
         }
-        else{
-            println(evaluated.value!!.unparse() + " :: ${typed.result}" )
-        }
-        println("parser: ${parserTime/1e6f}ms, type: ${typeTime/1e6f}ms,  eval: ${evalTime/1e6f}ms")
     }
 
 }

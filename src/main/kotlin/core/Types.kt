@@ -297,8 +297,12 @@ fun lambdaType(e: ELambdaDefinition, te: TypeEnv): TypeCheckResult {
             return type
         }
     }
-    val resType = typeOf(e.body.last(), localTypeEnv).result
-    return TypeCheckResult(true, TScheme(argTypes.map { it.type }, TFunc(params = argTypes, result = resType.type)), te)
+    val resType = typeOf(e.body.last(), localTypeEnv)
+    val subArgs = mutableListOf<StrongType>()
+    for(arg in argTypes){
+        subArgs.add(applySubstitution(resType.sub, arg))
+    }
+    return TypeCheckResult(true, TScheme(argTypes.map { it.type }, TFunc(params = subArgs, result = resType.result.type)), te)
 
 }
 
@@ -369,10 +373,13 @@ fun binaryBoolOpType(e: EBinaryBoolOp, te:TypeEnv): TypeCheckResult {
     if(!right.success){
         return right
     }
-   if(left.result.type is TBool && right.result.type is TBool){
-       return TypeCheckResult(true, TBool().toScheme(), te)
-   }
-    return TypeCheckResult(false, TypeError("binary_bool_type_error", e, "left and right arguments of `${e.operationName}` are expected to be booleans, but got $left and $right in ${e.unparse()}").toScheme(),te)
+    val subRes = unify(left.result.type, right.result.type)
+    if(!subRes.success) {
+        return TypeCheckResult(false,  TypeError("binary_bool_type_error", e, subRes.errorMessage).toScheme(),
+            te
+        )
+    }
+    return TypeCheckResult(true, TBool().toScheme(), te, subRes.sub)
 }
 
 fun binaryNumericOpType(e: EBinaryNumericOp, te:TypeEnv): TypeCheckResult {
@@ -409,10 +416,20 @@ fun binaryIntegerOpType(e: EBinaryIntegerOp, te:TypeEnv): TypeCheckResult {
     if(!right.success){
         return right
     }
-    if(left.result.type is TInt && right.result.type is TInt){
-        return TypeCheckResult(true, left.result, te)
+    val leftSub = unify(left.result.type, TInt())
+    val rightSub = unify(right.result.type, TInt())
+    if(!leftSub.success) {
+        return TypeCheckResult(false,  TypeError("binary_int_type_error", e, leftSub.errorMessage).toScheme(),
+            te
+        )
     }
-    return TypeCheckResult(false, TypeError("binary_integer_type_error", e, "left and right arguments of `${e.operationName}` are expected to be integers, but got $left and $right in ${e.unparse()}").toScheme(), te)
+    if(!rightSub.success) {
+        return TypeCheckResult(false,  TypeError("binary_int_type_error", e, rightSub.errorMessage).toScheme(),
+            te
+        )
+    }
+    val composedSub = composeSub(leftSub.sub, rightSub.sub)
+    return TypeCheckResult(true, TInt().toScheme(), te, composedSub)
 }
 fun binaryFloatOpType(e: EBinaryFloatOp, te:TypeEnv): TypeCheckResult {
     val left = typeOf(e.left, te)
